@@ -327,7 +327,7 @@ public class ConnectWindow extends javax.swing.JFrame {
         String password = new String(this.jtf_passw_new.getPassword());
         String dbName = this.jtf_dbName_new.getText();
         
-        url = "//" + this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
+        url = this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
         try {
             Main.conn = Database.buildManuzioDB(url, dbName, user, password, true);
         } catch (SQLException ex) {
