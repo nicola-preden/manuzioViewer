@@ -179,9 +179,6 @@
               </Events>
             </Component>
             <Component class="javax.swing.JPasswordField" name="jtf_passw_new">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="jPasswordField1"/>
-              </Properties>
             </Component>
             <Component class="javax.swing.JLabel" name="jlb_passw_new">
               <Properties>

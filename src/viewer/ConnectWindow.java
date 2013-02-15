@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import viewer.manuzioParser.Database;
 
 /**
  *
@@ -88,8 +87,6 @@ public class ConnectWindow extends javax.swing.JFrame {
                 jtf_usr_newActionPerformed(evt);
             }
         });
-
-        jtf_passw_new.setText("jPasswordField1");
 
         jlb_passw_new.setText("Password");
 
@@ -322,12 +319,10 @@ public class ConnectWindow extends javax.swing.JFrame {
 
     private void jb_Connect_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_Connect_newActionPerformed
 
-        String url = null;
         String user = this.jtf_usr_new.getText();
         String password = new String(this.jtf_passw_new.getPassword());
         String dbName = this.jtf_dbName_new.getText();
-        
-        url = this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
+        String url = this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
         try {
             Main.conn = Database.buildManuzioDB(url, dbName, user, password, true);
         } catch (SQLException ex) {

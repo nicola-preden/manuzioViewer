@@ -1,4 +1,4 @@
-package viewer.manuzioParser;
+package viewer;
 
 import java.io.FileNotFoundException;
 import java.sql.Connection;
@@ -9,7 +9,10 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <p>This static class manages the interaction with the databases.</p>
@@ -23,7 +26,6 @@ public class Database {
     private final static String[] driverName = {"org.postgresql.Driver"};	//here are stored the names of all the jdbc drivers installed
     private final static String[] driverPrefix = {"jdbc:postgresql:"};	//here are stored the prefixes of all the jdbc drivers installed
     private static final double VERSION = 3.1;
-
 
     /**
      * <p>Gets the version of the Manuzio Language and the relative database</p>
@@ -49,13 +51,11 @@ public class Database {
      * are supported by this class. For the supported drivers' list, use
      * <code>getSupportedDrivers()</code> method.</p>
      *
-     * @param url a server or database url of the
-     * form <code>jdbc:subprotocol:subname</code>
+     * @param url a server or database url of the      * form <code>jdbc:subprotocol:subname</code>
      * @param user the username of the server or database
      * @param password - the password used to log in the server or database
      * using the account of <code>user</code>
-     * @return the Connection Object to the database or server specified by
-     * the <code>url</code>
+     * @return the Connection Object to the database or server specified by      * the <code>url</code>
      * @throws SQLException if a database access error occurs.
      * @see manuzioParser.Database#getUnknownConnection(String, String, String)
      * @see manuzioParser.Database#getSupportedDrivers()
@@ -69,10 +69,15 @@ public class Database {
             throw new SQLException("Fatal error: cannot load internal drivers");
         }
         try {
-            return DriverManager.getConnection(url, user, password);
-        } catch (SQLException e) {
-            return getUnknownConnection(url, user, password);
+            Properties props = new Properties();
+            props.setProperty("user", user);
+            props.setProperty("password", password);
+            props.setProperty("ssl", "true");
+            return DriverManager.getConnection(Database.driverPrefix[0] + "//" + url + "/", props);
+        } catch (SQLException ex) {
+            throw new SQLException ("cannot connect to the given url '" + url + "': bad url input or driver for the selected database not found");
         }
+
     }
 
     /**
@@ -89,8 +94,7 @@ public class Database {
      * @param user the username of the server or database
      * @param password - the password used to log in the server or database
      * using the account of <code>user</code>
-     * @return the Connection Object to the database or server specified by
-     * the <code>url</code>
+     * @return the Connection Object to the database or server specified by      * the <code>url</code>
      * @throws SQLException if a database access error occurs.
      * @see manuzioParser.Database#getSupportedDrivers()
      */
@@ -127,9 +131,8 @@ public class Database {
      * <code>override = true</code> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
-     * @param url the server path -either of the
-     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
-     * itself
+     * @param url the server path -either of the      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * serverPath itself
      * @param dbName the name given to the new database
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
@@ -311,9 +314,8 @@ public class Database {
      * name, this method could be used to delete any database, not only a
      * Manuzio one.</p>
      *
-     * @param url the server path -either of the
-     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
-     * itself
+     * @param url the server path -either of the      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * serverPath itself
      * @param dbName - the name of the database to delete
      * @param user the username to connect to the server
      * @param password the password related to the <code>user</code> to connect
