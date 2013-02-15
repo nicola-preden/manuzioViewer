@@ -1,0 +1,95 @@
+UPDATE v3.1
+aggiunto colonna 'description' nel tipo 'schema'
+modificato colonna description nel tipo 'types' (tolto vincolo NOT NULL)
+aggiunto funzione 'create_or_update_schema' per caricare in automatico lo schema dai tipi e composizione dei tipi esistenti.
+
+
+v3.0
+Non ho testato tutte le funzioni, per mancanza di tempo e di comprensione (non sono sicuro di come dovrebbero funzionare).
+Però ho testato con successo le funzioni che riguardavano direttamente le tab modificate (methods, attribute, types, type_composition)
+aggiunto vincolo di unicità nel campo 'nickname' della tabella 'users'.
+aggiunta function 'insert_method'
+
+function create_composition
+-modificati i parametri di input
+-rimosso controllo di relazione già esistente (container/contained)
+-aggiunto controllo duplicati su chiave primaria (container, component_name)
+-aggiunto controllo component_name <> ''
+-modificato l'inesrimento dei dati in accordo col nuovo db
+
+create_object_composition
+-fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
+-IMPORTANTE: in precedenza era possibile che il tipo di riferimento nella tab. types_composition fosse plurale. Ora bisognerebbe controllare la colonna isPlural.
+	Serve? -> per me conta; nella function ho controllato se si fa riferimento al tipo singolare o plurale del contained_type in type_composition.
+	
+create_or_return_att_for_admin
+-fatte piccole modifiche (nomi delle colonne del nuovo db)
+
+create_or_return_att_for_user
+-fatte piccole modifiche (nomi delle colonne del nuovo db)
+
+create_or_return_obj
+-modificati i parametri di input
+-fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
+-IMPORTANTE: in precedenza era possibile che il tipo di riferimento nella tab. textual_object fosse plurale. Ora bisognerebbe controllare la colonna isPlural.
+	Serve? -> per me conta; nella function ho dato la possibilità di specificare il genere.
+	
+create_or_return_rto
+-modificati i parametri di input
+-fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
+-IMPORTANTE: in precedenza era possibile che il tipo di riferimento nella tab. textual_object fosse plurale. Ora bisognerebbe controllare la colonna isPlural.
+	Serve? -> per me conta; nella function ho dato la possibilità di specificare il genere.
+	
+create_or_return_sto
+-modificati i parametri di input
+-fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
+-IMPORTANTE: in precedenza era possibile che il tipo di riferimento nella tab. textual_object fosse plurale. Ora bisognerebbe controllare la colonna isPlural.
+	Serve? -> per me conta; nella function ho dato la possibilità di specificare il genere.
+	
+create_or_return_text
+Non toccata.
+
+create_rto_from_pos_type
+-modificati i parametri di input
+-fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
+-MOLTO IMPORTANTE: isPlural aggiunto come input. Ho interpretato la seconda metà della funzione (testualmente "vericare l'esistenza di un tipo
+plurale.") come: se il tipo è la max_unit allora isPlural è settato a false; altrimenti true.
+Non sono però convinto di questa interpretazione, per cui vorrei discuterne con Lei.
+
+get_all_attribute_for_obj
+Non toccata
+
+get_all_attribute_for_user
+Non toccata
+
+get_all_component
+non tocccata
+
+get_container_obj
+-fatte piccole modifiche (nomi delle colonne modificate dal nuovo db)
+
+get_obj_from_text
+-fatte piccole modifiche (nomi delle colonne modificate dal nuovo db)
+
+get_text_from_id
+-fatte piccole modifiche (nomi delle colonne modificate dal nuovo db)
+
+get_text_from_text
+non toccata
+
+insert_att_ty_of_type e insert_att_type
+-fuse in un'unica funzione 'insert_att_type' (causa cancellamento tabella att_ty_of_type)
+-modificata pesantemente (input, controlli, inserimento)
+
+insert_type
+modificato pesantemente (valori di input, controlli, inserimento)
+
+insert_user
+non toccato
+
+
+select_obj_from_pos_type
+-modificati i parametri di input
+-fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
+-IMPORTANTE: in precedenza era possibile che il tipo di riferimento nella tab. textual_object fosse plurale. Ora bisognerebbe controllare la colonna isPlural.
+	Serve? -> per me conta; nella function ho dato la possibilità di specificare il genere.

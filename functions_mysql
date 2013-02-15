@@ -1,0 +1,22 @@
+CREATE TRIGGER "check_unique_insert TR" BEFORE INSERT ON types
+FOR EACH ROW
+BEGIN
+    IF (EXISTS (SELECT * FROM types WHERE plural_name = NEW.type_name)) THEN 
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Transaction aborted. Details -> type_name duplicates existing plural_name.'; 
+	END IF; 
+	IF (EXISTS (SELECT * FROM types WHERE type_name = NEW.plural_name)) THEN 
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Transaction aborted. Details -> plural_name duplicates existing type_name.'; 
+	END IF;		
+END;
+-----
+CREATE TRIGGER "check_unique_update TR" BEFORE UPDATE ON types
+FOR EACH ROW
+BEGIN
+    IF (EXISTS (SELECT * FROM types WHERE plural_name = NEW.type_name)) THEN 
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Transaction aborted. Details -> type_name duplicates existing plural_name.'; 
+	END IF; 
+	IF (EXISTS (SELECT * FROM types WHERE type_name = NEW.plural_name)) THEN 
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Transaction aborted. Details -> plural_name duplicates existing type_name.'; 
+	END IF;		
+END;
+-----
