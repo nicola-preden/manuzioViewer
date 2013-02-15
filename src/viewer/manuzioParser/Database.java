@@ -21,7 +21,7 @@ import java.util.Scanner;
 public class Database {
 
     private final static String[] driverName = {"org.postgresql.Driver"};	//here are stored the names of all the jdbc drivers installed
-    private final static String[] driverPrefix = {"jdbc:postgresql://"};	//here are stored the prefixes of all the jdbc drivers installed
+    private final static String[] driverPrefix = {"jdbc:postgresql:"};	//here are stored the prefixes of all the jdbc drivers installed
     private static final double VERSION = 3.1;
 
 
@@ -99,7 +99,7 @@ public class Database {
         int i = 0;
         while (i < driverPrefix.length && conn == null) {
             try {
-                conn = DriverManager.getConnection(driverPrefix[i] + url, user, password);
+                conn = DriverManager.getConnection(driverPrefix[i] + "//" + url, user, password);
             } catch (Exception e) {
                 i++;
             }
