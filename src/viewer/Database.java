@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>This static class manages the interaction with the databases.</p>
@@ -23,8 +21,8 @@ import java.util.logging.Logger;
  */
 public class Database {
 
-    private final static String[] driverName = {"org.postgresql.Driver"};	//here are stored the names of all the jdbc drivers installed
-    private final static String[] driverPrefix = {"jdbc:postgresql:"};	//here are stored the prefixes of all the jdbc drivers installed
+    private final static String[] driverName = {"org.postgresql.Driver"/*, "com.mysql.jdbc.Driver"*/};	//here are stored the names of all the jdbc drivers installed
+    private final static String[] driverPrefix = {"jdbc:postgresql://"/*, "jdbc:mysql://"*/};	//here are stored the prefixes of all the jdbc drivers installed
     private static final double VERSION = 3.1;
 
     /**
@@ -68,14 +66,14 @@ public class Database {
         } catch (Exception e) {
             throw new SQLException("Fatal error: cannot load internal drivers");
         }
+        
         try {
             Properties props = new Properties();
             props.setProperty("user", user);
             props.setProperty("password", password);
-            props.setProperty("ssl", "true");
-            return DriverManager.getConnection(Database.driverPrefix[0] + "//" + url + "/", props);
+            return DriverManager.getConnection(url, props);
         } catch (SQLException ex) {
-            throw new SQLException ("cannot connect to the given url '" + url + "': bad url input or driver for the selected database not found");
+            return getUnknownConnection(url, user, password);
         }
 
     }
@@ -103,7 +101,7 @@ public class Database {
         int i = 0;
         while (i < driverPrefix.length && conn == null) {
             try {
-                conn = DriverManager.getConnection(driverPrefix[i] + "//" + url, user, password);
+                conn = DriverManager.getConnection(driverPrefix[i] + url + "/", user, password);
             } catch (Exception e) {
                 i++;
             }
@@ -276,6 +274,7 @@ public class Database {
             if (s.equals(MARKER)) {
                 q.add(fun);
                 fun = "";
+                continue;
             }
             fun += s + "\n";
         }
