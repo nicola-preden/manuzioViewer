@@ -62,7 +62,6 @@ public class ConnectWindow extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Connetti");
-        setAlwaysOnTop(true);
 
         jlb_addr_new.setText("Indirizzo Server");
 
@@ -73,6 +72,8 @@ public class ConnectWindow extends javax.swing.JFrame {
                 jtf_port_newActionPerformed(evt);
             }
         });
+
+        jtf_addr_new.setToolTipText("<html>\nwww.server.it <br \\>\n192.169.34.2");
 
         jlb_dbName_new.setText("Nome Database");
 
@@ -170,6 +171,8 @@ public class ConnectWindow extends javax.swing.JFrame {
 
         jlb_port.setText("Porta");
 
+        jtf_addr.setToolTipText("<html> www.server.it <br \\> 192.169.34.2");
+
         jtf_port.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jtf_portActionPerformed(evt);
@@ -192,11 +195,20 @@ public class ConnectWindow extends javax.swing.JFrame {
             }
         });
 
-        jtf_passw.setText("jPasswordField1");
+        jtf_passw.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jtf_passwActionPerformed(evt);
+            }
+        });
 
         jlb_passw.setText("Password");
 
         jb_Connect.setText("Connetti");
+        jb_Connect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jb_ConnectActionPerformed(evt);
+            }
+        });
 
         org.jdesktop.layout.GroupLayout jp_connect_DBLayout = new org.jdesktop.layout.GroupLayout(jp_connect_DB);
         jp_connect_DB.setLayout(jp_connect_DBLayout);
@@ -319,18 +331,51 @@ public class ConnectWindow extends javax.swing.JFrame {
 
     private void jb_Connect_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_Connect_newActionPerformed
 
+        boolean test = false;
         String user = this.jtf_usr_new.getText();
         String password = new String(this.jtf_passw_new.getPassword());
         String dbName = this.jtf_dbName_new.getText();
         String url = this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
+
+        if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         try {
             Main.conn = Database.buildManuzioDB(url, dbName, user, password, true);
         } catch (SQLException ex) {
             Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Impossibile Creare il DataBase", "Errore", JOptionPane.ERROR_MESSAGE);
         }
+        this.setVisible(false);
+
     }//GEN-LAST:event_jb_Connect_newActionPerformed
 
+    private void jtf_passwActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtf_passwActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jtf_passwActionPerformed
+
+    private void jb_ConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_ConnectActionPerformed
+        // TODO add your handling code here:
+        String user = this.jtf_usr.getText();
+        String password = new String(this.jtf_passw.getPassword());
+        String dbName = this.jtf_dbName.getText();
+        String url = this.jtf_addr.getText() + ":" + this.jtf_port.getText() + "/" + this.jtf_dbName.getText();
+
+        if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            Main.conn = Database.getConnection(url, user, password);
+        } catch (SQLException ex) {
+            Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
+        }
+        this.setVisible(false);
+    }//GEN-LAST:event_jb_ConnectActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jb_Connect;
