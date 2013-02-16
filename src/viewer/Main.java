@@ -4,16 +4,9 @@
  */
 package viewer;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**
  * <p> Classe contenete il main e tutti i metodi per operare su file xml </p>
@@ -22,10 +15,24 @@ import org.xml.sax.SAXException;
  * in Venice
  */
 public class Main {
+    private static class Timer extends Thread {
+        @Override
+        public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(30000);
+                        System.gc();
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+    }
 
     static Connection conn = null;
     static MainWindow mw = null;
     private static String urlXml = "setting.xml";
+    private static Timer tm = new Timer();
 
     /**
      * @param args the command line arguments
@@ -35,20 +42,8 @@ public class Main {
 
         mw = new MainWindow();
         mw.setVisible(true);
-
-        new Runnable() {    // forzatura esecuzione garbage collector
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        System.gc();
-                        Thread.sleep(30000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        };
+        tm.start();
+        
 
     }
 }

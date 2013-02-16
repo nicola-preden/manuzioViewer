@@ -5,6 +5,7 @@
 package viewer.setting;
 
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Properties;
 
 /**
@@ -25,27 +26,27 @@ interface NodeSettingInterface extends Comparable<NodeSettingInterface> {
      * @param Prop
      * @return <code>true</code> in caso di successo altrimenti <code>false</code>
      */
-    boolean addProp(Properties ... prop);
+    void addProp(Properties... prop);
     /**
      * <p>Aggiunge una coppia di valori in testa</p>
      * @param pro
      * @return 
      */
-    boolean addAtFistOccProp(Properties pro);
+    void addAtFistOccProp(Properties pro);
     /**
-     * <p>Rimuove una o più coppie di valori</p>
+     * <p>Rimuove una coppie di valori</p>
      * @param Prop
      * @return <code>true</code> in caso di successo altrimenti <code>false</code>
      */
-    boolean removeProp(Properties ... prop);
+    void removeProp(Properties ... prop);
     /**
      * <p>Rimuove l'ultima coppia di valori presente nel nodo</p>
      * @return 
      */
-    boolean removeLastProp();
+    void removeLastProp();
     /**
      * </p>Ritorna un iteratore non modificabile</p>
-     * @return <code>Iteratore non modificabile</code>
+     * @return <code>Iteratore alla lista</code>
      */
-    Iterator<Properties> readProp();
+    ListIterator<Properties> readProp();
 }
