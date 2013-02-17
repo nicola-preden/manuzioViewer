@@ -7,6 +7,7 @@ package viewer.setting;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,11 +76,13 @@ public class SettingXML {
                 }
             }
         } else {
-            for (NodeSetting ns : setting) {
-                if (ns.getDesc().compareTo(desc) == 0) {
-                    ns.removeProp(prop);
-                    if (ns.isEmpty()) {
-                        
+            Iterator<NodeSetting> iterator = setting.iterator();
+            while (iterator.hasNext()) {
+                NodeSetting next = iterator.next();
+                if (next.getDesc().compareTo(desc) == 0) {
+                    next.removeProp(prop);
+                    if (next.isEmpty()) {
+                        iterator.remove();
                     }
                     return true;
                 }
