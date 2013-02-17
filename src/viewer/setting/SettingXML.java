@@ -78,6 +78,9 @@ public class SettingXML {
             for (NodeSetting ns : setting) {
                 if (ns.getDesc().compareTo(desc) == 0) {
                     ns.removeProp(prop);
+                    if (ns.isEmpty()) {
+                        
+                    }
                     return true;
                 }
             }
@@ -115,11 +118,7 @@ public class SettingXML {
                 }
 
             }
-        } catch (SAXException ex) {
-            Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParserConfigurationException ex) {
+        } catch (SAXException | IOException | ParserConfigurationException ex) {
             Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
         }
 

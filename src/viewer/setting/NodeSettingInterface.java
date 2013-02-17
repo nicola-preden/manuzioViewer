@@ -49,4 +49,9 @@ interface NodeSettingInterface extends Comparable<NodeSettingInterface> {
      * @return <code>Iteratore alla lista</code>
      */
     ListIterator<Properties> readProp();
+    /**
+     * <p> Ritorna <code>TRUE</code> se il nodo con contiene coppie di valori</p>
+     * @return 
+     */
+    boolean isEmpty();
 }
