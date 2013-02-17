@@ -7,14 +7,15 @@ package viewer;
 import java.sql.Connection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import viewer.setting.SettingXML;
 
 /**
- * <p> Classe contenete il main e tutti i metodi per operare su file xml </p>
+ * <p> Classe contenete il main</p>
  *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
-public class Main {
+ class Main {
     private static class Timer extends Thread {
         @Override
         public void run() {
@@ -31,7 +32,8 @@ public class Main {
 
     static Connection conn = null;
     static MainWindow mw = null;
-    private static String urlXml = "setting.xml";
+    static SettingXML setting = null;
+    private static final String urlXml = "settings.xml";
     private static Timer tm = new Timer();
 
     /**
@@ -39,7 +41,7 @@ public class Main {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-
+        setting = new SettingXML(urlXml);        
         mw = new MainWindow();
         mw.setVisible(true);
         tm.start();

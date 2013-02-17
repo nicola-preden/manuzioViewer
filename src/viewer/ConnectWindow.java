@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import viewer.setting.SettingXML;
 
 /**
  *
@@ -34,18 +35,6 @@ public class ConnectWindow extends javax.swing.JFrame {
     private void initComponents() {
 
         jt_connect_type = new javax.swing.JTabbedPane();
-        jp_newDB = new javax.swing.JPanel();
-        jlb_addr_new = new javax.swing.JLabel();
-        jlb_port_new = new javax.swing.JLabel();
-        jtf_port_new = new javax.swing.JTextField();
-        jtf_addr_new = new javax.swing.JTextField();
-        jlb_dbName_new = new javax.swing.JLabel();
-        jtf_dbName_new = new javax.swing.JTextField();
-        jtf_usr_new = new javax.swing.JTextField();
-        jtf_passw_new = new javax.swing.JPasswordField();
-        jlb_passw_new = new javax.swing.JLabel();
-        jlb_usr_new = new javax.swing.JLabel();
-        jb_Connect_new = new javax.swing.JButton();
         jp_connect_DB = new javax.swing.JPanel();
         jlb_addr = new javax.swing.JLabel();
         jlb_port = new javax.swing.JLabel();
@@ -58,116 +47,24 @@ public class ConnectWindow extends javax.swing.JFrame {
         jtf_passw = new javax.swing.JPasswordField();
         jlb_passw = new javax.swing.JLabel();
         jb_Connect = new javax.swing.JButton();
+        jp_newDB = new javax.swing.JPanel();
+        jlb_addr_new = new javax.swing.JLabel();
+        jlb_port_new = new javax.swing.JLabel();
+        jtf_port_new = new javax.swing.JTextField();
+        jtf_addr_new = new javax.swing.JTextField();
+        jlb_dbName_new = new javax.swing.JLabel();
+        jtf_dbName_new = new javax.swing.JTextField();
+        jtf_usr_new = new javax.swing.JTextField();
+        jtf_passw_new = new javax.swing.JPasswordField();
+        jlb_passw_new = new javax.swing.JLabel();
+        jlb_usr_new = new javax.swing.JLabel();
+        jb_Connect_new = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Connetti");
         setAlwaysOnTop(true);
         setResizable(false);
-
-        jlb_addr_new.setText("Indirizzo Server");
-
-        jlb_port_new.setText("Porta");
-
-        jtf_port_new.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_port_newActionPerformed(evt);
-            }
-        });
-
-        jtf_addr_new.setToolTipText("<html>\nwww.server.it <br \\>\n192.169.34.2");
-
-        jlb_dbName_new.setText("Nome Database");
-
-        jtf_dbName_new.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_dbName_newActionPerformed(evt);
-            }
-        });
-
-        jtf_usr_new.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_usr_newActionPerformed(evt);
-            }
-        });
-
-        jlb_passw_new.setText("Password");
-
-        jlb_usr_new.setText("Nome Utente");
-
-        jb_Connect_new.setText("Connetti");
-        jb_Connect_new.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jb_Connect_newActionPerformed(evt);
-            }
-        });
-
-        org.jdesktop.layout.GroupLayout jp_newDBLayout = new org.jdesktop.layout.GroupLayout(jp_newDB);
-        jp_newDB.setLayout(jp_newDBLayout);
-        jp_newDBLayout.setHorizontalGroup(
-            jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jp_newDBLayout.createSequentialGroup()
-                .add(24, 24, 24)
-                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jtf_dbName_new)
-                    .add(jp_newDBLayout.createSequentialGroup()
-                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jlb_addr_new)
-                            .add(jtf_addr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 262, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(jlb_dbName_new))
-                        .add(18, 18, Short.MAX_VALUE)
-                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                            .add(jp_newDBLayout.createSequentialGroup()
-                                .add(jlb_port_new)
-                                .add(48, 48, 48))
-                            .add(jtf_port_new)))
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jp_newDBLayout.createSequentialGroup()
-                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jtf_usr_new)
-                            .add(jp_newDBLayout.createSequentialGroup()
-                                .add(jlb_usr_new)
-                                .add(0, 0, Short.MAX_VALUE)))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jlb_passw_new)
-                            .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 179, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
-                .add(33, 33, 33))
-            .add(jp_newDBLayout.createSequentialGroup()
-                .add(150, 150, 150)
-                .add(jb_Connect_new)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jp_newDBLayout.setVerticalGroup(
-            jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jp_newDBLayout.createSequentialGroup()
-                .add(12, 12, 12)
-                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(jp_newDBLayout.createSequentialGroup()
-                        .add(jlb_addr_new)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(jtf_addr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(jp_newDBLayout.createSequentialGroup()
-                        .add(jlb_port_new)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                        .add(jtf_port_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                .add(jlb_dbName_new)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jtf_dbName_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(jlb_usr_new)
-                    .add(jlb_passw_new))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.CENTER)
-                    .add(jtf_usr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jb_Connect_new)
-                .addContainerGap(17, Short.MAX_VALUE))
-        );
-
-        jt_connect_type.addTab("Nuovo DataBase", jp_newDB);
 
         jlb_addr.setText("Indirizzo Server");
 
@@ -277,7 +174,111 @@ public class ConnectWindow extends javax.swing.JFrame {
                 .addContainerGap(17, Short.MAX_VALUE))
         );
 
-        jt_connect_type.addTab("Connetti DataBase", jp_connect_DB);
+        jt_connect_type.addTab("Connetti ...", jp_connect_DB);
+
+        jlb_addr_new.setText("Indirizzo Server");
+
+        jlb_port_new.setText("Porta");
+
+        jtf_port_new.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jtf_port_newActionPerformed(evt);
+            }
+        });
+
+        jtf_addr_new.setToolTipText("<html>\nwww.server.it <br \\>\n192.169.34.2");
+
+        jlb_dbName_new.setText("Nome del nuovo Database");
+
+        jtf_dbName_new.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jtf_dbName_newActionPerformed(evt);
+            }
+        });
+
+        jtf_usr_new.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jtf_usr_newActionPerformed(evt);
+            }
+        });
+
+        jlb_passw_new.setText("Password");
+
+        jlb_usr_new.setText("Nome Utente");
+
+        jb_Connect_new.setText("Connetti");
+        jb_Connect_new.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jb_Connect_newActionPerformed(evt);
+            }
+        });
+
+        org.jdesktop.layout.GroupLayout jp_newDBLayout = new org.jdesktop.layout.GroupLayout(jp_newDB);
+        jp_newDB.setLayout(jp_newDBLayout);
+        jp_newDBLayout.setHorizontalGroup(
+            jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jp_newDBLayout.createSequentialGroup()
+                .add(24, 24, 24)
+                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jtf_dbName_new)
+                    .add(jp_newDBLayout.createSequentialGroup()
+                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(jlb_addr_new)
+                            .add(jtf_addr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 262, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .add(jlb_dbName_new))
+                        .add(18, 18, Short.MAX_VALUE)
+                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                            .add(jp_newDBLayout.createSequentialGroup()
+                                .add(jlb_port_new)
+                                .add(48, 48, 48))
+                            .add(jtf_port_new)))
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jp_newDBLayout.createSequentialGroup()
+                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(jtf_usr_new)
+                            .add(jp_newDBLayout.createSequentialGroup()
+                                .add(jlb_usr_new)
+                                .add(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(jlb_passw_new)
+                            .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 179, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
+                .add(33, 33, 33))
+            .add(jp_newDBLayout.createSequentialGroup()
+                .add(150, 150, 150)
+                .add(jb_Connect_new)
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jp_newDBLayout.setVerticalGroup(
+            jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jp_newDBLayout.createSequentialGroup()
+                .add(12, 12, 12)
+                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(jp_newDBLayout.createSequentialGroup()
+                        .add(jlb_addr_new)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jtf_addr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(jp_newDBLayout.createSequentialGroup()
+                        .add(jlb_port_new)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jtf_port_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(jlb_dbName_new)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jtf_dbName_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(jlb_usr_new)
+                    .add(jlb_passw_new))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.CENTER)
+                    .add(jtf_usr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jb_Connect_new)
+                .addContainerGap(17, Short.MAX_VALUE))
+        );
+
+        jt_connect_type.addTab("Crea un nuovo Database", jp_newDB);
 
         jButton1.setText("Annulla");
 
@@ -376,6 +377,7 @@ public class ConnectWindow extends javax.swing.JFrame {
             Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
         }
+        
         this.setVisible(false);
     }//GEN-LAST:event_jb_ConnectActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

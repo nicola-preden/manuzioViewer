@@ -8,13 +8,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -58,8 +63,7 @@ public class SettingXML {
      * @param prop parametri di configurazione
      */
     public synchronized boolean addSetting(String desc, Properties prop) {
-        boolean test = true;
-        int find = 0;
+        int find;
         if (desc == null || desc.isEmpty() || prop == null) {
             return false;
         }
@@ -154,5 +158,54 @@ public class SettingXML {
     }
 
     private void writeSettingXml() {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+
+            Document doc = docBuilder.newDocument();
+            Element rootElement = doc.createElement("Setting");
+            doc.appendChild(rootElement);
+
+
+            NodeSetting ns_c = (NodeSetting) this.getSetting(SettingXML.CONNECTION_LIST);
+            if (ns_c != null) {
+                ListIterator<Properties> readProp = ns_c.readProp();
+                while (readProp.hasNext()) {
+                    Properties next;
+                    Element ConnectionsList;
+                    Element db_url;
+                    Element user;
+                    Element password;
+
+                    next = readProp.next();
+                    ConnectionsList = doc.createElement(SettingXML.CONNECTION_LIST);
+                    rootElement.appendChild(ConnectionsList);
+
+                    db_url = doc.createElement("url");
+                    db_url.appendChild(doc.createTextNode(next.getProperty("url")));
+                    ConnectionsList.appendChild(db_url);
+
+                    user = doc.createElement("user");
+                    user.appendChild(doc.createTextNode(next.getProperty("user")));
+                    ConnectionsList.appendChild(user);
+
+                    password = doc.createElement("url");
+                    password.appendChild(doc.createTextNode(next.getProperty("url")));
+                    ConnectionsList.appendChild(password);
+                }
+            }
+            
+            // SCRITTURA FILE
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            //StreamResult result = new StreamResult(new File(this.url));
+            StreamResult result = new StreamResult(System.out);
+            transformer.transform(source, result);
+            
+        } catch (TransformerException | ParserConfigurationException ex) {
+            Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
