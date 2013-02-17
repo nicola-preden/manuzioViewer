@@ -7,6 +7,7 @@ package viewer.setting;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -29,9 +30,20 @@ import org.xml.sax.SAXException;
  */
 public class SettingXML {
 
+    /**
+     * <p>markup xml lista connessioni recenti</p>
+     */
+    public static final String CONNECTION_LIST = "ConnectionsList";
     private ArrayList<NodeSetting> setting;
     private String url;
 
+    /**
+     * <p>Crea un nuovo oggetti contenente tutte le configurazione dell'app in
+     * base</p>
+     *
+     * @param url indirizzo del file xml di configurazione
+     * @param desc
+     */
     public SettingXML(String url) {
         this.url = url;
         this.setting = new ArrayList<NodeSetting>();
@@ -39,22 +51,26 @@ public class SettingXML {
     }
 
     /**
-     * <p>Aggiunge un nuovo valore di configurazione</p>
+     * <p>Aggiunge un nuovo valore di configurazione in coda alle atre gia
+     * presenti</p>
      *
      * @param desc descrittore
      * @param prop parametri di configurazione
      */
-    synchronized boolean addSetting(String desc, Properties prop) {
+    public synchronized boolean addSetting(String desc, Properties prop) {
+        boolean test = true;
+        int find = 0;
         if (desc == null || desc.isEmpty() || prop == null) {
             return false;
         }
-        for (NodeSetting ns : setting) {
-            if (ns.getDesc().compareTo(desc) == 0) {
-                ns.addProp(prop);
-                return true;
-            }
+
+        find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
+        if (find != -1) {
+            setting.get(find).addProp(prop);
+        } else {
+            setting.add(new NodeSetting(desc, prop));
+            Collections.sort(setting, new NodeSettingComparator());
         }
-        setting.add(new NodeSetting(desc, prop));
         return true;
     }
 
@@ -64,31 +80,40 @@ public class SettingXML {
      * @param desc descrittore
      * @param prop se <code>NULL</code> rimuove tutto il blocco
      */
-    synchronized boolean removeSetting(String desc, Properties prop) {
+    public synchronized boolean removeSetting(String desc, Properties prop) {
         if (desc == null || desc.isEmpty()) {
             return false;
         }
+        int find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
         if (prop == null) {
-            for (int i = 0; i < setting.size(); i++) {
-                if (setting.get(i).getDesc().compareTo(desc) == 0) {
-                    setting.remove(i);
-                    return true;
-                }
-            }
+            setting.remove(find);
         } else {
-            Iterator<NodeSetting> iterator = setting.iterator();
-            while (iterator.hasNext()) {
-                NodeSetting next = iterator.next();
-                if (next.getDesc().compareTo(desc) == 0) {
-                    next.removeProp(prop);
-                    if (next.isEmpty()) {
-                        iterator.remove();
-                    }
-                    return true;
-                }
+            NodeSetting get = setting.get(find);
+            get.removeProp(prop);
+            if (get.isEmpty()) {
+                setting.remove(find);
             }
         }
         return false;
+    }
+
+    /**
+     * <p>Ritona un
+     * <code>viewer.setting.NodeSettingInterface</code> se trova l'oggetto
+     * altrimenti
+     * <code>NULL</code>
+     *
+     * @param desc
+     * @return
+     */
+    public synchronized NodeSettingInterface getSetting(String desc) {
+        int find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
+        if (find != -1) {
+            return setting.get(find);
+        } else {
+            return null;
+        }
+
     }
 
     private void readSettingXml() {
@@ -105,8 +130,7 @@ public class SettingXML {
             Document doc = dBuilder.parse(file);
             doc.getDocumentElement().normalize();
 
-
-            NodeList nList = doc.getElementsByTagName("connection");
+            NodeList nList = doc.getElementsByTagName(SettingXML.CONNECTION_LIST);
 
             for (int i = 0; i < nList.getLength(); i++) {
                 Node n = nList.item(i);
@@ -117,10 +141,11 @@ public class SettingXML {
                     p.setProperty("url", e.getElementsByTagName("url").item(0).getTextContent());
                     p.setProperty("user", e.getElementsByTagName("user").item(0).getTextContent());
                     p.setProperty("password", e.getElementsByTagName("password").item(0).getTextContent());
-                    this.addSetting("connection", p);
+                    this.addSetting("ConnectionsList", p);
                 }
 
             }
+
         } catch (SAXException | IOException | ParserConfigurationException ex) {
             Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
         }

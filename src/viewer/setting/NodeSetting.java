@@ -9,16 +9,25 @@ import java.util.Collections;
 import java.util.ListIterator;
 import java.util.Properties;
 
-public class NodeSetting implements NodeSettingInterface {
+/**
+ * Implementazione dell'interfaccia
+ * <code>viewer.setting.NodeSettingInterface</code>
+ *
+ * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
+ * in Venice
+ */
+class NodeSetting implements NodeSettingInterface {
 
     private String desc;
     private ArrayList<Properties> ls;
 
-    public NodeSetting(String desc, Properties... prop) {
+    NodeSetting(String desc, Properties... prop) {
         this.desc = desc;
-        ls = new ArrayList<Properties>();
-        for (Properties p : prop) {
-            ls.add(p);
+        if (prop != null) {
+            ls = new ArrayList<Properties>();
+            for (Properties p : prop) {
+                ls.add(p);
+            }
         }
 
     }
@@ -89,4 +98,13 @@ public class NodeSetting implements NodeSettingInterface {
         return this.ls.isEmpty();
     }
 
+    @Override
+    public int size() {
+        return ls.size();
+    }
+
+    @Override
+    public String toString() {
+        return this.getDesc();
+    }
 }
