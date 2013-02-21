@@ -4,6 +4,9 @@
  */
 package viewer;
 
+import database.ConnectionPoolException;
+import database.ConnectionPoolFactory;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -334,7 +337,7 @@ public class ConnectWindow extends javax.swing.JFrame {
 
     private void jb_Connect_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_Connect_newActionPerformed
 
-        boolean test = false;
+        Connection conn = null;
         String user = this.jtf_usr_new.getText();
         String password = new String(this.jtf_passw_new.getPassword());
         String dbName = this.jtf_dbName_new.getText();
@@ -346,12 +349,21 @@ public class ConnectWindow extends javax.swing.JFrame {
         }
 
         try {
-            Main.conn = Database.buildManuzioDB(url, dbName, user, password, true);
+            conn = Main.buildManuzioDB(url, dbName, user, password, true);
         } catch (SQLException ex) {
             Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Impossibile Creare il DataBase", "Errore", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (conn != null) {
+                this.setVisible(false);
+                try {
+                    Main.setConnectionPool(url + "/" + dbName, user, password);
+                } catch (ConnectionPoolException ex) {
+                    Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         }
-        this.setVisible(false);
 
     }//GEN-LAST:event_jb_Connect_newActionPerformed
 
@@ -361,10 +373,11 @@ public class ConnectWindow extends javax.swing.JFrame {
 
     private void jb_ConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_ConnectActionPerformed
         // TODO add your handling code here:
+        Connection conn = null;
         String user = this.jtf_usr.getText();
         String password = new String(this.jtf_passw.getPassword());
         String dbName = this.jtf_dbName.getText();
-        String url = this.jtf_addr.getText() + ":" + this.jtf_port.getText() + "/" + this.jtf_dbName.getText();
+        String url = this.jtf_addr.getText() + ":" + this.jtf_port.getText() + "/" + dbName;
 
         if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
@@ -372,13 +385,21 @@ public class ConnectWindow extends javax.swing.JFrame {
         }
 
         try {
-            Main.conn = Database.getConnection(url, user, password);
+            conn = ConnectionPoolFactory.getConnection(url, user, password);
         } catch (SQLException ex) {
             Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
+        }finally {
+            if (conn != null) {
+                this.setVisible(false);
+                try {
+                    Main.setConnectionPool(url, user, password);
+                } catch (ConnectionPoolException ex) {
+                    Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         }
-        
-        this.setVisible(false);
     }//GEN-LAST:event_jb_ConnectActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;

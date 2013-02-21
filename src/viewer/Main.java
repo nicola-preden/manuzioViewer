@@ -4,48 +4,420 @@
  */
 package viewer;
 
+import com.jolbox.bonecp.BoneCP;
+import database.ConnectionPoolException;
+import database.ConnectionPoolFactory;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import viewer.setting.SettingXML;
 
 /**
- * <p> Classe contenete il main</p>
+ * <p>lasse contenete il main e i metodi per inizializzare il database</p>
  *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
- class Main {
+public class Main {
+
     private static class Timer extends Thread {
+
         @Override
         public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(30000);
-                        System.gc();
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+            while (true) {
+                try {
+                    Thread.sleep(30000);
+                    System.gc();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+        }
     }
-
-    static Connection conn = null;
-    static MainWindow mw = null;
-    static SettingXML setting = null;
-    private static final String urlXml = "settings.xml";
+    private static volatile boolean isConnect = false;
+    static BoneCP connPool = null;                              // Pool Connessione al DB
+    static MainWindow mw = null;                                // Finestra Principale
+    static SettingXML setting = null;                           // Struttura configurazione
+    private static final String urlXml = "settings.xml";        // File di Configurazione
     private static Timer tm = new Timer();
+    private static final double VERSION_Manuzio = 3.1;
+    private Object ob = new Object();
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        setting = new SettingXML(urlXml);        
+        setting = new SettingXML(urlXml);
         mw = new MainWindow();
         mw.setVisible(true);
         tm.start();
-        
 
+    }
+
+    /**
+     * Fornisce indicazione se è disponibile la connessione ad un server
+     *
+     * @return <code>TRUE</code> se connesso altrimenti <code>FALSE</code>
+     */
+    static synchronized boolean connectionIsSet() {
+        return isConnect;
+    }
+    
+    static synchronized void setConnectionPool(String url, String user, String password) throws ConnectionPoolException {
+        ConnectionPoolFactory cpf = new ConnectionPoolFactory(url, user, password);
+        connPool = cpf.createConnectionPool();
+        isConnect = true;
+    }
+
+    static synchronized boolean shutdownConnectionPool() {
+        if (isConnect) {
+            connPool.shutdown();
+            isConnect = false;
+            connPool = null;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * <p>Gets the version of the Manuzio Language and the relative database</p>
+     *
+     * @return - a double representing the version
+     */
+    public static double getVersion() {
+        return (Main.VERSION_Manuzio);
+    }
+
+    /**
+     * <p>Builds an empty Manuzio database version 3.1 on the server
+     * <code>url</code> with the given name
+     * <code>dbName</code></p> <p>If
+     * <code>override = true</code> and already exists a database with the given
+     * name, then tries to delete and substitute it with a new database</p>
+     *
+     * @param url the server path -either of the *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * serverPath itself
+     * @param dbName the name given to the new database
+     * @param user the username to log in the server
+     * @param password - the password used to log in the server using the
+     * account of <code>user</code>
+     * @param override specifies if a database already existing with the given
+     * has to be overridden or not.
+     * @return a Connection Object with the database just created
+     * @throws SQLException if a server error occurs.
+     */
+    public static Connection buildManuzioDB(String url, String dbName, String user, String password, boolean override) throws SQLException {
+        final String MARKER = "-----"; //to delimiter a query in the file
+        String file = "functions";	//filename = functions_ + subprotocol
+        Scanner scan = null;
+        Statement query = null; //query
+        SQLException err = null;	//to catch an error during the drop of the old db
+
+        Connection conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to the server
+
+        //builds the name of the database's specific functions file
+        String[] url_temp = conn.getMetaData().getURL().split(":");
+        file += "_" + url_temp[1];
+
+        //builds the db. If it already exists and override=true, then deletes it and builds a new one 
+        try {
+            if (override) {
+                try {
+                    deleteManuzioDB(url, dbName, user, password);
+                } catch (SQLException e) {
+                    err = e;
+                } //probably the db does not exist
+            }
+            query = conn.createStatement();
+            query.executeUpdate("CREATE DATABASE \"" + dbName + '"');
+        } catch (SQLException e) {
+            if (override && err != null) {
+                throw err;	//there was an exception during the db drop
+            } else {
+                throw e;
+            }
+        } finally {
+            close(query);
+            close(conn);
+        }
+
+        final List<String> q = new ArrayList<String>();	//memorizes the query
+
+        //query to build sequences
+        q.add("CREATE SEQUENCE id_att_val_seq INCREMENT 1 MINVALUE 1  START 1 CACHE 1");
+        q.add("CREATE SEQUENCE id_tex_obj_seq INCREMENT 1 MINVALUE 1  START 1 CACHE 1");
+        q.add("CREATE SEQUENCE id_text_occ_seq INCREMENT 1 MINVALUE 1  START 1 CACHE 1");
+        q.add("CREATE SEQUENCE id_text_seq INCREMENT 1 MINVALUE 1  START 1 CACHE 1");
+        q.add("CREATE SEQUENCE id_user_seq INCREMENT 1 MINVALUE 1  START 1 CACHE 1");
+        q.add("CREATE SEQUENCE id_att_type_seq INCREMENT 1 MINVALUE 1  START 1 CACHE 1");
+        q.add("CREATE SEQUENCE id_method_seq INCREMENT 1 MINVALUE 1 START 1 CACHE 1");
+
+        //query to build tables
+        q.add("CREATE TABLE types "
+                + "(type_name character varying NOT NULL, plural_name character varying NOT NULL, extends character varying, description text, "
+                + "CONSTRAINT \"types PK\" PRIMARY KEY (type_name), "
+                + "CONSTRAINT \"types FK\" FOREIGN KEY (extends) REFERENCES types (type_name), "
+                + "CONSTRAINT \"types U\" UNIQUE (plural_name), "
+                + "CONSTRAINT \"types_not_empty CHK\" CHECK (type_name <> ''::bpchar AND plural_name <> ''::bpchar))");
+        q.add("CREATE TABLE schema "
+                + "(schema_name character varying NOT NULL, max_unit character varying NOT NULL, min_unit character varying NOT NULL, description text, "
+                + "db_version numeric NOT NULL, \"timestamp\" timestamp(6) without time zone NOT NULL DEFAULT now(), "
+                + "CONSTRAINT \"schema PK\" PRIMARY KEY (schema_name), "
+                + "CONSTRAINT \"schema_max_unit FK\" FOREIGN KEY (max_unit) REFERENCES types (type_name), "
+                + "CONSTRAINT \"schema_min_unit FK\" FOREIGN KEY (min_unit) REFERENCES types (type_name), "
+                + "CONSTRAINT \"schema CHK\" CHECK (schema_name <> ''::bpchar))");
+        q.add("CREATE TABLE type_composition "
+                + "(container_type character varying NOT NULL, contained_type character varying NOT NULL, component_name character varying NOT NULL, "
+                + "optional boolean NOT NULL DEFAULT false, is_plural boolean NOT NULL, "
+                + "CONSTRAINT \"type_composition PK\" PRIMARY KEY (container_type, component_name ), "
+                + "CONSTRAINT \"type_contained FK\" FOREIGN KEY (contained_type) REFERENCES types (type_name), "
+                + "CONSTRAINT \"type_container FK\" FOREIGN KEY (container_type) REFERENCES types (type_name), "
+                + "CONSTRAINT \"type_composition CHK\" CHECK (component_name <> ''::bpchar))");
+        q.add("CREATE TABLE attribute_types "
+                + "(id_att_type integer NOT NULL DEFAULT nextval('id_att_type_seq'::regclass), type_name character varying NOT NULL, label character varying NOT NULL, "
+                + "type character varying NOT NULL, is_plural boolean NOT NULL DEFAULT false, editable boolean NOT NULL, "
+                + "CONSTRAINT \"att_types PK\" PRIMARY KEY (id_att_type), "
+                + "CONSTRAINT \"att_types U\" UNIQUE (type_name, label ), "
+                + "CONSTRAINT \"att_types FK\" FOREIGN KEY (type_name) REFERENCES types (type_name), "
+                + "CONSTRAINT \"attribute_types CHK\" CHECK (label <> ''::bpchar AND type <> ''::bpchar))");
+        q.add("CREATE TABLE methods "
+                + "(id_method integer NOT NULL DEFAULT nextval('id_method_seq'::regclass), type_name character varying NOT NULL, label character varying NOT NULL, "
+                + "syntax text NOT NULL, code bytea, is_plural boolean NOT NULL DEFAULT false, "
+                + "CONSTRAINT \"methods PK\" PRIMARY KEY (id_method), "
+                + "CONSTRAINT \"methods U\" UNIQUE (type_name, label), "
+                + "CONSTRAINT \"methods FK\" FOREIGN KEY (type_name) REFERENCES types (type_name), "
+                + "CONSTRAINT \"methods CHK\" CHECK (label <> ''::bpchar AND syntax <> ''::text))");
+        q.add("CREATE TABLE textual_objects "
+                + "(id_tex_obj integer NOT NULL DEFAULT nextval('id_tex_obj_seq'::regclass), type_name character varying NOT NULL, "
+                + "is_plural boolean NOT NULL, start integer NOT NULL, label character varying, "
+                + "CONSTRAINT \"tex_obj PK\" PRIMARY KEY (id_tex_obj), "
+                + "CONSTRAINT \"tex_obj FK\" FOREIGN KEY (type_name) REFERENCES types (type_name))");
+        q.add("CREATE TABLE objects_composition "
+                + "(id_container integer NOT NULL, id_contained integer NOT NULL, pos integer NOT NULL, ty_of_relation boolean NOT NULL, "
+                + "CONSTRAINT \"obj_comp PK\" PRIMARY KEY (id_container , id_contained ), "
+                + "CONSTRAINT \"obj_comp_contained FK\" FOREIGN KEY (id_contained) REFERENCES textual_objects (id_tex_obj), "
+                + "CONSTRAINT \"obj_comp_container FK\" FOREIGN KEY (id_container) REFERENCES textual_objects (id_tex_obj))");
+        q.add("CREATE TABLE users "
+                + "(id_user integer NOT NULL DEFAULT nextval('id_user_seq'::regclass), lastname character varying NOT NULL, "
+                + "firstname character varying NOT NULL, nickname character(10) NOT NULL, "
+                + "CONSTRAINT \"users PK\" PRIMARY KEY (id_user), "
+                + "CONSTRAINT \"users U\" UNIQUE (nickname))");
+        q.add("CREATE TABLE attribute_values "
+                + "(id_att_value integer NOT NULL DEFAULT nextval('id_att_val_seq'::regclass),content text NOT NULL, "
+                + "\"timestamp\" timestamp(6) without time zone NOT NULL DEFAULT NULL::timestamp without time zone, id_user integer, "
+                + "id_tex_obj integer NOT NULL, id_att_type integer NOT NULL,"
+                + "CONSTRAINT \"att_val PK\" PRIMARY KEY (id_att_value), "
+                + "CONSTRAINT \"att_val_att FK\" FOREIGN KEY (id_att_type) REFERENCES attribute_types (id_att_type), "
+                + "CONSTRAINT \"att_val_tex_obj FK\" FOREIGN KEY (id_tex_obj) REFERENCES textual_objects (id_tex_obj), "
+                + "CONSTRAINT \"att_val_user FK\" FOREIGN KEY (id_user) REFERENCES users (id_user))");
+        q.add("CREATE TABLE texts "
+                + "(id_text integer NOT NULL DEFAULT nextval('id_text_seq'::regclass), cached_text text NOT NULL, lenght integer NOT NULL, "
+                + "CONSTRAINT \"text PK\" PRIMARY KEY (id_text), "
+                + "CONSTRAINT \"text U\" UNIQUE (cached_text))");
+        q.add("CREATE TABLE text_occurence "
+                + "(id_text_occurence integer NOT NULL DEFAULT nextval('id_text_occ_seq'::regclass), id_text integer NOT NULL, "
+                + "start integer NOT NULL, \"end\" integer NOT NULL, "
+                + "CONSTRAINT \"text_occ PK\" PRIMARY KEY (id_text_occurence ), "
+                + "CONSTRAINT \"text_occ FK\" FOREIGN KEY (id_text) REFERENCES texts (id_text))");
+        q.add("CREATE TABLE elements "
+                + "(id_tex_obj integer NOT NULL, id_text_occurence integer NOT NULL, "
+                + "CONSTRAINT \"elements PK\" PRIMARY KEY (id_tex_obj , id_text_occurence ), "
+                + "CONSTRAINT \"elements _tex_obj FK\" FOREIGN KEY (id_tex_obj) REFERENCES textual_objects (id_tex_obj), "
+                + "CONSTRAINT \"elements_occ FK\" FOREIGN KEY (id_text_occurence) REFERENCES text_occurence (id_text_occurence))");
+        q.add("INSERT INTO users (id_user, lastname, firstname, nickname) VALUES (0, 'Admin', 'Admin', 'Admin')");
+
+
+        //loads database specific functions
+        try {
+            scan = new Scanner(new java.io.File(file));
+        } catch (FileNotFoundException e1) {
+            deleteManuzioDB(url, "man_DB " + dbName, user, password);
+            throw new SQLException("Cannot find system file '" + file + "'");
+        }
+        String fun = "";
+        while (scan.hasNext()) {
+            String s = scan.nextLine();
+            if (s.equals(MARKER)) {
+                q.add(fun);
+                fun = "";
+                continue;
+            }
+            fun += s + "\n";
+        }
+        scan.close();
+
+        try {	//builds the db
+            conn = ConnectionPoolFactory.getConnection(url + "/" + dbName, user, password); //connects to db just created
+            query = conn.createStatement();
+
+            //if the db support batch updates, then it is more efficient doing a batch update instead of doing the querys one at time
+            if (conn.getMetaData().supportsBatchUpdates()) {
+                for (int i = 0; i < q.size(); i++) {
+                    query.addBatch((q.get(i)));
+                }
+                query.executeBatch();
+            } else {
+                for (int i = 0; i < q.size(); i++) {
+                    query.executeUpdate(q.get(i));
+                }
+            }
+        } catch (SQLException e) {
+            //closes resources and deletes the bad-formed db
+            close(query);
+            close(conn);
+            deleteManuzioDB(url, dbName, user, password);
+            throw e;
+        } finally {
+            close(query);
+        }
+        return conn;
+    }
+
+    /**
+     * <p>Deletes the database with the given name
+     * <code>dbName</code> from the server.</p> <p>Despite to this method's
+     * name, this method could be used to delete any database, not only a
+     * Manuzio one.</p>
+     *
+     * @param url the server path -either of the *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * serverPath itself
+     * @param dbName - the name of the database to delete
+     * @param user the username to connect to the server
+     * @param password the password related to the <code>user</code> to connect
+     * to the server
+     * @throws SQLException if the database couldn't be deleted for any reason
+     */
+    public static void deleteManuzioDB(String url, String dbName, String user, String password) throws SQLException {
+        Connection conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to the server
+        try {
+            conn.createStatement().executeUpdate("DROP DATABASE \"" + dbName + "\";");
+        } catch (SQLException e) {
+            throw new SQLException("FATAL " + e.getMessage() + "\nWARNING: The database just created may be in a incosistent status.");
+        } finally {
+            close(conn);
+        }
+    }
+
+    /**
+     * <p>Empties the given Manuzio database.</p> <p>NOTE: the database must
+     * have a Manuzio DB version 3.1 structure</p>
+     *
+     * @param url - the location and the name of the DB to empty
+     * @param user the username to log in the server
+     * @param password - the password used to log in the server using the
+     * account of <code>user</code>
+     * @throws SQLException - can't connect to the given DB. Maybe the path, the
+     * user or the password are wrong
+     * @throws ParseException - the given DB hasn't a Manuzio 3.1 structure
+     */
+    public static void emptyDB(String url, String user, String password) throws SQLException, ParseException {
+        Connection conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to the server
+        Statement query = null; //query
+        try {
+            query = conn.createStatement();
+            query.executeUpdate("DELETE FROM schema");
+            query.executeUpdate("DELETE FROM type_composition");
+            query.executeUpdate("DELETE FROM attribute_values");
+            query.executeUpdate("DELETE FROM attribute_types");
+            query.executeUpdate("DELETE FROM users");
+            query.executeUpdate("DELETE FROM objects_composition");
+            query.executeUpdate("DELETE FROM elements");
+            query.executeUpdate("DELETE FROM text_occurence");
+            query.executeUpdate("DELETE FROM texts");
+            query.executeUpdate("DELETE FROM types");
+            query.executeUpdate("DELETE FROM textual_objects");
+            query.executeUpdate("DELETE FROM methods");
+            query.executeUpdate("ALTER SEQUENCE id_att_type_seq RESTART");
+            query.executeUpdate("ALTER SEQUENCE id_method_seq RESTART");
+            query.executeUpdate("ALTER SEQUENCE id_att_val_seq RESTART");
+            query.executeUpdate("ALTER SEQUENCE id_att_val_seq RESTART");
+            query.executeUpdate("ALTER SEQUENCE id_att_val_seq RESTART");
+            query.executeUpdate("ALTER SEQUENCE id_tex_ob_seq RESTART");
+            query.executeUpdate("ALTER SEQUENCE id_text_occ_seq RESTART");
+            query.executeUpdate("ALTER SEQUENCE id_text_seq RESTART");
+            query.executeUpdate("ALTER SEQUENCE id_user_seq RESTART");
+        } catch (SQLException e) {
+            throw new ParseException("Invalid DB format", -1);
+        } finally {
+            //closes resources
+            close(query);
+            close(conn);
+        }
+    }
+
+    /**
+     * <p>Closes any open
+     * <code>ResultSet</code>.</p>
+     *
+     * @param resultSets the ResultSets to close
+     * @throws SQLException if a database error occurs
+     */
+    public static void close(ResultSet... resultSets) throws SQLException {
+        if (resultSets == null) {
+            return;
+        }
+        for (ResultSet resultSet : resultSets) {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    throw new SQLException("Fatal error. Try restart the program.");
+                }
+            }
+        }
+    }
+
+    /**
+     * <p>Closes any open
+     * <code>Statement</code>.</p>
+     *
+     * @param statements the Statement to close
+     * @throws SQLException if a database error occurs
+     */
+    public static void close(Statement... statements) throws SQLException {
+        if (statements == null) {
+            return;
+        }
+        for (Statement statement : statements) {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    throw new SQLException("Fatal error. Try restart the program.");
+                }
+            }
+        }
+    }
+
+    /**
+     * <p>Closes any open
+     * <code>Connection</code>.</p>
+     *
+     * @param connections the Connection to close
+     * @throws SQLException if a database error occurs
+     */
+    public static void close(Connection... connections) throws SQLException {
+        if (connections == null) {
+            return;
+        }
+        for (Connection connection : connections) {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    throw new SQLException("Fatal error. Try restart the program.");
+                }
+            }
+        }
     }
 }

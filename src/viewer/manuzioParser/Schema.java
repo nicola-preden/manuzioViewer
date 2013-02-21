@@ -1,6 +1,6 @@
 package viewer.manuzioParser;
 
-import viewer.Database;
+import database.ConnectionPoolFactory;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import viewer.Main;
 import viewer.manuzioParser.Type.number;
 
 /**
@@ -202,7 +203,7 @@ public class Schema {
         ResultSet res = null;	//results of a query
         PreparedStatement stat = null; //query
 
-        Connection conn = Database.getConnection(url, user, password); //connects to DB
+        Connection conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to DB
 
         try {	//checks database version
             double version;
@@ -212,8 +213,8 @@ public class Schema {
                 throw new ParseException("Invalid database format:\nNo Schema definition found.", -1);
             }
             version = res.getDouble("db_version");
-            if (version != Database.getVersion()) {
-                throw new ParseException("Invalid database format:\nSupported version is " + Database.getVersion() + ".\nDatabase version is " + version + ".", -1);
+            if (version != Main.getVersion()) {
+                throw new ParseException("Invalid database format:\nSupported version is " + Main.getVersion() + ".\nDatabase version is " + version + ".", -1);
             }
 
             //builds the schema
@@ -224,9 +225,9 @@ public class Schema {
             }
         } catch (SQLException e) {
             //closes resources
-            Database.close(res);
-            Database.close(stat);
-            Database.close(conn);
+            Main.close(res);
+            Main.close(stat);
+            Main.close(conn);
             throw new ParseException("Invalid database format:\n" + e.getMessage(), -1);
         }
 
@@ -280,15 +281,13 @@ public class Schema {
             }
 
             return schema;
-        } catch (SQLException e) {
-            throw e;
-        } catch (ParseException e) {
+        } catch (SQLException | ParseException e) {
             throw e;
         } finally {
             //closes resources
-            Database.close(res);
-            Database.close(stat);
-            Database.close(conn);
+            Main.close(res);
+            Main.close(stat);
+            Main.close(conn);
         }
     }
 
@@ -314,13 +313,13 @@ public class Schema {
         if (this.isEmpty()) {
             throw new ParseException("Error: the Schema is empty.", -1);
         }
-        Connection conn = Database.getConnection(url, user, password); //connects to the server
+        Connection conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to the server
 
         PreparedStatement query_ins_type = null, query_ins_att = null, query_ins_met = null, query_type_comp = null, query_schema = null, query_supertype = null; //query
         Set<ComponentProperty> compSet = new HashSet<ComponentProperty>();	//memorizes the type's structure
         Map<String, String> supertype = new HashMap<String, String>();	//memorizes the type's extensions
 
-        conn = Database.buildManuzioDB(url, dbName, user, password, override); //builds the database
+        conn = Main.buildManuzioDB(url, dbName, user, password, override); //builds the database
 
         try {
             //prepare the statements 
@@ -388,18 +387,18 @@ public class Schema {
             query_schema.setString(1, this.getName());
             query_schema.setString(2, this.getMaximalUnit().getTypeName());
             query_schema.setString(3, this.getMinimalUnit().getTypeName());
-            query_schema.setDouble(4, Database.getVersion());
+            query_schema.setDouble(4, Main.getVersion());
             query_schema.executeUpdate();
 
             //closes resources
-            Database.close(query_schema, query_type_comp, query_ins_type, query_ins_att, query_ins_met, query_supertype);
-            Database.close(conn);
+            Main.close(query_schema, query_type_comp, query_ins_type, query_ins_att, query_ins_met, query_supertype);
+            Main.close(conn);
 
         } catch (SQLException e) {
             //closes resources
-            Database.close(query_schema, query_type_comp, query_ins_type, query_ins_att, query_ins_met, query_supertype);
-            Database.close(conn);
-            Database.deleteManuzioDB(url, dbName, user, password); //to not leave the DB in a inconsistent status
+            Main.close(query_schema, query_type_comp, query_ins_type, query_ins_att, query_ins_met, query_supertype);
+            Main.close(conn);
+            Main.deleteManuzioDB(url, dbName, user, password); //to not leave the DB in a inconsistent status
             throw e;
         }
     }
