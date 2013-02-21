@@ -8,6 +8,7 @@ import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -343,7 +344,7 @@ public class ConnectWindow extends javax.swing.JFrame {
         String dbName = this.jtf_dbName_new.getText();
         String url = this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
 
-        if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {
+        if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {                        // Controlla se tutti i campi non son vuoti
             JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -358,6 +359,11 @@ public class ConnectWindow extends javax.swing.JFrame {
                 this.setVisible(false);
                 try {
                     Main.setConnectionPool(url + "/" + dbName, user, password);
+                    Properties prop = new Properties();
+                    prop.setProperty("url", url + "/" + dbName);
+                    prop.setProperty("user", user);
+                    prop.setProperty("password", password);
+                    Main.setting.addSetting(SettingXML.CONNECTION_LIST, prop);
                 } catch (ConnectionPoolException ex) {
                     Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
@@ -394,6 +400,11 @@ public class ConnectWindow extends javax.swing.JFrame {
                 this.setVisible(false);
                 try {
                     Main.setConnectionPool(url, user, password);
+                    Properties prop = new Properties();
+                    prop.setProperty("url", url);
+                    prop.setProperty("user", user);
+                    prop.setProperty("password", password);
+                    Main.setting.addSetting(SettingXML.CONNECTION_LIST, prop);
                 } catch (ConnectionPoolException ex) {
                     Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);

@@ -70,7 +70,7 @@ public class SettingXML {
 
         find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
         if (find != -1) {
-            setting.get(find).addProp(prop);
+            setting.get(find).addAtFistOccProp(prop);
         } else {
             setting.add(new NodeSetting(desc, prop));
             Collections.sort(setting, new NodeSettingComparator());

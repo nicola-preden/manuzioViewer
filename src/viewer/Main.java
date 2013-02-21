@@ -45,11 +45,11 @@ public class Main {
     private static volatile boolean isConnect = false;
     static BoneCP connPool = null;                              // Pool Connessione al DB
     static MainWindow mw = null;                                // Finestra Principale
+    static ConnectWindow cw = null;                             // Finestra di login
     static SettingXML setting = null;                           // Struttura configurazione
     private static final String urlXml = "settings.xml";        // File di Configurazione
     private static Timer tm = new Timer();
     private static final double VERSION_Manuzio = 3.1;
-    private Object ob = new Object();
 
     /**
      * @param args the command line arguments
@@ -57,9 +57,12 @@ public class Main {
     public static void main(String[] args) {
         // TODO code application logic here
         setting = new SettingXML(urlXml);
-        mw = new MainWindow();
-        mw.setVisible(true);
         tm.start();
+        mw = new MainWindow();
+        cw = new ConnectWindow();
+        
+        mw.setVisible(true);
+
 
     }
 
@@ -71,13 +74,34 @@ public class Main {
     static synchronized boolean connectionIsSet() {
         return isConnect;
     }
-    
+
+    /**
+     * Imposta un nuovo ConnectionPool
+     *
+     * @param url Indirizzo al server seco la      * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
+     * @param user
+     * @param password
+     * @throws ConnectionPoolException
+     */
     static synchronized void setConnectionPool(String url, String user, String password) throws ConnectionPoolException {
         ConnectionPoolFactory cpf = new ConnectionPoolFactory(url, user, password);
         connPool = cpf.createConnectionPool();
         isConnect = true;
     }
 
+    static synchronized Connection getConnection() throws SQLException {
+        if (isConnect) {
+            return connPool.getConnection();
+        }
+        return null;
+    }
+
+    /**
+     * Chiude il connectionPool e chiude tutte le connessioni aperte al momento
+     * della chimata
+     *
+     * @return <code>TRUE</code> se l'operazione ha successo
+     */
     static synchronized boolean shutdownConnectionPool() {
         if (isConnect) {
             connPool.shutdown();
@@ -105,7 +129,7 @@ public class Main {
      * <code>override = true</code> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
-     * @param url the server path -either of the *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * @param url the server path -either of the * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
      * serverPath itself
      * @param dbName the name given to the new database
      * @param user the username to log in the server
@@ -289,7 +313,7 @@ public class Main {
      * name, this method could be used to delete any database, not only a
      * Manuzio one.</p>
      *
-     * @param url the server path -either of the *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * @param url the server path -either of the * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
      * serverPath itself
      * @param dbName - the name of the database to delete
      * @param user the username to connect to the server
