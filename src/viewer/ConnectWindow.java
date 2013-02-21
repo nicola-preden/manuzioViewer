@@ -285,6 +285,11 @@ public class ConnectWindow extends javax.swing.JFrame {
         jt_connect_type.addTab("Crea un nuovo Database", jp_newDB);
 
         jButton1.setText("Annulla");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -357,6 +362,7 @@ public class ConnectWindow extends javax.swing.JFrame {
         } finally {
             if (conn != null) {
                 this.setVisible(false);
+                Main.cw = null;
                 try {
                     Main.setConnectionPool(url + "/" + dbName, user, password);
                     Properties prop = new Properties();
@@ -395,9 +401,10 @@ public class ConnectWindow extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
-        }finally {
+        } finally {
             if (conn != null) {
                 this.setVisible(false);
+                Main.cw = null;
                 try {
                     Main.setConnectionPool(url, user, password);
                     Properties prop = new Properties();
@@ -412,6 +419,12 @@ public class ConnectWindow extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_jb_ConnectActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        this.setVisible(false);
+        Main.cw = null;
+    }//GEN-LAST:event_jButton1ActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jb_Connect;

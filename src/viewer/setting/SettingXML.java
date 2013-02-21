@@ -119,6 +119,12 @@ public class SettingXML {
         }
 
     }
+    /**
+     * Salva il contenuto della struttura su file
+     */
+    public synchronized void saveOnFile() {
+        this.writeSettingXml();
+    }
 
     private void readSettingXml() {
         try {

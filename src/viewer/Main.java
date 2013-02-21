@@ -112,6 +112,12 @@ public class Main {
             return false;
         }
     }
+    
+    static void shutdownProgram() {
+        setting.saveOnFile();
+        System.exit(0);
+        
+    }
 
     /**
      * <p>Gets the version of the Manuzio Language and the relative database</p>

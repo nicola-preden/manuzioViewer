@@ -42,7 +42,8 @@ public class MainWindow extends javax.swing.JFrame {
         contentsMenuItem = new javax.swing.JMenuItem();
         aboutMenuItem = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setTitle("ManuzioViewer");
 
         fileMenu.setMnemonic('f');
         fileMenu.setText("File");
@@ -123,11 +124,13 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
-        System.exit(0);
+        Main.shutdownProgram();
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
     private void connectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectMenuItemActionPerformed
         // TODO add your handling code here:
+        Main.cw = new ConnectWindow();
+        Main.cw.setVisible(true);
     }//GEN-LAST:event_connectMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
