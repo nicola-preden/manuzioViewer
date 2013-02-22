@@ -4,6 +4,20 @@
  */
 package viewer;
 
+import database.ConnectionPoolException;
+import database.ConnectionPoolFactory;
+import java.awt.event.ActionEvent;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ListIterator;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import viewer.setting.NodeSettingInterface;
+import viewer.setting.SettingXML;
+
 /**
  *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
@@ -11,16 +25,82 @@ package viewer;
  */
 public class MainWindow extends javax.swing.JFrame {
 
+    private class MyActionListener implements java.awt.event.ActionListener {
+
+        String url = null;
+        String user = null;
+        String passw = null;
+
+        MyActionListener(Properties prop) {
+            url = prop.getProperty("url");
+            user = prop.getProperty("user");
+            passw = prop.getProperty("password");
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Connection conn = null;
+            try {
+                conn = ConnectionPoolFactory.getConnection(url, user, passw);
+            } catch (SQLException ex) {
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(Main.mw, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                if (conn != null) {
+                    try {
+                        Main.setConnectionPool(url, user, passw);
+                        setEnableConnectMenu(false);
+                    } catch (ConnectionPoolException ex) {
+                        Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+                        JOptionPane.showMessageDialog(Main.mw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
         initComponents();
+        updateMenu();
     }
 
-    void updateMenu() {
-        
+    /**
+     * Disabilità o abilità i menu per la connessione/disconnessione
+     * <code>javax.swing.JMenu</code> relativo alle connessioni a un db
+     *
+     * @param set
+     */
+    public synchronized void setEnableConnectMenu(boolean set) {
+        jM_Connects.setEnabled(set);
+        disconnectMenuItem.setEnabled(!set);
     }
+
+    public synchronized void updateMenu() {
+        if (jM_Connects.getItemCount() > 2) {
+            for (int i = 2; i < jM_Connects.getItemCount(); i++) {
+                JMenuItem item = jM_Connects.getItem(i);
+                jM_Connects.remove(i);
+            }
+        }
+        NodeSettingInterface setting = Main.setting.getSetting(SettingXML.CONNECTION_LIST);
+        if (setting != null) {
+            ListIterator<Properties> readProp = setting.readProp();
+            while (readProp.hasNext()) {
+                Properties next = readProp.next();
+                String url = next.getProperty("url");
+
+                JMenuItem x = new javax.swing.JMenuItem();
+                x.setText(url.split("/")[0]);
+                x.addActionListener(new MyActionListener(next));
+                jM_Connects.add(x);
+
+            }
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -35,6 +115,7 @@ public class MainWindow extends javax.swing.JFrame {
         jM_Connects = new javax.swing.JMenu();
         connectMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        disconnectMenuItem = new javax.swing.JMenuItem();
         exitMenuItem = new javax.swing.JMenuItem();
         editMenu = new javax.swing.JMenu();
         cutMenuItem = new javax.swing.JMenuItem();
@@ -53,6 +134,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         jM_Connects.setText("Connetti ....");
 
+        connectMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.ALT_MASK));
         connectMenuItem.setMnemonic('o');
         connectMenuItem.setText("Nuovo ...");
         connectMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -65,6 +147,17 @@ public class MainWindow extends javax.swing.JFrame {
 
         fileMenu.add(jM_Connects);
 
+        disconnectMenuItem.setMnemonic('s');
+        disconnectMenuItem.setText("Disconnetti");
+        disconnectMenuItem.setEnabled(false);
+        disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                disconnectMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(disconnectMenuItem);
+
+        exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.META_MASK));
         exitMenuItem.setMnemonic('x');
         exitMenuItem.setText("Exit");
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
@@ -136,6 +229,13 @@ public class MainWindow extends javax.swing.JFrame {
         Main.cw.setVisible(true);
     }//GEN-LAST:event_connectMenuItemActionPerformed
 
+    private void disconnectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectMenuItemActionPerformed
+        // TODO add your handling code here:
+        if (Main.shutdownConnectionPool()) {
+            this.setEnableConnectMenu(true);
+        }
+    }//GEN-LAST:event_disconnectMenuItemActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem connectMenuItem;
@@ -143,6 +243,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem copyMenuItem;
     private javax.swing.JMenuItem cutMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
+    private javax.swing.JMenuItem disconnectMenuItem;
     private javax.swing.JMenu editMenu;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;

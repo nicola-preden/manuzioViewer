@@ -4,7 +4,10 @@
  */
 package viewer.setting;
 
+import com.sun.org.apache.xml.internal.serialize.OutputFormat;
+import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -155,7 +158,6 @@ public class SettingXML {
             File file = new File(this.url);
 
             if (!file.isFile()) {
-                writeSettingXml();
                 return;
             }
 
@@ -195,7 +197,7 @@ public class SettingXML {
 
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement("Setting");
-            rootElement.setAttribute("test", "1");
+            //rootElement.setAttribute("test", "1");
             doc.appendChild(rootElement);
 
 
@@ -221,23 +223,30 @@ public class SettingXML {
                     user.appendChild(doc.createTextNode(next.getProperty("user")));
                     ConnectionsList.appendChild(user);
 
-                    password = doc.createElement("url");
-                    password.appendChild(doc.createTextNode(next.getProperty("url")));
+                    password = doc.createElement("password");
+                    password.appendChild(doc.createTextNode(next.getProperty("password")));
                     ConnectionsList.appendChild(password);
                 }
             }
 
             // SCRITTURA FILE
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            doc.normalizeDocument();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File(this.url));
-            //StreamResult result = new StreamResult(System.out);
-            
-            transformer.transform(source, result);
 
-        } catch (TransformerException | ParserConfigurationException ex) {
+            /*TransformerFactory transformerFactory = TransformerFactory.newInstance();
+             Transformer transformer = transformerFactory.newTransformer();
+             doc.normalizeDocument();
+             DOMSource source = new DOMSource(doc);
+             StreamResult result = new StreamResult(new File(this.url));
+             //StreamResult result = new StreamResult(System.out);
+
+             transformer.transform(source, result);
+             */
+            // cosi il testo risulta umanamente leggibile
+            OutputFormat format = new OutputFormat(doc);
+            format.setIndenting(true);
+            XMLSerializer serializer = new XMLSerializer(new FileOutputStream(new File(this.url)), format);
+            serializer.serialize(doc);
+
+        } catch (ParserConfigurationException | IOException ex) {
             Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

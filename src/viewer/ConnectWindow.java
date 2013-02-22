@@ -373,6 +373,7 @@ public class ConnectWindow extends javax.swing.JFrame {
                     prop.setProperty("password", password);
                     Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
                     mainWindow.updateMenu();
+                    mainWindow.setEnableConnectMenu(false);
                 } catch (ConnectionPoolException ex) {
                     Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
@@ -416,6 +417,7 @@ public class ConnectWindow extends javax.swing.JFrame {
                     prop.setProperty("password", password);
                     Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
                     mainWindow.updateMenu();
+                    mainWindow.setEnableConnectMenu(false);
                 } catch (ConnectionPoolException ex) {
                     Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);

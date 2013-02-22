@@ -42,8 +42,9 @@ public class Main {
             }
         }
     }
+    
     private static volatile boolean isConnect = false;
-    static BoneCP connPool = null;                              // Pool Connessione al DB
+    private static BoneCP connPool = null;                              // Pool Connessione al DB
     static MainWindow mw = null;                                // Finestra Principale
     static ConnectWindow cw = null;                             // Finestra di login
     static SettingXML setting = null;                           // Struttura configurazione
@@ -58,7 +59,7 @@ public class Main {
         // TODO code application logic here
         setting = new SettingXML(urlXml);
         tm.start();
-        mw = new MainWindow();        
+        mw = new MainWindow();
         mw.setVisible(true);
 
 
@@ -74,17 +75,20 @@ public class Main {
     }
 
     /**
-     * Imposta un nuovo ConnectionPool
+     * Imposta un nuovo ConnectionPool chiudendo il precedente creato
      *
-     * @param url Indirizzo al server seco la      * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
+     * @param url Indirizzo al server secondo la 
+     * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
      * @param user
      * @param password
      * @throws ConnectionPoolException
      */
     static synchronized void setConnectionPool(String url, String user, String password) throws ConnectionPoolException {
-        ConnectionPoolFactory cpf = new ConnectionPoolFactory(url, user, password);
-        connPool = cpf.createConnectionPool();
-        isConnect = true;
+        if (!isConnect) {
+            ConnectionPoolFactory cpf = new ConnectionPoolFactory(url, user, password);
+            connPool = cpf.createConnectionPool();
+            isConnect = true;
+        }
     }
 
     static synchronized Connection getConnection() throws SQLException {
@@ -110,11 +114,11 @@ public class Main {
             return false;
         }
     }
-    
+
     static void shutdownProgram() {
         setting.saveOnFile();
         System.exit(0);
-        
+
     }
 
     /**
@@ -133,8 +137,9 @@ public class Main {
      * <code>override = true</code> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
-     * @param url the server path -either of the * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
-     * serverPath itself
+     * @param url the server path -either of the * * *
+     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
+     * itself
      * @param dbName the name given to the new database
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
@@ -317,8 +322,9 @@ public class Main {
      * name, this method could be used to delete any database, not only a
      * Manuzio one.</p>
      *
-     * @param url the server path -either of the * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
-     * serverPath itself
+     * @param url the server path -either of the * * *
+     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
+     * itself
      * @param dbName - the name of the database to delete
      * @param user the username to connect to the server
      * @param password the password related to the <code>user</code> to connect
