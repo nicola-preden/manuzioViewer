@@ -58,9 +58,7 @@ public class Main {
         // TODO code application logic here
         setting = new SettingXML(urlXml);
         tm.start();
-        mw = new MainWindow();
-        cw = new ConnectWindow();
-        
+        mw = new MainWindow();        
         mw.setVisible(true);
 
 

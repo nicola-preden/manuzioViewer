@@ -56,13 +56,36 @@ public class SettingXML {
     }
 
     /**
-     * <p>Aggiunge un nuovo valore di configurazione in coda alle atre gia
+     * <p>Aggiunge un nuovo valore di configurazione in coda agli altri già
      * presenti</p>
      *
      * @param desc descrittore
      * @param prop parametri di configurazione
      */
     public synchronized boolean addSetting(String desc, Properties prop) {
+        int find;
+        if (desc == null || desc.isEmpty() || prop == null) {
+            return false;
+        }
+
+        find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
+        if (find != -1) {
+            setting.get(find).addProp(prop);
+        } else {
+            setting.add(new NodeSetting(desc, prop));
+            Collections.sort(setting, new NodeSettingComparator());
+        }
+        return true;
+    }
+
+    /**
+     * <p>Aggiunge un nuovo valore di configurazione in testa agli altri già
+     * presenti</p>
+     *
+     * @param desc descrittore
+     * @param prop parametri di configurazione
+     */
+    public synchronized boolean addSettingAtTop(String desc, Properties prop) {
         int find;
         if (desc == null || desc.isEmpty() || prop == null) {
             return false;
@@ -119,6 +142,7 @@ public class SettingXML {
         }
 
     }
+
     /**
      * Salva il contenuto della struttura su file
      */
@@ -171,6 +195,7 @@ public class SettingXML {
 
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement("Setting");
+            rootElement.setAttribute("test", "1");
             doc.appendChild(rootElement);
 
 
@@ -201,15 +226,17 @@ public class SettingXML {
                     ConnectionsList.appendChild(password);
                 }
             }
-            
+
             // SCRITTURA FILE
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
+            doc.normalizeDocument();
             DOMSource source = new DOMSource(doc);
-            //StreamResult result = new StreamResult(new File(this.url));
-            StreamResult result = new StreamResult(System.out);
-            transformer.transform(source, result);
+            StreamResult result = new StreamResult(new File(this.url));
+            //StreamResult result = new StreamResult(System.out);
             
+            transformer.transform(source, result);
+
         } catch (TransformerException | ParserConfigurationException ex) {
             Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
         }

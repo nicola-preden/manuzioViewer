@@ -21,12 +21,14 @@ import viewer.setting.SettingXML;
  */
 public class ConnectWindow extends javax.swing.JFrame {
 
+    private MainWindow mainWindow;
     /**
      * Creates new form ConnectWindow
      */
-    public ConnectWindow() {
+    public ConnectWindow(MainWindow mainWindow) {
         initComponents();
         this.setVisible(false);
+        this.mainWindow =  mainWindow;
     }
 
     /**
@@ -369,7 +371,8 @@ public class ConnectWindow extends javax.swing.JFrame {
                     prop.setProperty("url", url + "/" + dbName);
                     prop.setProperty("user", user);
                     prop.setProperty("password", password);
-                    Main.setting.addSetting(SettingXML.CONNECTION_LIST, prop);
+                    Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
+                    mainWindow.updateMenu();
                 } catch (ConnectionPoolException ex) {
                     Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
@@ -411,7 +414,8 @@ public class ConnectWindow extends javax.swing.JFrame {
                     prop.setProperty("url", url);
                     prop.setProperty("user", user);
                     prop.setProperty("password", password);
-                    Main.setting.addSetting(SettingXML.CONNECTION_LIST, prop);
+                    Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
+                    mainWindow.updateMenu();
                 } catch (ConnectionPoolException ex) {
                     Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
