@@ -1,0 +1,50 @@
+Schema  PlaySchema            
+type Play Plays 
+has
+optional title:Sentence
+acts :Acts
+attributes
+author :String
+plural year:Integer
+end
+type Act Acts
+has 
+scenes: Scenes
+attributes
+directions : String
+methods
+prova :=[questo è un metodo di prova]
+end
+type Scene Scenes
+has
+speeches : Speeches
+end
+type Prologue Prologues is Scene end
+type Epilogue   Epilogues is Scene
+has
+salutations : Speech
+attributes
+plural ciao: qualcosa
+methods
+plural meth:=[provaprova] 
+end
+type Speech  Speeches
+has
+sentences: Sentences
+lines : Lines
+attributes
+speaker : String
+directions : String
+end
+type Line Lines
+has words : Words
+end
+type Sentence Sentences
+has words : Words
+end
+type Word Words
+has character: Characters
+end
+type  Character Characters
+end
+End

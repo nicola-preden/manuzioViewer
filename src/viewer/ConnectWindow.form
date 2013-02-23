@@ -32,8 +32,8 @@
           </Group>
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="32767" attributes="0"/>
-              <Component id="jButton1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
+              <Component id="jB_cancel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -41,10 +41,10 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jt_connect_type" min="-2" pref="284" max="-2" attributes="0"/>
+              <Component id="jt_connect_type" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jButton1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <Component id="jB_cancel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -103,8 +103,8 @@
                       <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="150" max="-2" attributes="0"/>
-                      <Component id="jb_Connect" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="151" max="-2" attributes="0"/>
+                      <Component id="jb_Connect" min="-2" pref="98" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
@@ -139,9 +139,9 @@
                           <Component id="jtf_usr" alignment="2" min="-2" max="-2" attributes="0"/>
                           <Component id="jtf_passw" alignment="2" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace pref="71" max="32767" attributes="0"/>
                       <Component id="jb_Connect" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="17" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -163,9 +163,6 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="jtf_port">
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtf_portActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jlb_dbName">
               <Properties>
@@ -173,9 +170,6 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="jtf_dbName">
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtf_dbNameActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jlb_usr">
               <Properties>
@@ -183,14 +177,8 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="jtf_usr">
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtf_usrActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JPasswordField" name="jtf_passw">
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtf_passwActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jlb_passw">
               <Properties>
@@ -219,7 +207,7 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="24" pref="24" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jtf_dbName_new" max="32767" attributes="0"/>
@@ -252,13 +240,17 @@
                                   <Component id="jtf_passw_new" min="-2" pref="179" max="-2" attributes="0"/>
                               </Group>
                           </Group>
+                          <Group type="102" attributes="0">
+                              <EmptySpace min="-2" pref="127" max="-2" attributes="0"/>
+                              <Component id="jb_Connect_new" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="1" max="32767" attributes="0"/>
+                              <Component id="jB_load" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="150" max="-2" attributes="0"/>
-                      <Component id="jb_Connect_new" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -292,9 +284,11 @@
                           <Component id="jtf_usr_new" alignment="2" min="-2" max="-2" attributes="0"/>
                           <Component id="jtf_passw_new" alignment="2" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                      <Component id="jB_load" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="24" max="32767" attributes="0"/>
                       <Component id="jb_Connect_new" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="17" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -311,9 +305,6 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="jtf_port_new">
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtf_port_newActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="jtf_addr_new">
               <Properties>
@@ -326,14 +317,8 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="jtf_dbName_new">
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtf_dbName_newActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="jtf_usr_new">
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtf_usr_newActionPerformed"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JPasswordField" name="jtf_passw_new">
             </Component>
@@ -355,16 +340,25 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jb_Connect_newActionPerformed"/>
               </Events>
             </Component>
+            <Component class="javax.swing.JButton" name="jB_load">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Carica"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jB_loadActionPerformed"/>
+              </Events>
+            </Component>
           </SubComponents>
         </Container>
       </SubComponents>
     </Container>
-    <Component class="javax.swing.JButton" name="jButton1">
+    <Component class="javax.swing.JButton" name="jB_cancel">
       <Properties>
         <Property name="text" type="java.lang.String" value="Annulla"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jB_cancelActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

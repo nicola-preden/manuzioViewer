@@ -22,13 +22,14 @@ import viewer.setting.SettingXML;
 public class ConnectWindow extends javax.swing.JFrame {
 
     private MainWindow mainWindow;
+
     /**
      * Creates new form ConnectWindow
      */
     public ConnectWindow(MainWindow mainWindow) {
         initComponents();
         this.setVisible(false);
-        this.mainWindow =  mainWindow;
+        this.mainWindow = mainWindow;
     }
 
     /**
@@ -65,7 +66,8 @@ public class ConnectWindow extends javax.swing.JFrame {
         jlb_passw_new = new javax.swing.JLabel();
         jlb_usr_new = new javax.swing.JLabel();
         jb_Connect_new = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        jB_load = new javax.swing.JButton();
+        jB_cancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Connetti");
@@ -78,33 +80,9 @@ public class ConnectWindow extends javax.swing.JFrame {
 
         jtf_addr.setToolTipText("<html> www.server.it <br \\> 192.169.34.2");
 
-        jtf_port.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_portActionPerformed(evt);
-            }
-        });
-
         jlb_dbName.setText("Nome Database");
 
-        jtf_dbName.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_dbNameActionPerformed(evt);
-            }
-        });
-
         jlb_usr.setText("Nome Utente");
-
-        jtf_usr.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_usrActionPerformed(evt);
-            }
-        });
-
-        jtf_passw.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_passwActionPerformed(evt);
-            }
-        });
 
         jlb_passw.setText("Password");
 
@@ -146,8 +124,8 @@ public class ConnectWindow extends javax.swing.JFrame {
                             .add(jtf_passw, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 179, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
                 .add(33, 33, 33))
             .add(jp_connect_DBLayout.createSequentialGroup()
-                .add(150, 150, 150)
-                .add(jb_Connect)
+                .add(151, 151, 151)
+                .add(jb_Connect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 98, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jp_connect_DBLayout.setVerticalGroup(
@@ -175,9 +153,9 @@ public class ConnectWindow extends javax.swing.JFrame {
                 .add(jp_connect_DBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.CENTER)
                     .add(jtf_usr, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jtf_passw, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 71, Short.MAX_VALUE)
                 .add(jb_Connect)
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jt_connect_type.addTab("Connetti ...", jp_connect_DB);
@@ -186,27 +164,9 @@ public class ConnectWindow extends javax.swing.JFrame {
 
         jlb_port_new.setText("Porta");
 
-        jtf_port_new.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_port_newActionPerformed(evt);
-            }
-        });
-
         jtf_addr_new.setToolTipText("<html>\nwww.server.it <br \\>\n192.169.34.2");
 
         jlb_dbName_new.setText("Nome del nuovo Database");
-
-        jtf_dbName_new.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_dbName_newActionPerformed(evt);
-            }
-        });
-
-        jtf_usr_new.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jtf_usr_newActionPerformed(evt);
-            }
-        });
 
         jlb_passw_new.setText("Password");
 
@@ -216,6 +176,14 @@ public class ConnectWindow extends javax.swing.JFrame {
         jb_Connect_new.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jb_Connect_newActionPerformed(evt);
+            }
+        });
+
+        jB_load.setText("Carica");
+        jB_load.setEnabled(false);
+        jB_load.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jB_loadActionPerformed(evt);
             }
         });
 
@@ -247,12 +215,15 @@ public class ConnectWindow extends javax.swing.JFrame {
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                         .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                             .add(jlb_passw_new)
-                            .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 179, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
+                            .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 179, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                    .add(jp_newDBLayout.createSequentialGroup()
+                        .add(127, 127, 127)
+                        .add(jb_Connect_new)
+                        .add(0, 0, Short.MAX_VALUE))
+                    .add(jp_newDBLayout.createSequentialGroup()
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(jB_load)))
                 .add(33, 33, 33))
-            .add(jp_newDBLayout.createSequentialGroup()
-                .add(150, 150, 150)
-                .add(jb_Connect_new)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jp_newDBLayout.setVerticalGroup(
             jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -279,17 +250,19 @@ public class ConnectWindow extends javax.swing.JFrame {
                 .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.CENTER)
                     .add(jtf_usr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(18, 18, 18)
+                .add(jB_load)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 24, Short.MAX_VALUE)
                 .add(jb_Connect_new)
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jt_connect_type.addTab("Crea un nuovo Database", jp_newDB);
 
-        jButton1.setText("Annulla");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        jB_cancel.setText("Annulla");
+        jB_cancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jB_cancelActionPerformed(evt);
             }
         });
 
@@ -303,45 +276,21 @@ public class ConnectWindow extends javax.swing.JFrame {
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .add(jButton1)
-                .add(26, 26, 26))
+                .add(jB_cancel)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
-                .add(jt_connect_type, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 284, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(jt_connect_type)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jButton1)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .add(jB_cancel)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jtf_usr_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtf_usr_newActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jtf_usr_newActionPerformed
-
-    private void jtf_dbName_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtf_dbName_newActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jtf_dbName_newActionPerformed
-
-    private void jtf_port_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtf_port_newActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jtf_port_newActionPerformed
-
-    private void jtf_portActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtf_portActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jtf_portActionPerformed
-
-    private void jtf_dbNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtf_dbNameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jtf_dbNameActionPerformed
-
-    private void jtf_usrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtf_usrActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jtf_usrActionPerformed
 
     private void jb_Connect_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_Connect_newActionPerformed
 
@@ -383,10 +332,6 @@ public class ConnectWindow extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jb_Connect_newActionPerformed
 
-    private void jtf_passwActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtf_passwActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jtf_passwActionPerformed
-
     private void jb_ConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_ConnectActionPerformed
         // TODO add your handling code here:
         Connection conn = null;
@@ -426,13 +371,18 @@ public class ConnectWindow extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jb_ConnectActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jB_cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_cancelActionPerformed
         // TODO add your handling code here:
         this.setVisible(false);
         Main.cw = null;
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_jB_cancelActionPerformed
+
+    private void jB_loadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_loadActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jB_loadActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jB_cancel;
+    private javax.swing.JButton jB_load;
     private javax.swing.JButton jb_Connect;
     private javax.swing.JButton jb_Connect_new;
     private javax.swing.JLabel jlb_addr;

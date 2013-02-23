@@ -66,7 +66,7 @@ public class Main {
     }
 
     /**
-     * Fornisce indicazione se è disponibile la connessione ad un server
+     * <p>Fornisce indicazione se è disponibile la connessione ad un server</p>
      *
      * @return <code>TRUE</code> se connesso altrimenti <code>FALSE</code>
      */
@@ -90,8 +90,12 @@ public class Main {
             isConnect = true;
         }
     }
-
-    static synchronized Connection getConnection() throws SQLException {
+/**
+ * <p>Ritorna una connessione dal connection pool se disponibile</p>
+ * @return 
+ * @throws SQLException 
+ */
+    static public synchronized Connection getConnection() throws SQLException {
         if (isConnect) {
             return connPool.getConnection();
         }
@@ -99,8 +103,8 @@ public class Main {
     }
 
     /**
-     * Chiude il connectionPool e chiude tutte le connessioni aperte al momento
-     * della chimata
+     * <p>Chiude il connectionPool e chiude tutte le connessioni aperte al momento
+     * della chimata</p>
      *
      * @return <code>TRUE</code> se l'operazione ha successo
      */

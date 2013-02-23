@@ -187,23 +187,19 @@ public class Schema {
      * <code>url</code></p> <p>NOTE: the database must have a Manuzio Structure
      * version 3.1</p>
      *
-     * @param url the database path -either of the
-     * form <code>jdbc:subprotocol:Path</code>, or only the Path itself
-     * @param user the username to log in the database
-     * @param password - the password used to log in the database using the
-     * account of <code>user</code>
+     * @param connection a connection to the manuzio DB
      * @return the Schema Object loaded from the given database
      * @throws SQLException if a database error occurs.
      * @throws ParseException if the given database has a bad format, as if the
      * version is not 3.1 or if the database is empty
      */
-    public static Schema loadFromDB(String url, String user, String password) throws SQLException, ParseException {
+    public static Schema loadFromDB(Connection connection) throws SQLException, ParseException {
         Schema schema = null;
         Map<String, String> ext = new HashMap<String, String>();	//memorizes the extensions
         ResultSet res = null;	//results of a query
         PreparedStatement stat = null; //query
 
-        Connection conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to DB
+        Connection conn = connection; //connects to DB
 
         try {	//checks database version
             double version;
@@ -319,7 +315,7 @@ public class Schema {
         Set<ComponentProperty> compSet = new HashSet<ComponentProperty>();	//memorizes the type's structure
         Map<String, String> supertype = new HashMap<String, String>();	//memorizes the type's extensions
 
-        conn = Main.buildManuzioDB(url, dbName, user, password, override); //builds the database
+        // conn = Main.buildManuzioDB(url, dbName, user, password, override); //builds the database (creato attraverso l'interfaccia grafica)
 
         try {
             //prepare the statements 
