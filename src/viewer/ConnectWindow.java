@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.ProgressMonitor;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import viewer.manuzioParser.Schema;
 import viewer.setting.SettingXML;
@@ -341,6 +342,8 @@ public class ConnectWindow extends javax.swing.JFrame {
         String password = new String(this.jtf_passw_new.getPassword());
         String dbName = this.jtf_dbName_new.getText();
         String url = this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
+        
+        ProgressMonitor progressMonitor = new ProgressMonitor(this,"Running a Long Task","", 0, 6);
 
         if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {                        // Controlla se tutti i campi non son vuoti
             JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
