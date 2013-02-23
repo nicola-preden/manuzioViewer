@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import viewer.manuzioParser.Schema;
 import viewer.setting.SettingXML;
 
 /**
@@ -34,7 +35,7 @@ public class Main {
         public void run() {
             while (true) {
                 try {
-                    Thread.sleep(30000);
+                    Thread.sleep(10000);
                     System.gc();
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -42,12 +43,12 @@ public class Main {
             }
         }
     }
-    
     private static volatile boolean isConnect = false;
     private static BoneCP connPool = null;                              // Pool Connessione al DB
     static MainWindow mw = null;                                // Finestra Principale
     static ConnectWindow cw = null;                             // Finestra di login
     static SettingXML setting = null;                           // Struttura configurazione
+    static Schema schema = null;
     private static final String urlXml = "settings.xml";        // File di Configurazione
     private static Timer tm = new Timer();
     private static final double VERSION_Manuzio = 3.1;
@@ -77,8 +78,7 @@ public class Main {
     /**
      * Imposta un nuovo ConnectionPool chiudendo il precedente creato
      *
-     * @param url Indirizzo al server secondo la 
-     * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
+     * @param url Indirizzo al server secondo la      * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
      * @param user
      * @param password
      * @throws ConnectionPoolException
@@ -90,11 +90,13 @@ public class Main {
             isConnect = true;
         }
     }
-/**
- * <p>Ritorna una connessione dal connection pool se disponibile</p>
- * @return 
- * @throws SQLException 
- */
+
+    /**
+     * <p>Ritorna una connessione dal connection pool se disponibile</p>
+     *
+     * @return
+     * @throws SQLException
+     */
     static public synchronized Connection getConnection() throws SQLException {
         if (isConnect) {
             return connPool.getConnection();
@@ -103,8 +105,8 @@ public class Main {
     }
 
     /**
-     * <p>Chiude il connectionPool e chiude tutte le connessioni aperte al momento
-     * della chimata</p>
+     * <p>Chiude il connectionPool e chiude tutte le connessioni aperte al
+     * momento della chimata</p>
      *
      * @return <code>TRUE</code> se l'operazione ha successo
      */
@@ -141,9 +143,8 @@ public class Main {
      * <code>override = true</code> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
-     * @param url the server path -either of the * * *
-     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
-     * itself
+     * @param url the server path -either of the * * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * serverPath itself
      * @param dbName the name given to the new database
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
@@ -153,18 +154,14 @@ public class Main {
      * @return a Connection Object with the database just created
      * @throws SQLException if a server error occurs.
      */
-    public static Connection buildManuzioDB(String url, String dbName, String user, String password, boolean override) throws SQLException {
+    public static boolean buildManuzioDB(String url, String dbName, String user, String password, boolean override) throws SQLException {
         final String MARKER = "-----"; //to delimiter a query in the file
         String file = "functions";	//filename = functions_ + subprotocol
         Scanner scan = null;
         Statement query = null; //query
         SQLException err = null;	//to catch an error during the drop of the old db
+        Connection conn = null;
 
-        Connection conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to the server
-
-        //builds the name of the database's specific functions file
-        String[] url_temp = conn.getMetaData().getURL().split(":");
-        file += "_" + url_temp[1];
 
         //builds the db. If it already exists and override=true, then deletes it and builds a new one 
         try {
@@ -175,8 +172,14 @@ public class Main {
                     err = e;
                 } //probably the db does not exist
             }
+            conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to the server
             query = conn.createStatement();
             query.executeUpdate("CREATE DATABASE \"" + dbName + '"');
+
+            //builds the name of the database's specific functions file
+            String[] url_temp = conn.getMetaData().getURL().split(":");
+            file += "_" + url_temp[1];
+            
         } catch (SQLException e) {
             if (override && err != null) {
                 throw err;	//there was an exception during the db drop
@@ -302,7 +305,7 @@ public class Main {
                 for (int i = 0; i < q.size(); i++) {
                     query.addBatch((q.get(i)));
                 }
-                query.executeBatch();
+                int[] executeBatch = query.executeBatch();
             } else {
                 for (int i = 0; i < q.size(); i++) {
                     query.executeUpdate(q.get(i));
@@ -316,8 +319,9 @@ public class Main {
             throw e;
         } finally {
             close(query);
+            close(conn);
         }
-        return conn;
+        return true;
     }
 
     /**
@@ -326,9 +330,8 @@ public class Main {
      * name, this method could be used to delete any database, not only a
      * Manuzio one.</p>
      *
-     * @param url the server path -either of the * * *
-     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
-     * itself
+     * @param url the server path -either of the * * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * serverPath itself
      * @param dbName - the name of the database to delete
      * @param user the username to connect to the server
      * @param password the password related to the <code>user</code> to connect

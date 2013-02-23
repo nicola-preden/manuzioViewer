@@ -1,6 +1,7 @@
 package viewer.manuzioParser;
 
 import database.ConnectionPoolFactory;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -288,7 +289,7 @@ public class Schema {
     }
 
     /**
-     * <p>Builds a new Manuzio database and saves the Schema into the database
+     * <p>Saves the Schema into the database
      * just created</p> <p>If
      * <code>override = true</code> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
@@ -300,16 +301,14 @@ public class Schema {
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
      * account of <code>user</code>
-     * @param override specifies if a database already existing with the given
-     * has to be overridden or not.
      * @throws SQLException if a server error occurs.
      * @throws ParseException if the Schema to save is empty
      */
-    public void saveToDB(String url, String dbName, String user, String password, boolean override) throws SQLException, ParseException {
+    public void saveToDB(String url, String dbName, String user, String password) throws SQLException, ParseException {
         if (this.isEmpty()) {
             throw new ParseException("Error: the Schema is empty.", -1);
         }
-        Connection conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to the server
+        Connection conn = ConnectionPoolFactory.getConnection(url + "/" + dbName, user, password); //connects to the server
 
         PreparedStatement query_ins_type = null, query_ins_att = null, query_ins_met = null, query_type_comp = null, query_schema = null, query_supertype = null; //query
         Set<ComponentProperty> compSet = new HashSet<ComponentProperty>();	//memorizes the type's structure
@@ -415,14 +414,13 @@ public class Schema {
     /**
      * <p>Loads the Schema from a source code from a file.</p>
      *
-     * @param fileName - the path and the name of the file which contains the
-     * code to analyze.
+     * @param f - file which contains the code to analyze.
      * @return the Schema built analyzing the code from the given file
      * @throws IOException if an I/O error occurs
      * @throws ParseException if there are lexical, syntactical or semantical
      * errors in the source code
      */
-    public static Schema loadFromFile(String fileName) throws IOException, ParseException {
-        return Parser.parsing(new java.io.File(fileName));
+    public static Schema loadFromFile(File f) throws IOException, ParseException {
+        return Parser.parsing(f);
     }
 }

@@ -6,12 +6,18 @@ package viewer;
 
 import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import viewer.manuzioParser.Schema;
 import viewer.setting.SettingXML;
 
 /**
@@ -22,6 +28,8 @@ import viewer.setting.SettingXML;
 public class ConnectWindow extends javax.swing.JFrame {
 
     private MainWindow mainWindow;
+    private JFileChooser chooser;
+    private File f = null;
 
     /**
      * Creates new form ConnectWindow
@@ -30,6 +38,10 @@ public class ConnectWindow extends javax.swing.JFrame {
         initComponents();
         this.setVisible(false);
         this.mainWindow = mainWindow;
+        chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Plain text file", "txt");
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.addChoosableFileFilter(filter);
     }
 
     /**
@@ -41,6 +53,7 @@ public class ConnectWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jbG_load = new javax.swing.ButtonGroup();
         jt_connect_type = new javax.swing.JTabbedPane();
         jp_connect_DB = new javax.swing.JPanel();
         jlb_addr = new javax.swing.JLabel();
@@ -67,6 +80,8 @@ public class ConnectWindow extends javax.swing.JFrame {
         jlb_usr_new = new javax.swing.JLabel();
         jb_Connect_new = new javax.swing.JButton();
         jB_load = new javax.swing.JButton();
+        jRb_loadFromFile = new javax.swing.JRadioButton();
+        jRb_loadFromString = new javax.swing.JRadioButton();
         jB_cancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -153,9 +168,8 @@ public class ConnectWindow extends javax.swing.JFrame {
                 .add(jp_connect_DBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.CENTER)
                     .add(jtf_usr, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jtf_passw, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 71, Short.MAX_VALUE)
-                .add(jb_Connect)
-                .addContainerGap())
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 96, Short.MAX_VALUE)
+                .add(jb_Connect))
         );
 
         jt_connect_type.addTab("Connetti ...", jp_connect_DB);
@@ -187,6 +201,22 @@ public class ConnectWindow extends javax.swing.JFrame {
             }
         });
 
+        jbG_load.add(jRb_loadFromFile);
+        jRb_loadFromFile.setText("Carica Schema da File");
+        jRb_loadFromFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRb_loadFromFileActionPerformed(evt);
+            }
+        });
+
+        jbG_load.add(jRb_loadFromString);
+        jRb_loadFromString.setText("Carica Schema da testo");
+        jRb_loadFromString.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRb_loadFromStringActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout jp_newDBLayout = new org.jdesktop.layout.GroupLayout(jp_newDB);
         jp_newDB.setLayout(jp_newDBLayout);
         jp_newDBLayout.setHorizontalGroup(
@@ -194,36 +224,41 @@ public class ConnectWindow extends javax.swing.JFrame {
             .add(jp_newDBLayout.createSequentialGroup()
                 .add(24, 24, 24)
                 .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jtf_dbName_new)
                     .add(jp_newDBLayout.createSequentialGroup()
                         .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jlb_addr_new)
-                            .add(jtf_addr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 262, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(jlb_dbName_new))
-                        .add(18, 18, Short.MAX_VALUE)
-                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                            .add(jtf_dbName_new)
                             .add(jp_newDBLayout.createSequentialGroup()
-                                .add(jlb_port_new)
-                                .add(48, 48, 48))
-                            .add(jtf_port_new)))
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, jp_newDBLayout.createSequentialGroup()
-                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jtf_usr_new)
+                                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jlb_addr_new)
+                                    .add(jtf_addr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 262, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                    .add(jlb_dbName_new))
+                                .add(18, 18, Short.MAX_VALUE)
+                                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                                    .add(jp_newDBLayout.createSequentialGroup()
+                                        .add(jlb_port_new)
+                                        .add(48, 48, 48))
+                                    .add(jtf_port_new)))
+                            .add(org.jdesktop.layout.GroupLayout.TRAILING, jp_newDBLayout.createSequentialGroup()
+                                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jtf_usr_new)
+                                    .add(jp_newDBLayout.createSequentialGroup()
+                                        .add(jlb_usr_new)
+                                        .add(0, 0, Short.MAX_VALUE)))
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jlb_passw_new)
+                                    .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 179, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
                             .add(jp_newDBLayout.createSequentialGroup()
-                                .add(jlb_usr_new)
-                                .add(0, 0, Short.MAX_VALUE)))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                        .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jlb_passw_new)
-                            .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 179, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(jRb_loadFromFile)
+                                    .add(jRb_loadFromString))
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .add(jB_load)))
+                        .add(33, 33, 33))
                     .add(jp_newDBLayout.createSequentialGroup()
                         .add(127, 127, 127)
                         .add(jb_Connect_new)
-                        .add(0, 0, Short.MAX_VALUE))
-                    .add(jp_newDBLayout.createSequentialGroup()
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(jB_load)))
-                .add(33, 33, 33))
+                        .add(0, 0, Short.MAX_VALUE))))
         );
         jp_newDBLayout.setVerticalGroup(
             jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -250,11 +285,18 @@ public class ConnectWindow extends javax.swing.JFrame {
                 .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.CENTER)
                     .add(jtf_usr_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jtf_passw_new, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(18, 18, 18)
-                .add(jB_load)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 24, Short.MAX_VALUE)
-                .add(jb_Connect_new)
-                .addContainerGap())
+                .add(jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jp_newDBLayout.createSequentialGroup()
+                        .add(18, 18, 18)
+                        .add(jB_load)
+                        .addContainerGap())
+                    .add(jp_newDBLayout.createSequentialGroup()
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                        .add(jRb_loadFromFile)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jRb_loadFromString)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 32, Short.MAX_VALUE)
+                        .add(jb_Connect_new))))
         );
 
         jt_connect_type.addTab("Crea un nuovo Database", jp_newDB);
@@ -294,7 +336,7 @@ public class ConnectWindow extends javax.swing.JFrame {
 
     private void jb_Connect_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_Connect_newActionPerformed
 
-        Connection conn = null;
+        boolean conn = false;
         String user = this.jtf_usr_new.getText();
         String password = new String(this.jtf_passw_new.getPassword());
         String dbName = this.jtf_dbName_new.getText();
@@ -304,15 +346,23 @@ public class ConnectWindow extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         try {
+            Main.schema = Schema.loadFromFile(f);
+            this.repaint();
             conn = Main.buildManuzioDB(url, dbName, user, password, true);
+            this.repaint();
+            Main.schema.saveToDB(url, dbName, user, password);
+            this.repaint();
+        } catch (IOException | ParseException ex) {
+            Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+            Main.schema = null;
+            JOptionPane.showMessageDialog(this, "Errore Caricamento Schema", "Errore", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException ex) {
             Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Impossibile Creare il DataBase", "Errore", JOptionPane.ERROR_MESSAGE);
+            conn = false;
         } finally {
-            if (conn != null) {
-                this.setVisible(false);
+            if (conn) {
                 Main.cw = null;
                 try {
                     Main.setConnectionPool(url + "/" + dbName, user, password);
@@ -323,6 +373,7 @@ public class ConnectWindow extends javax.swing.JFrame {
                     Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
                     mainWindow.updateMenu();
                     mainWindow.setEnableConnectMenu(false);
+                    this.setVisible(false);
                 } catch (ConnectionPoolException ex) {
                     Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
@@ -379,10 +430,32 @@ public class ConnectWindow extends javax.swing.JFrame {
 
     private void jB_loadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_loadActionPerformed
         // TODO add your handling code here:
+        if (jRb_loadFromFile.isSelected()) { // scelta del file contenente lo schema
+            int showOpenDialog = chooser.showOpenDialog(this);
+            if (showOpenDialog == JFileChooser.APPROVE_OPTION) {
+                f = chooser.getSelectedFile();
+            }
+        }
+        if (jRb_loadFromString.isSelected()) {
+        }
     }//GEN-LAST:event_jB_loadActionPerformed
+
+    private void jRb_loadFromFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRb_loadFromFileActionPerformed
+        // TODO add your handling code here:
+        jB_load.setEnabled(true);
+    }//GEN-LAST:event_jRb_loadFromFileActionPerformed
+
+    private void jRb_loadFromStringActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRb_loadFromStringActionPerformed
+        // TODO add your handling code here:
+        jB_load.setEnabled(true);
+    }//GEN-LAST:event_jRb_loadFromStringActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jB_cancel;
     private javax.swing.JButton jB_load;
+    private javax.swing.JRadioButton jRb_loadFromFile;
+    private javax.swing.JRadioButton jRb_loadFromString;
+    private javax.swing.ButtonGroup jbG_load;
     private javax.swing.JButton jb_Connect;
     private javax.swing.JButton jb_Connect_new;
     private javax.swing.JLabel jlb_addr;

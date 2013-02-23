@@ -175,7 +175,9 @@ public class ConnectionPoolFactory {
     public static Connection getConnection(String url, String user, String password) throws SQLException {
         loadDrivers();
         try {
-            return DriverManager.getConnection(ConnectionPoolFactory.driverPrefix[0] + url, user, password);
+            Connection connection = DriverManager.getConnection(ConnectionPoolFactory.driverPrefix[0] + url, user, password);
+            connection.setAutoCommit(true);
+            return connection;
         } catch (SQLException ex) {
             throw new SQLException("Fatal error: cannot connect to DB");
         }
