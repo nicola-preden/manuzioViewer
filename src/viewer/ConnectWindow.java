@@ -6,6 +6,13 @@ package viewer;
 
 import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
+import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Toolkit;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -16,7 +23,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.ProgressMonitor;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import viewer.manuzioParser.Schema;
 import viewer.setting.SettingXML;
@@ -26,11 +36,134 @@ import viewer.setting.SettingXML;
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
-public class ConnectWindow extends javax.swing.JFrame {
+public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeListener {
 
     private MainWindow mainWindow;
     private JFileChooser chooser;
     private File f = null;
+    private String text = null;
+    private String user;
+    private String password;
+    private String dbName;
+    private String url;
+
+    private class TaskCreate extends SwingWorker<Void, Void> {
+
+        private static final int MAX = 5;
+
+        @Override
+        protected Void doInBackground() {
+            boolean conn = false;
+            try {
+                setProgress(0);
+                if (jRb_loadFromFile.isSelected()) {
+                    Main.schema = Schema.loadFromFile(f);
+                }
+                if (jRb_loadFromString.isSelected()) {
+                    Main.schema = Schema.buildFromSourceCode(text);
+                }
+                setProgress(100 * 1 / MAX);
+                conn = Main.buildManuzioDB(url, dbName, user, password, true);
+                setProgress(100 * 2 / MAX);
+                Main.schema.saveToDB(url, dbName, user, password);
+                setProgress(100 * 3 / MAX);
+            } catch (IOException | ParseException ex) {
+                Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+                Main.schema = null;
+                JOptionPane.showMessageDialog(Main.cw, "Errore Caricamento Schema", "Errore", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException ex) {
+                Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(Main.cw, "Impossibile Creare il DataBase", "Errore", JOptionPane.ERROR_MESSAGE);
+                conn = false;
+            } finally {
+                if (conn) {
+                    try {
+                        Main.setConnectionPool(url + "/" + dbName, user, password);
+                        setProgress(100 * 4 / MAX);
+                        Properties prop = new Properties();
+                        prop.setProperty("url", url + "/" + dbName);
+                        prop.setProperty("user", user);
+                        prop.setProperty("password", password);
+                        Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
+                        mainWindow.updateMenu();
+                        mainWindow.setEnableConnectMenu(false);
+                        setProgress(100 * 5 / MAX);
+                    } catch (ConnectionPoolException ex) {
+                        Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+                        JOptionPane.showMessageDialog(Main.cw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            Toolkit.getDefaultToolkit().beep();
+            setCursor(null);
+            jb_Connect_new.setEnabled(true);
+            this.removePropertyChangeListener(Main.cw);
+            if (Main.connectionIsSet()) {
+                Main.cw.setVisible(false);
+                Main.cw = null;
+            } else {
+                jPr_create.setVisible(false);
+            }
+        }
+    }
+
+    private class TaskConnect extends SwingWorker<Void, Void> {
+
+        private static final int MAX = 5;
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            Connection conn = null;
+            try {
+                setProgress(0);
+                conn = ConnectionPoolFactory.getConnection(url, user, password);
+                setProgress(100 * 1 / MAX);
+                Main.schema = Schema.loadFromDB(conn);
+                setProgress(100 * 2 / MAX);
+            } catch (SQLException ex) {
+                Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(Main.cw, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                if (conn != null) {
+                    try {
+                        Main.setConnectionPool(url, user, password);
+                        setProgress(100 * 3 / MAX);
+                        Properties prop = new Properties();
+                        prop.setProperty("url", url);
+                        prop.setProperty("user", user);
+                        prop.setProperty("password", password);
+                        Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
+                        mainWindow.updateMenu();
+                        mainWindow.setEnableConnectMenu(false);
+                        setProgress(100 * 4 / MAX);
+                    } catch (ConnectionPoolException ex) {
+                        Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+                        JOptionPane.showMessageDialog(Main.cw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            Toolkit.getDefaultToolkit().beep();
+            setCursor(null);
+            jb_Connect.setEnabled(true);
+            this.removePropertyChangeListener(Main.cw);
+            if (Main.connectionIsSet()) {
+                Main.cw.setVisible(false);
+                Main.cw = null;
+            } else {
+                jPr_connect.setVisible(false);
+            }
+        }
+    }
 
     /**
      * Creates new form ConnectWindow
@@ -68,6 +201,7 @@ public class ConnectWindow extends javax.swing.JFrame {
         jtf_passw = new javax.swing.JPasswordField();
         jlb_passw = new javax.swing.JLabel();
         jb_Connect = new javax.swing.JButton();
+        jPr_connect = new javax.swing.JProgressBar();
         jp_newDB = new javax.swing.JPanel();
         jlb_addr_new = new javax.swing.JLabel();
         jlb_port_new = new javax.swing.JLabel();
@@ -83,6 +217,7 @@ public class ConnectWindow extends javax.swing.JFrame {
         jB_load = new javax.swing.JButton();
         jRb_loadFromFile = new javax.swing.JRadioButton();
         jRb_loadFromString = new javax.swing.JRadioButton();
+        jPr_create = new javax.swing.JProgressBar();
         jB_cancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -108,6 +243,10 @@ public class ConnectWindow extends javax.swing.JFrame {
                 jb_ConnectActionPerformed(evt);
             }
         });
+
+        jPr_connect.setStringPainted(true);
+        jPr_connect.setVisible(false);
+        jPr_connect.setIndeterminate(true);
 
         org.jdesktop.layout.GroupLayout jp_connect_DBLayout = new org.jdesktop.layout.GroupLayout(jp_connect_DB);
         jp_connect_DB.setLayout(jp_connect_DBLayout);
@@ -140,8 +279,13 @@ public class ConnectWindow extends javax.swing.JFrame {
                             .add(jtf_passw, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 179, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
                 .add(33, 33, 33))
             .add(jp_connect_DBLayout.createSequentialGroup()
-                .add(151, 151, 151)
-                .add(jb_Connect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 98, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(jp_connect_DBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jp_connect_DBLayout.createSequentialGroup()
+                        .add(151, 151, 151)
+                        .add(jb_Connect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 98, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(jp_connect_DBLayout.createSequentialGroup()
+                        .add(127, 127, 127)
+                        .add(jPr_connect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jp_connect_DBLayout.setVerticalGroup(
@@ -169,7 +313,9 @@ public class ConnectWindow extends javax.swing.JFrame {
                 .add(jp_connect_DBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.CENTER)
                     .add(jtf_usr, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(jtf_passw, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 96, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 70, Short.MAX_VALUE)
+                .add(jPr_connect, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jb_Connect))
         );
 
@@ -218,6 +364,10 @@ public class ConnectWindow extends javax.swing.JFrame {
             }
         });
 
+        jPr_create.setStringPainted(true);
+        jPr_create.setVisible(false);
+        jPr_create.setIndeterminate(true);
+
         org.jdesktop.layout.GroupLayout jp_newDBLayout = new org.jdesktop.layout.GroupLayout(jp_newDB);
         jp_newDB.setLayout(jp_newDBLayout);
         jp_newDBLayout.setHorizontalGroup(
@@ -260,6 +410,10 @@ public class ConnectWindow extends javax.swing.JFrame {
                         .add(127, 127, 127)
                         .add(jb_Connect_new)
                         .add(0, 0, Short.MAX_VALUE))))
+            .add(jp_newDBLayout.createSequentialGroup()
+                .add(127, 127, 127)
+                .add(jPr_create, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(0, 0, Short.MAX_VALUE))
         );
         jp_newDBLayout.setVerticalGroup(
             jp_newDBLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -296,7 +450,9 @@ public class ConnectWindow extends javax.swing.JFrame {
                         .add(jRb_loadFromFile)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(jRb_loadFromString)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 32, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jPr_create, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .add(jb_Connect_new))))
         );
 
@@ -335,94 +491,66 @@ public class ConnectWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("progress".equals(evt.getPropertyName())) {
+
+            if (!jb_Connect_new.isEnabled()) { // barra di progressione pe nuovo server
+                int progress = (Integer) evt.getNewValue();
+                jPr_create.setValue(progress);
+            }
+            if (!jb_Connect.isEnabled()) { // modifica barra di progressione per connessione ad un server gia configurato
+                int progress = (Integer) evt.getNewValue();
+                jPr_create.setValue(progress);
+            }
+        }
+
+    }
+
     private void jb_Connect_newActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_Connect_newActionPerformed
 
-        boolean conn = false;
-        String user = this.jtf_usr_new.getText();
-        String password = new String(this.jtf_passw_new.getPassword());
-        String dbName = this.jtf_dbName_new.getText();
-        String url = this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
-        
-        ProgressMonitor progressMonitor = new ProgressMonitor(this,"Running a Long Task","", 0, 6);
+        user = this.jtf_usr_new.getText();
+        password = new String(this.jtf_passw_new.getPassword());
+        dbName = this.jtf_dbName_new.getText();
+        url = this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
 
         if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {                        // Controlla se tutti i campi non son vuoti
             JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        try {
-            Main.schema = Schema.loadFromFile(f);
-            this.repaint();
-            conn = Main.buildManuzioDB(url, dbName, user, password, true);
-            this.repaint();
-            Main.schema.saveToDB(url, dbName, user, password);
-            this.repaint();
-        } catch (IOException | ParseException ex) {
-            Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-            Main.schema = null;
-            JOptionPane.showMessageDialog(this, "Errore Caricamento Schema", "Errore", JOptionPane.ERROR_MESSAGE);
-        } catch (SQLException ex) {
-            Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(this, "Impossibile Creare il DataBase", "Errore", JOptionPane.ERROR_MESSAGE);
-            conn = false;
-        } finally {
-            if (conn) {
-                Main.cw = null;
-                try {
-                    Main.setConnectionPool(url + "/" + dbName, user, password);
-                    Properties prop = new Properties();
-                    prop.setProperty("url", url + "/" + dbName);
-                    prop.setProperty("user", user);
-                    prop.setProperty("password", password);
-                    Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
-                    mainWindow.updateMenu();
-                    mainWindow.setEnableConnectMenu(false);
-                    this.setVisible(false);
-                } catch (ConnectionPoolException ex) {
-                    Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
-                }
-            }
+        if (this.jRb_loadFromFile.isSelected() && f == null) {
+            JOptionPane.showMessageDialog(this, "Devi scegliere un file", "Attenzione", JOptionPane.WARNING_MESSAGE);
+            return;
         }
+        jPr_create.setVisible(true);
+        jPr_create.setIndeterminate(false);
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        jb_Connect_new.setEnabled(false);
+        TaskCreate taskCreate = new TaskCreate();
+        taskCreate.addPropertyChangeListener(this);
+        taskCreate.execute();
 
     }//GEN-LAST:event_jb_Connect_newActionPerformed
 
     private void jb_ConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_ConnectActionPerformed
         // TODO add your handling code here:
         Connection conn = null;
-        String user = this.jtf_usr.getText();
-        String password = new String(this.jtf_passw.getPassword());
-        String dbName = this.jtf_dbName.getText();
-        String url = this.jtf_addr.getText() + ":" + this.jtf_port.getText() + "/" + dbName;
+        user = this.jtf_usr.getText();
+        password = new String(this.jtf_passw.getPassword());
+        dbName = this.jtf_dbName.getText();
+        url = this.jtf_addr.getText() + ":" + this.jtf_port.getText() + "/" + dbName;
 
         if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        try {
-            conn = ConnectionPoolFactory.getConnection(url, user, password);
-        } catch (SQLException ex) {
-            Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(this, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            if (conn != null) {
-                this.setVisible(false);
-                Main.cw = null;
-                try {
-                    Main.setConnectionPool(url, user, password);
-                    Properties prop = new Properties();
-                    prop.setProperty("url", url);
-                    prop.setProperty("user", user);
-                    prop.setProperty("password", password);
-                    Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
-                    mainWindow.updateMenu();
-                    mainWindow.setEnableConnectMenu(false);
-                } catch (ConnectionPoolException ex) {
-                    Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        }
+        jPr_connect.setVisible(true);
+        jPr_connect.setIndeterminate(false);
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        jb_Connect.setEnabled(false);
+        TaskConnect taskConnect = new TaskConnect();
+        taskConnect.addPropertyChangeListener(this);
+        taskConnect.execute();
     }//GEN-LAST:event_jb_ConnectActionPerformed
 
     private void jB_cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_cancelActionPerformed
@@ -437,9 +565,30 @@ public class ConnectWindow extends javax.swing.JFrame {
             int showOpenDialog = chooser.showOpenDialog(this);
             if (showOpenDialog == JFileChooser.APPROVE_OPTION) {
                 f = chooser.getSelectedFile();
+            } else {
+                jbG_load.clearSelection();
+                jB_load.setEnabled(false);
             }
         }
         if (jRb_loadFromString.isSelected()) {
+            JPanel jp = new JPanel(new BorderLayout()); // Creo un nuovo pannello
+            JTextArea textArea = new JTextArea(30, 100);
+            textArea.setFont(new Font("Arial", Font.PLAIN, 16));
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+
+            JScrollPane areaScrollPane = new JScrollPane(textArea); // Aggiungo una textarea allo scroller
+            areaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            areaScrollPane.setPreferredSize(new Dimension(250, 250));
+
+            jp.add(areaScrollPane, BorderLayout.CENTER); // Aggiungo lo scroller centrato al pannello
+            int confirm = JOptionPane.showConfirmDialog(this, jp, "Inserisci lo Schema", JOptionPane.OK_CANCEL_OPTION);
+            if (confirm == JOptionPane.OK_OPTION) {
+                this.text = textArea.getText();
+            } else {
+                jbG_load.clearSelection();
+                jB_load.setEnabled(false);
+            }
         }
     }//GEN-LAST:event_jB_loadActionPerformed
 
@@ -452,10 +601,11 @@ public class ConnectWindow extends javax.swing.JFrame {
         // TODO add your handling code here:
         jB_load.setEnabled(true);
     }//GEN-LAST:event_jRb_loadFromStringActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jB_cancel;
     private javax.swing.JButton jB_load;
+    private javax.swing.JProgressBar jPr_connect;
+    private javax.swing.JProgressBar jPr_create;
     private javax.swing.JRadioButton jRb_loadFromFile;
     private javax.swing.JRadioButton jRb_loadFromString;
     private javax.swing.ButtonGroup jbG_load;

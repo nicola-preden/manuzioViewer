@@ -76,7 +76,8 @@ public class Main {
     }
 
     /**
-     * Imposta un nuovo ConnectionPool chiudendo il precedente creato
+     * <p>Imposta un nuovo ConnectionPool per generare un nuovo ConnectionPool è necessario chiamare il metodo
+     * <code>viewer.Main.shutdownConnectionPool</code></p>
      *
      * @param url Indirizzo al server secondo la      * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
      * @param user
