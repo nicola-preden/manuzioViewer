@@ -86,7 +86,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                         prop.setProperty("password", password);
                         Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
                         mainWindow.updateMenu();
-                        mainWindow.setEnableConnectMenu(false);
+                        mainWindow.setEnableConnectStatus(true);
                         setProgress(100 * 5 / MAX);
                     } catch (ConnectionPoolException ex) {
                         Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -139,7 +139,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                         prop.setProperty("password", password);
                         Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
                         mainWindow.updateMenu();
-                        mainWindow.setEnableConnectMenu(false);
+                        mainWindow.setEnableConnectStatus(true);
                         setProgress(100 * 4 / MAX);
                     } catch (ConnectionPoolException ex) {
                         Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);

@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 import viewer.manuzioParser.Schema;
 import viewer.setting.SettingXML;
 
@@ -58,6 +61,16 @@ public class Main {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+        if ("Nimbus".equals(info.getName())) { // Cambio Look & Feel
+            try {
+                UIManager.setLookAndFeel(info.getClassName());
+                break;
+            } catch (    ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
         setting = new SettingXML(urlXml);
         tm.start();
         mw = new MainWindow();

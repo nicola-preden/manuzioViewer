@@ -9,12 +9,14 @@ import database.ConnectionPoolFactory;
 import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ListIterator;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import viewer.manuzioParser.Schema;
 import viewer.setting.NodeSettingInterface;
 import viewer.setting.SettingXML;
 
@@ -25,13 +27,16 @@ import viewer.setting.SettingXML;
  */
 public class MainWindow extends javax.swing.JFrame {
 
-    private class MyActionListener implements java.awt.event.ActionListener {
+    /**
+     *  ActionListener per il menu
+     */
+    private class MenuConnectActionListener implements java.awt.event.ActionListener {
 
         String url = null;
         String user = null;
         String passw = null;
 
-        MyActionListener(Properties prop) {
+        MenuConnectActionListener(Properties prop) {
             url = prop.getProperty("url");
             user = prop.getProperty("user");
             passw = prop.getProperty("password");
@@ -42,6 +47,10 @@ public class MainWindow extends javax.swing.JFrame {
             Connection conn = null;
             try {
                 conn = ConnectionPoolFactory.getConnection(url, user, passw);
+                Main.schema = Schema.loadFromDB(conn);
+            } catch (ParseException ex) {
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(Main.mw, "Impossibile Scaricare lo schema", "Errore", JOptionPane.ERROR_MESSAGE);
             } catch (SQLException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(Main.mw, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
@@ -49,7 +58,7 @@ public class MainWindow extends javax.swing.JFrame {
                 if (conn != null) {
                     try {
                         Main.setConnectionPool(url, user, passw);
-                        setEnableConnectMenu(false);
+                        setEnableConnectStatus(true);
                     } catch (ConnectionPoolException ex) {
                         Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                         JOptionPane.showMessageDialog(Main.mw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
@@ -64,18 +73,19 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public MainWindow() {
         initComponents();
-        updateMenu();
+        this.updateMenu();
     }
 
     /**
-     * Disabilità o abilità i menu per la connessione/disconnessione
+     * Disabilità o abilità i menu per la connessione/disconnessione, le toolbar e tutti i 
+     * JPanel inerenti questa classe.
      * <code>javax.swing.JMenu</code> relativo alle connessioni a un db
      *
      * @param set
      */
-    public synchronized void setEnableConnectMenu(boolean set) {
-        jM_Connects.setEnabled(set);
-        disconnectMenuItem.setEnabled(!set);
+    public synchronized void setEnableConnectStatus(boolean set) {
+        jM_Connects.setEnabled(!set);
+        disconnectMenuItem.setEnabled(set);
     }
 
     public synchronized void updateMenu() {
@@ -94,7 +104,7 @@ public class MainWindow extends javax.swing.JFrame {
 
                 JMenuItem x = new javax.swing.JMenuItem();
                 x.setText(url.split("/")[0]);
-                x.addActionListener(new MyActionListener(next));
+                x.addActionListener(new MenuConnectActionListener(next));
                 jM_Connects.add(x);
 
             }
@@ -110,6 +120,17 @@ public class MainWindow extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jP_Server = new javax.swing.JPanel();
+        toolBarServer = new javax.swing.JToolBar();
+        toolBarSx_Disconnect = new javax.swing.JButton();
+        toolBarSx_NewType = new javax.swing.JButton();
+        toolBarSx_RemoveType = new javax.swing.JButton();
+        toolBarSx_RefrashRate = new javax.swing.JComboBox();
+        jSlider1 = new javax.swing.JSlider();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTree1 = new javax.swing.JTree();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         jM_Connects = new javax.swing.JMenu();
@@ -128,6 +149,111 @@ public class MainWindow extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("ManuzioViewer");
+
+        jP_Server.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
+        jP_Server.setEnabled(false);
+
+        toolBarServer.setFloatable(false);
+        toolBarServer.setRollover(true);
+
+        toolBarSx_Disconnect.setText("Disconnetti");
+        toolBarSx_Disconnect.setFocusable(false);
+        toolBarSx_Disconnect.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        toolBarSx_Disconnect.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBarSx_Disconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolBarSx_DisconnectActionPerformed(evt);
+            }
+        });
+        toolBarServer.add(toolBarSx_Disconnect);
+
+        toolBarSx_NewType.setText("Nuovo");
+        toolBarSx_NewType.setToolTipText("Appendi un nuovo tipo alla selezione");
+        toolBarSx_NewType.setFocusable(false);
+        toolBarSx_NewType.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        toolBarSx_NewType.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBarSx_NewType.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolBarSx_NewTypeActionPerformed(evt);
+            }
+        });
+        toolBarServer.add(toolBarSx_NewType);
+
+        toolBarSx_RemoveType.setText("Rimuovi");
+        toolBarSx_RemoveType.setToolTipText("Rimuovi selezionato");
+        toolBarSx_RemoveType.setFocusable(false);
+        toolBarSx_RemoveType.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        toolBarSx_RemoveType.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBarSx_RemoveType.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolBarSx_RemoveTypeActionPerformed(evt);
+            }
+        });
+        toolBarServer.add(toolBarSx_RemoveType);
+
+        toolBarSx_RefrashRate.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "45 s", "30 s", "15 s", "10 s", "5   s" }));
+        toolBarSx_RefrashRate.setToolTipText("Tempo di aggirnamento finestra");
+        toolBarSx_RefrashRate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolBarSx_RefrashRateActionPerformed(evt);
+            }
+        });
+        toolBarServer.add(toolBarSx_RefrashRate);
+
+        jSlider1.setPaintLabels(true);
+        jSlider1.setPaintTicks(true);
+        jSlider1.setToolTipText("Livello di dettaglio");
+        jSlider1.setValue(20);
+        toolBarServer.add(jSlider1);
+
+        jScrollPane1.setViewportView(jTree1);
+
+        org.jdesktop.layout.GroupLayout jP_ServerLayout = new org.jdesktop.layout.GroupLayout(jP_Server);
+        jP_Server.setLayout(jP_ServerLayout);
+        jP_ServerLayout.setHorizontalGroup(
+            jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, toolBarServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_ServerLayout.createSequentialGroup()
+                .addContainerGap()
+                .add(jScrollPane1)
+                .addContainerGap())
+        );
+        jP_ServerLayout.setVerticalGroup(
+            jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jP_ServerLayout.createSequentialGroup()
+                .add(toolBarServer, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 25, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 488, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
+        jPanel2.setEnabled(false);
+
+        org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 543, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 0, Short.MAX_VALUE)
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
+        jPanel3.setEnabled(false);
+
+        org.jdesktop.layout.GroupLayout jPanel3Layout = new org.jdesktop.layout.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 33, Short.MAX_VALUE)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 0, Short.MAX_VALUE)
+        );
 
         fileMenu.setMnemonic('f');
         fileMenu.setText("File");
@@ -209,11 +335,18 @@ public class MainWindow extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 936, Short.MAX_VALUE)
+            .add(layout.createSequentialGroup()
+                .add(jP_Server, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .add(6, 6, 6)
+                .add(jPanel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(6, 6, 6)
+                .add(jPanel3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 514, Short.MAX_VALUE)
+            .add(jP_Server, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .add(jPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .add(jPanel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -232,9 +365,28 @@ public class MainWindow extends javax.swing.JFrame {
     private void disconnectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectMenuItemActionPerformed
         // TODO add your handling code here:
         if (Main.shutdownConnectionPool()) {
-            this.setEnableConnectMenu(true);
+            this.setEnableConnectStatus(false);
         }
     }//GEN-LAST:event_disconnectMenuItemActionPerformed
+
+    private void toolBarSx_DisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_DisconnectActionPerformed
+        // TODO add your handling code here:
+        if (Main.shutdownConnectionPool()) {
+            this.setEnableConnectStatus(false);
+        }
+    }//GEN-LAST:event_toolBarSx_DisconnectActionPerformed
+
+    private void toolBarSx_NewTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_NewTypeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_toolBarSx_NewTypeActionPerformed
+
+    private void toolBarSx_RemoveTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_RemoveTypeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_toolBarSx_RemoveTypeActionPerformed
+
+    private void toolBarSx_RefrashRateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_RefrashRateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_toolBarSx_RefrashRateActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
@@ -249,8 +401,19 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenu helpMenu;
     private javax.swing.JMenu jM_Connects;
+    private javax.swing.JPanel jP_Server;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JSlider jSlider1;
+    private javax.swing.JTree jTree1;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem pasteMenuItem;
+    private javax.swing.JToolBar toolBarServer;
+    private javax.swing.JButton toolBarSx_Disconnect;
+    private javax.swing.JButton toolBarSx_NewType;
+    private javax.swing.JComboBox toolBarSx_RefrashRate;
+    private javax.swing.JButton toolBarSx_RemoveType;
     // End of variables declaration//GEN-END:variables
 }
