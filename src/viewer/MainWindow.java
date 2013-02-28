@@ -126,7 +126,7 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarSx_NewType = new javax.swing.JButton();
         toolBarSx_RemoveType = new javax.swing.JButton();
         toolBarSx_RefrashRate = new javax.swing.JComboBox();
-        jSlider1 = new javax.swing.JSlider();
+        jS_Level = new javax.swing.JSlider();
         jScrollPane1 = new javax.swing.JScrollPane();
         jT_SchemaServer = new javax.swing.JTree();
         jPanel2 = new javax.swing.JPanel();
@@ -157,9 +157,10 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarServer.setRollover(true);
 
         toolBarSx_Disconnect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/32px/038.png"))); // NOI18N
+        toolBarSx_Disconnect.setBorderPainted(false);
         toolBarSx_Disconnect.setFocusable(false);
         toolBarSx_Disconnect.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        toolBarSx_Disconnect.setPreferredSize(new java.awt.Dimension(32, 32));
+        toolBarSx_Disconnect.setPreferredSize(new java.awt.Dimension(40, 40));
         toolBarSx_Disconnect.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBarSx_Disconnect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -170,9 +171,10 @@ public class MainWindow extends javax.swing.JFrame {
 
         toolBarSx_NewType.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/32px/060.png"))); // NOI18N
         toolBarSx_NewType.setToolTipText("Aggiungi un nuovo tipo alla selezione");
+        toolBarSx_NewType.setBorderPainted(false);
         toolBarSx_NewType.setFocusable(false);
         toolBarSx_NewType.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        toolBarSx_NewType.setPreferredSize(new java.awt.Dimension(32, 32));
+        toolBarSx_NewType.setPreferredSize(new java.awt.Dimension(40, 40));
         toolBarSx_NewType.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBarSx_NewType.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -183,9 +185,10 @@ public class MainWindow extends javax.swing.JFrame {
 
         toolBarSx_RemoveType.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/32px/059.png"))); // NOI18N
         toolBarSx_RemoveType.setToolTipText("Rimuovi selezionato");
+        toolBarSx_RemoveType.setBorderPainted(false);
         toolBarSx_RemoveType.setFocusable(false);
         toolBarSx_RemoveType.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        toolBarSx_RemoveType.setPreferredSize(new java.awt.Dimension(32, 32));
+        toolBarSx_RemoveType.setPreferredSize(new java.awt.Dimension(40, 40));
         toolBarSx_RemoveType.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBarSx_RemoveType.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -196,7 +199,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         toolBarSx_RefrashRate.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "45 s", "30 s", "15 s", "10 s", "5   s" }));
         toolBarSx_RefrashRate.setToolTipText("Tempo di aggirnamento finestra");
-        toolBarSx_RefrashRate.setMinimumSize(new java.awt.Dimension(76, 27));
         toolBarSx_RefrashRate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 toolBarSx_RefrashRateActionPerformed(evt);
@@ -204,11 +206,11 @@ public class MainWindow extends javax.swing.JFrame {
         });
         toolBarServer.add(toolBarSx_RefrashRate);
 
-        jSlider1.setPaintLabels(true);
-        jSlider1.setPaintTicks(true);
-        jSlider1.setToolTipText("Livello di dettaglio");
-        jSlider1.setValue(20);
-        toolBarServer.add(jSlider1);
+        jS_Level.setPaintLabels(true);
+        jS_Level.setPaintTicks(true);
+        jS_Level.setToolTipText("Livello di dettaglio");
+        jS_Level.setValue(20);
+        toolBarServer.add(jS_Level);
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         jT_SchemaServer.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
@@ -227,7 +229,7 @@ public class MainWindow extends javax.swing.JFrame {
         jP_ServerLayout.setVerticalGroup(
             jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jP_ServerLayout.createSequentialGroup()
-                .add(toolBarServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .add(toolBarServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 483, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -412,9 +414,9 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel jP_Server;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JSlider jS_Level;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
-    private javax.swing.JSlider jSlider1;
     private javax.swing.JTree jT_SchemaServer;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem pasteMenuItem;
