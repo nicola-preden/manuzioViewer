@@ -193,6 +193,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         toolBarSx_RefrashRate.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "45 s", "30 s", "15 s", "10 s", "5   s" }));
         toolBarSx_RefrashRate.setToolTipText("Tempo di aggirnamento finestra");
+        toolBarSx_RefrashRate.setMinimumSize(new java.awt.Dimension(76, 27));
         toolBarSx_RefrashRate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 toolBarSx_RefrashRateActionPerformed(evt);
@@ -221,7 +222,7 @@ public class MainWindow extends javax.swing.JFrame {
         jP_ServerLayout.setVerticalGroup(
             jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jP_ServerLayout.createSequentialGroup()
-                .add(toolBarServer, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 25, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(toolBarServer, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 25, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 488, Short.MAX_VALUE)
                 .addContainerGap())
