@@ -4,6 +4,7 @@
  */
 package viewer.taskThread;
 
+import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -222,7 +223,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                     try {
                         // aggiorno contenuto finestra di output
                         conn = Main.getConnection();
-                        
+
                         // lettura attributi
                         String text = "id= " + poll.getId() + " type= " + poll.getType() + "\n"
                                 + "Attributi Textual Object: \n";
@@ -241,29 +242,38 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                         query.setInt(poll.getId(), 1);
                         res = query.executeQuery();
                         while (res.next()) {
-                            text+= "id_value= " + res.getInt("id_att_value") + " editable= " + res.getBoolean("editable")
+                            text += "id_value= " + res.getInt("id_att_value") + " editable= " + res.getBoolean("editable")
                                     + "\tlabel= " + res.getString("label") + " value=" + res.getString("value") + "\n";
                         }
-                        text+= "Fine Attributi\n INIZIO TESTO \n";
+                        text += "Fine Attributi\n INIZIO TESTO \n";
                         Main.close(res);
                         Main.close(query);
                         // lettura text object
-                        
-                        int[] arr = {poll.getId()};
+
+                        Object[] arr = {poll.getId()};
                         q = "{ ? = call get_text_from_id(?) }";
+                        Array t = conn.createArrayOf("integer", arr);
                         function = conn.prepareCall(q);
                         function.registerOutParameter(1, Types.ARRAY);
-                        function.setInt(2, arr);
-                        
-                        
-                        
+                        function.setArray(2, t);
+                        function.execute();
+                        Array array = function.getArray(1);
+                        // ottendo un resultSet dove la prima colonna è in indice mentre la vecoda il valore
+                        res = array.getResultSet();
 
+                        while (res.next()) {
+                            text += res.getString(2);
+                        }
+
+                        // Aggiorno contenuto finestra
+                        output.setText(null);
+                        output.setText(text);
                     } catch (SQLException ex) {
                         Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
                     } finally {
                         try {
                             Main.close(conn);
-                            Main.close(query);
+                            Main.close(query, function);
                             Main.close(res);
                         } catch (SQLException ex) {
                             Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
