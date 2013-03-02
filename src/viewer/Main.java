@@ -36,6 +36,7 @@ public class Main {
 
         @Override
         public void run() {
+            super.setName("Timer");
             while (true) {
                 try {
                     Thread.sleep(10000);

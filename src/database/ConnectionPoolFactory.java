@@ -73,6 +73,7 @@ public class ConnectionPoolFactory {
         config.setMaxConnectionsPerPartition(3);
         config.setPartitionCount(2);
         config.setTransactionRecoveryEnabled(false);
+        config.setDefaultAutoCommit(true);
     }
 
     /**

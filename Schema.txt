@@ -1,0 +1,26 @@
+Schema Collection
+    type Book Books
+        has
+            chapters: Chapters
+        attributes
+            tittle: String
+            author: String
+    end
+    type Chapter Chapters
+        has
+            sentence: Sentences
+        attributes
+            subTittle: String
+    end
+    type Sentence Sentences
+        has
+            words: Words
+    end
+    type Word Words
+        has
+            characters: Characters
+    end
+    type Character Characters
+    end
+End
+        
