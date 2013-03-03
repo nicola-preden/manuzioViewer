@@ -125,10 +125,10 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarSx_Disconnect = new javax.swing.JButton();
         toolBarSx_NewType = new javax.swing.JButton();
         toolBarSx_RemoveType = new javax.swing.JButton();
-        toolBarSx_RefrashRate = new javax.swing.JComboBox();
         jS_Level = new javax.swing.JSlider();
         jScrollPane1 = new javax.swing.JScrollPane();
         jT_SchemaServer = new javax.swing.JTree();
+        jT_SchemaServer.setToggleClickCount(2);
         jPanel2 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
@@ -197,22 +197,17 @@ public class MainWindow extends javax.swing.JFrame {
         });
         toolBarServer.add(toolBarSx_RemoveType);
 
-        toolBarSx_RefrashRate.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "45 s", "30 s", "15 s", "10 s", "5   s" }));
-        toolBarSx_RefrashRate.setToolTipText("Tempo di aggirnamento finestra");
-        toolBarSx_RefrashRate.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                toolBarSx_RefrashRateActionPerformed(evt);
-            }
-        });
-        toolBarServer.add(toolBarSx_RefrashRate);
-
+        jS_Level.setMajorTickSpacing(1);
+        jS_Level.setMaximum(10);
         jS_Level.setPaintLabels(true);
         jS_Level.setPaintTicks(true);
+        jS_Level.setSnapToTicks(true);
         jS_Level.setToolTipText("Livello di dettaglio");
-        jS_Level.setValue(20);
+        jS_Level.setValue(1);
+        jS_Level.setEnabled(false);
         toolBarServer.add(jS_Level);
 
-        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Server Vuoto");
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Server Disconnesso");
         jT_SchemaServer.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         jScrollPane1.setViewportView(jT_SchemaServer);
 
@@ -229,7 +224,7 @@ public class MainWindow extends javax.swing.JFrame {
         jP_ServerLayout.setVerticalGroup(
             jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jP_ServerLayout.createSequentialGroup()
-                .add(toolBarServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
+                .add(toolBarServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 483, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -394,10 +389,6 @@ public class MainWindow extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_toolBarSx_RemoveTypeActionPerformed
 
-    private void toolBarSx_RefrashRateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_RefrashRateActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_toolBarSx_RefrashRateActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem connectMenuItem;
@@ -423,7 +414,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JToolBar toolBarServer;
     private javax.swing.JButton toolBarSx_Disconnect;
     private javax.swing.JButton toolBarSx_NewType;
-    private javax.swing.JComboBox toolBarSx_RefrashRate;
     private javax.swing.JButton toolBarSx_RemoveType;
     // End of variables declaration//GEN-END:variables
 }

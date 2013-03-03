@@ -11,10 +11,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Enumeration;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JSlider;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -24,8 +26,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 import viewer.Main;
 import viewer.manuzioParser.Schema;
-import viewer.manuzioParser.Type;
-import org.postgresql.*;
 
 /**
  * <p> Si occupa di aggiornare e gestire un
@@ -43,6 +43,10 @@ import org.postgresql.*;
 public class TaskTree<T extends JTextComponent> extends Thread implements TreeSelectionListener {
 
     /**
+     * Richiede il refresh
+     */
+    private static final int REFRESH = -1;
+    /**
      * Thread corrente
      */
     private volatile Thread thisThread;
@@ -51,6 +55,10 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
      */
     private JTree tree;
     private DefaultMutableTreeNode root;
+    /**
+     * slider responsabile di gestire il numero di sotto alberi aperti
+     */
+    private final JSlider slider;
     /**
      * JTextComponent che si occupa di visualizzare l'output delle query
      * generate dai eventi associati
@@ -70,6 +78,10 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
      * da aprire
      */
     private LinkedTransferQueue<TreeNodeObject> queue;
+    /**
+     * indica l'altezza dell'albero
+     */
+    private int level = 0;
 
     @Override
     public void valueChanged(TreeSelectionEvent e) {
@@ -129,15 +141,19 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
      * @param output oggetto che estendedo un JTextComponent visualizza
      * l'aoutput delle query
      * @param schema lo schema del database manuzio
+     * @param slider lo slider che gestisce il livello di dettaglio visibile del
+     * jtree
      */
-    public TaskTree(JTree tree, T output, Schema schema) {
+    public TaskTree(JTree tree, T output, Schema schema, JSlider slider) {
         this.tree = tree;
         this.output = output;
         this.schema = schema;
+        this.slider = slider;
+        //  this.slider;
         this.root = null;
 
         super.setName("TaskTree");
-        this.attesa = 30;
+        this.attesa = 60;
         this.end = false;
         this.queue = new LinkedTransferQueue<TreeNodeObject>();
     }
@@ -147,10 +163,8 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
         thisThread = Thread.currentThread();
         tree.setEditable(false);
 
-        while (!end) {
+        while (!endValue()) {
             String q;
-            Type maximalUnit = schema.getMaximalUnit();
-            String typeNameMaxUnit = maximalUnit.getTypeName();
             Connection conn = null;
             PreparedStatement query = null;
             CallableStatement function = null; // da usarsi per le chiamate alle funzioni
@@ -159,52 +173,37 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                 // Carico la Radice dell'albero
                 conn = Main.getConnection();
                 if (conn != null) {  // Se è ancora disponibile una connessione al database
-                    q = "SELECT"
-                            + "  textual_objects.id_tex_obj,"
-                            + "  textual_objects.type_name,"
-                            + "  textual_objects.is_plural"
-                            + "FROM"
-                            + "  public.textual_objects"
-                            + "WHERE"
-                            + "  textual_objects.type_name = ?;";
-                    query = conn.prepareStatement(q);
-                    query.setString(1, typeNameMaxUnit);
-                    res = query.getResultSet();
-                    if (res.next()) {
-                        // Il database ha almeno un elemento
-                        root = new DefaultMutableTreeNode(new TreeNodeObject(res.getInt("id_tex_obj"), res.getString("type_name"), res.getBoolean("is_plural")));
-                    } else {
-                        // Il databse è completameto vuoto
-                        root = null;
-                    }
+                    // Creo la Radice
+                    String[] temp = conn.getMetaData().getURL().split("://");
+
+                    root = new DefaultMutableTreeNode(temp[1]);
                 } else {
-                    // Se non che il database
-                    end = true;
+                    // Se la connessione è caduta chiudo il thread
+                    stopThread();
                     continue;
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
-                    Main.close(res);
-                    Main.close(query);
                     Main.close(conn);
                 } catch (SQLException ex) {
                     Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
-            if (root != null) {
+            if (root != null) { // Controllo superfluo ma meglio esere sicuri
                 // Creo l'albero
+                slider.setEnabled(false);
                 tree.setEnabled(false);
                 tree.removeTreeSelectionListener(this);
 
-                // pulisce il JTree
-                tree.removeAll();
 
                 // Caricamento del nuovo modello
-                loadChild(root);
+                level = 0;
+                loadChild();
 
+                // Inserisco il nuovo modello
                 DefaultTreeModel treeModel = new DefaultTreeModel(root);
                 tree.setModel(treeModel);
                 tree.addTreeSelectionListener(this);
@@ -212,14 +211,20 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                 tree.setRootVisible(true);
                 tree.setEnabled(true);
 
-            } else {
-                // Inerisco un segnaposto
-                // Database Vuoto
+                // Aggiorno lo slider
+                slider.setMaximum(level);
+                slider.setEnabled(true);
+                slider.setValue(1);
+
+
             }
             try {
                 // Attendo un tempo prefissato per riaggiornare l'albero ed attendo un comando
-                TreeNodeObject poll = queue.poll(getWaitTime(), TimeUnit.SECONDS);
+                TreeNodeObject poll = queue.poll(attesa, TimeUnit.SECONDS);
                 if (poll != null) {
+                    if (poll.getId() == TaskTree.REFRESH) {
+                        continue;
+                    }
                     try {
                         // aggiorno contenuto finestra di output
                         conn = Main.getConnection();
@@ -258,7 +263,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                         function.setArray(2, t);
                         function.execute();
                         Array array = function.getArray(1);
-                        // ottendo un resultSet dove la prima colonna è in indice mentre la vecoda il valore
+                        // ottendo un resultSet dove la prima colonna è in indice mentre la secondo il valore
                         res = array.getResultSet();
 
                         while (res.next()) {
@@ -273,7 +278,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                     } finally {
                         try {
                             Main.close(conn);
-                            Main.close(query, function);
+                            Main.close(function);
                             Main.close(res);
                         } catch (SQLException ex) {
                             Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
@@ -285,24 +290,148 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
             }
         }
         // Chiudo il processo
-
+        DefaultMutableTreeNode node = new javax.swing.tree.DefaultMutableTreeNode("Server Disconnesso");
+        tree.setModel(new DefaultTreeModel(node));
+        tree.removeTreeSelectionListener(this);
+        slider.setMaximum(10);
+        slider.setEnabled(false);
+        slider.setValue(1);
     }
 
     /**
-     * <p>Popola l'albero a partire da
-     * <code>id_tex_obj</code> che identifica il primo text object presente sul
-     * database.</p>
+     * <p>Popola l'albero inserendo i vari
+     * <code>textual object</code> come figli della radiece dell albero,
+     * rispettando la loro struttura.</p>
      *
-     * @param root la testa dell'albero
-     * @return un albero importabile in un JTree
      */
-    protected DefaultMutableTreeNode loadChild(DefaultMutableTreeNode root) {
-        return null;
+    private void loadChild() {
+        String q = "SELECT"
+                + "  textual_objects.id_tex_obj,"
+                + "  textual_objects.type_name,"
+                + "  textual_objects.is_plural"
+                + " FROM "
+                + "  public.textual_objects"
+                + " WHERE "
+                + "  textual_objects.type_name = ? "
+                + " ORDER BY"
+                + "  textual_objects.start ASC;";
+
+        Connection conn = null;
+        PreparedStatement query = null;
+        ResultSet res = null;
+
+        // Genero il primo livello dell'albero contenente i maxUnit
+        try {
+            conn = Main.getConnection();
+            query = conn.prepareStatement(q);
+            query.setString(1, schema.getMaximalUnit().getTypeName());
+            res = query.executeQuery();
+            while (res.next()) {
+                // Creo un nuovo userObject per il DefaultMutableTreeNode
+                TreeNodeObject userObject = new TreeNodeObject(res.getInt("id_tex_obj"), res.getString("type_name"), res.getBoolean("is_plural"));
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode();
+                // inserisco l'userObject nel nodo
+                node.setUserObject(userObject);
+                // aggiungo il nodo
+                root.add(node);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                Main.close(res);
+                Main.close(query);
+                Main.close(conn);
+            } catch (SQLException ex) {
+                Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        // Ottengo un enumerazione dei figli e per ognuno di loro chiamo
+        // una funzione ricorsiva che carica tutti i figli
+
+        Enumeration children = root.children();
+        while (children.hasMoreElements()) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+            int x = insert(child);
+            if (x > level) {
+                level = x;
+            }
+        }
     }
 
-    protected boolean insert() {
-        return false;
+    /**
+     * <p>Inserisce tutti i figli di
+     * <code>head</code> fino a raggiungere le foglie ricorsivamente.</p>
+     * <p>Il metodo si ferma se si ha raggiunto il minimo dello schema oppure se
+     * <code>head</code> non ha figli</p>
+     *
+     * @param head un nodo dell'albero
+     */
+    protected int insert(DefaultMutableTreeNode head) {
 
+        if (head == null) {
+            return 0;
+        }
+        String q = "SELECT "
+                + "  textual_objects.id_tex_obj, "
+                + "  textual_objects.type_name, "
+                + "  textual_objects.is_plural "
+                + "FROM "
+                + "  public.objects_composition, "
+                + "  public.textual_objects "
+                + "WHERE "
+                + "  objects_composition.id_contained = textual_objects.id_tex_obj AND"
+                + "  objects_composition.id_container = ? "
+                + "ORDER BY "
+                + "  objects_composition.pos ASC;";
+        Connection conn = null;
+        PreparedStatement query = null;
+        ResultSet res = null;
+
+        String headType = ((TreeNodeObject) head.getUserObject()).getType();    // tipo del padre
+        int headId = ((TreeNodeObject) head.getUserObject()).getId();           // id del padre
+        if (schema.getMinimalUnit().getTypeName().compareTo(headType) == 0) {
+            return 1;
+        }
+        try {
+            // Eseguo la query per ottenere tutti i figli di head
+            conn = Main.getConnection();
+            query = conn.prepareStatement(q);
+            query.setInt(1, headId);
+            res = query.executeQuery();
+
+            while (res.next()) {
+                // Creo un nuovo userObject per il DefaultMutableTreeNode
+                TreeNodeObject userObject = new TreeNodeObject(res.getInt("id_tex_obj"), res.getString("type_name"), res.getBoolean("is_plural"));
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode();
+                // inserisco l'userObject nel nodo
+                node.setUserObject(userObject);
+                // aggiungo il nodo
+                head.add(node);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                Main.close(res);
+                Main.close(query);
+                Main.close(conn);
+            } catch (SQLException ex) {
+                Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        // Ottengo un enumerazione dei figli e per ognuno di loro chiamo
+        // una funzione ricorsiva che carica tutti i figli
+        int max = 0;
+        Enumeration children = head.children();
+        while (children.hasMoreElements()) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) children.nextElement();
+            int x = insert(child);
+            if (x > max) {
+                max = x;
+            }
+        }
+        return max + 1;
     }
 
     /**
@@ -311,27 +440,23 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
      * <code>javax.swing.JTree</code> e chiude la connessione al DB</p>
      */
     public synchronized void stopThread() {
-        if (!end) {
+        if (!endValue()) {
             end = true;
+            refresh(); // per evitare l'attesa di 30 sec nella peggiore delle ipotesi
         }
     }
 
-    /**
-     * <p>Metodo ThreadSafe per accedere al attuale tempo d'atesa impostato.</p>
-     *
-     * @return
-     */
-    protected synchronized int getWaitTime() {
-        return this.attesa;
+    protected synchronized boolean endValue() {
+        return end;
     }
 
     /**
-     * <p>Specifica il tempo di Refrash sulla struttura dell albero.</p>
+     * <p>Richiede un Refrash sulla struttura dell albero.</p>
      *
      * @param sec
      */
-    public synchronized void waitTime(int sec) {
-        this.attesa = sec;
+    public synchronized void refresh() {
+        queue.offer(new TreeNodeObject(TaskTree.REFRESH, null, false));
     }
 
     synchronized boolean sendMessage(TreeNodeObject s) {

@@ -70,7 +70,7 @@ public class ConnectionPoolFactory {
         config.setUsername(user);
         config.setPassword(password);
         config.setMinConnectionsPerPartition(1);
-        config.setMaxConnectionsPerPartition(3);
+        config.setMaxConnectionsPerPartition(10);
         config.setPartitionCount(2);
         config.setTransactionRecoveryEnabled(false);
         config.setDefaultAutoCommit(true);

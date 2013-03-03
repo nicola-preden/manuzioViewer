@@ -185,7 +185,7 @@
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <Component id="toolBarServer" pref="42" max="32767" attributes="0"/>
+                  <Component id="toolBarServer" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jScrollPane1" min="-2" pref="483" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -255,29 +255,16 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="toolBarSx_RemoveTypeActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JComboBox" name="toolBarSx_RefrashRate">
-              <Properties>
-                <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                  <StringArray count="5">
-                    <StringItem index="0" value="45 s"/>
-                    <StringItem index="1" value="30 s"/>
-                    <StringItem index="2" value="15 s"/>
-                    <StringItem index="3" value="10 s"/>
-                    <StringItem index="4" value="5   s"/>
-                  </StringArray>
-                </Property>
-                <Property name="toolTipText" type="java.lang.String" value="Tempo di aggirnamento finestra"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="toolBarSx_RefrashRateActionPerformed"/>
-              </Events>
-            </Component>
             <Component class="javax.swing.JSlider" name="jS_Level">
               <Properties>
+                <Property name="majorTickSpacing" type="int" value="1"/>
+                <Property name="maximum" type="int" value="10"/>
                 <Property name="paintLabels" type="boolean" value="true"/>
                 <Property name="paintTicks" type="boolean" value="true"/>
+                <Property name="snapToTicks" type="boolean" value="true"/>
                 <Property name="toolTipText" type="java.lang.String" value="Livello di dettaglio"/>
-                <Property name="value" type="int" value="20"/>
+                <Property name="value" type="int" value="1"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
             </Component>
           </SubComponents>
@@ -292,9 +279,12 @@
             <Component class="javax.swing.JTree" name="jT_SchemaServer">
               <Properties>
                 <Property name="model" type="javax.swing.tree.TreeModel" editor="org.netbeans.modules.form.editors2.TreeModelEditor">
-                  <TreeModel code="Server Vuoto"/>
+                  <TreeModel code="Server Disconnesso"/>
                 </Property>
               </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="jT_SchemaServer.setToggleClickCount(2);"/>
+              </AuxValues>
             </Component>
           </SubComponents>
         </Container>
