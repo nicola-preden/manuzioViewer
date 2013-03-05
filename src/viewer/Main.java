@@ -23,6 +23,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import viewer.manuzioParser.Schema;
 import viewer.setting.SettingXML;
+import viewer.taskThread.TaskTree;
 
 /**
  * <p>lasse contenete il main e i metodi per inizializzare il database</p>
@@ -53,6 +54,7 @@ public class Main {
     static ConnectWindow cw = null;                             // Finestra di login
     static SettingXML setting = null;                           // Struttura configurazione
     static Schema schema = null;
+    private TaskTree taskTree = null;
     private static final String urlXml = "settings.xml";        // File di Configurazione
     private static Timer tm = new Timer();
     private static final double VERSION_Manuzio = 3.1;
@@ -62,16 +64,25 @@ public class Main {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-        if ("Nimbus".equals(info.getName())) { // Cambio Look & Feel
-            try {
-                UIManager.setLookAndFeel(info.getClassName());
-                break;
-            } catch (    ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+       try {
+            if (System.getProperty("os.name").toLowerCase().indexOf("mac") != -1) {
+                System.setProperty("com.apple.mrj.application.apple.menu.about.name", "ManuzioViewer");
+                System.setProperty("apple.laf.useScreenMenuBar", "true");
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } else {
+                for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        // Cambio Look & Feel
+                        UIManager.setLookAndFeel(info.getClassName());
+                        break;
+                    }
+                }
             }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
+
+
         setting = new SettingXML(urlXml);
         tm.start();
         mw = new MainWindow();
@@ -90,10 +101,12 @@ public class Main {
     }
 
     /**
-     * <p>Imposta un nuovo ConnectionPool per generare un nuovo ConnectionPool è necessario chiamare il metodo
+     * <p>Imposta un nuovo ConnectionPool per generare un nuovo ConnectionPool è
+     * necessario chiamare il metodo
      * <code>viewer.Main.shutdownConnectionPool</code></p>
      *
-     * @param url Indirizzo al server secondo la      * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
+     * @param url Indirizzo al server secondo la * * * * *
+     * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
      * @param user
      * @param password
      * @throws ConnectionPoolException
@@ -137,6 +150,7 @@ public class Main {
     }
 
     static void shutdownProgram() {
+        shutdownConnectionPool();
         setting.saveOnFile();
         System.exit(0);
 
@@ -158,8 +172,9 @@ public class Main {
      * <code>override = true</code> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
-     * @param url the server path -either of the * * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
-     * serverPath itself
+     * @param url the server path -either of the * * * * * * * *
+     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
+     * itself
      * @param dbName the name given to the new database
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
@@ -194,7 +209,7 @@ public class Main {
             //builds the name of the database's specific functions file
             String[] url_temp = conn.getMetaData().getURL().split(":");
             file += "_" + url_temp[1];
-            
+
         } catch (SQLException e) {
             if (override && err != null) {
                 throw err;	//there was an exception during the db drop
@@ -345,8 +360,9 @@ public class Main {
      * name, this method could be used to delete any database, not only a
      * Manuzio one.</p>
      *
-     * @param url the server path -either of the * * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
-     * serverPath itself
+     * @param url the server path -either of the * * * * * * * *
+     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
+     * itself
      * @param dbName - the name of the database to delete
      * @param user the username to connect to the server
      * @param password the password related to the <code>user</code> to connect

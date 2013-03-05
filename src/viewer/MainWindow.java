@@ -28,7 +28,7 @@ import viewer.setting.SettingXML;
 public class MainWindow extends javax.swing.JFrame {
 
     /**
-     *  ActionListener per il menu
+     * ActionListener per il menu
      */
     private class MenuConnectActionListener implements java.awt.event.ActionListener {
 
@@ -77,8 +77,8 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     /**
-     * Disabilità o abilità i menu per la connessione/disconnessione, le toolbar e tutti i 
-     * JPanel inerenti questa classe.
+     * Disabilità o abilità i menu per la connessione/disconnessione, le toolbar
+     * e tutti i JPanel inerenti questa classe.
      * <code>javax.swing.JMenu</code> relativo alle connessioni a un db
      *
      * @param set
@@ -86,12 +86,12 @@ public class MainWindow extends javax.swing.JFrame {
     public synchronized void setEnableConnectStatus(boolean set) {
         jM_Connects.setEnabled(!set);
         disconnectMenuItem.setEnabled(set);
+        jE_output.setEnabled(set);
     }
 
     public synchronized void updateMenu() {
         if (jM_Connects.getItemCount() > 2) {
             for (int i = 2; i < jM_Connects.getItemCount(); i++) {
-                JMenuItem item = jM_Connects.getItem(i);
                 jM_Connects.remove(i);
             }
         }
@@ -129,8 +129,12 @@ public class MainWindow extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jT_SchemaServer = new javax.swing.JTree();
         jT_SchemaServer.setToggleClickCount(2);
-        jPanel2 = new javax.swing.JPanel();
+        jP_Output = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jE_output = new javax.swing.JEditorPane();
+        jP_Query = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
+        jToolBar1 = new javax.swing.JToolBar();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         jM_Connects = new javax.swing.JMenu();
@@ -149,9 +153,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("ManuzioViewer");
+        setLocationByPlatform(true);
+        setResizable(false);
+        getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
 
         jP_Server.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
-        jP_Server.setEnabled(false);
 
         toolBarServer.setFloatable(false);
         toolBarServer.setRollover(true);
@@ -215,48 +221,97 @@ public class MainWindow extends javax.swing.JFrame {
         jP_Server.setLayout(jP_ServerLayout);
         jP_ServerLayout.setHorizontalGroup(
             jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, toolBarServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_ServerLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(jScrollPane1)
+            .add(jP_ServerLayout.createSequentialGroup()
+                .add(jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jP_ServerLayout.createSequentialGroup()
+                        .add(toolBarServer, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 380, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(0, 0, Short.MAX_VALUE))
+                    .add(jP_ServerLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .add(jScrollPane1)))
                 .addContainerGap())
         );
         jP_ServerLayout.setVerticalGroup(
             jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jP_ServerLayout.createSequentialGroup()
-                .add(toolBarServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 483, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(toolBarServer, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(18, 18, 18)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
-        jPanel2.setEnabled(false);
+        getContentPane().add(jP_Server);
 
-        org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 543, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+        jP_Output.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
+
+        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane2.setViewportBorder(javax.swing.BorderFactory.createTitledBorder("OutPut Area"));
+        jScrollPane2.setMinimumSize(new java.awt.Dimension(500, 300));
+        jScrollPane2.setPreferredSize(new java.awt.Dimension(400, 300));
+
+        jE_output.setEnabled(false);
+        jScrollPane2.setViewportView(jE_output);
+
+        org.jdesktop.layout.GroupLayout jP_QueryLayout = new org.jdesktop.layout.GroupLayout(jP_Query);
+        jP_Query.setLayout(jP_QueryLayout);
+        jP_QueryLayout.setHorizontalGroup(
+            jP_QueryLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(0, 0, Short.MAX_VALUE)
         );
+        jP_QueryLayout.setVerticalGroup(
+            jP_QueryLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 163, Short.MAX_VALUE)
+        );
+
+        org.jdesktop.layout.GroupLayout jP_OutputLayout = new org.jdesktop.layout.GroupLayout(jP_Output);
+        jP_Output.setLayout(jP_OutputLayout);
+        jP_OutputLayout.setHorizontalGroup(
+            jP_OutputLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_OutputLayout.createSequentialGroup()
+                .addContainerGap()
+                .add(jP_OutputLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jP_Query, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jP_OutputLayout.setVerticalGroup(
+            jP_OutputLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_OutputLayout.createSequentialGroup()
+                .addContainerGap()
+                .add(jP_Query, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(18, 18, 18)
+                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        getContentPane().add(jP_Output);
 
         jPanel3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
         jPanel3.setEnabled(false);
+        jPanel3.setMinimumSize(new java.awt.Dimension(50, 50));
+        jPanel3.setPreferredSize(new java.awt.Dimension(37, 58));
+
+        jToolBar1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        jToolBar1.setRollover(true);
+        jToolBar1.setMaximumSize(new java.awt.Dimension(40, 40));
+        jToolBar1.setMinimumSize(new java.awt.Dimension(40, 40));
 
         org.jdesktop.layout.GroupLayout jPanel3Layout = new org.jdesktop.layout.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 33, Short.MAX_VALUE)
+            .add(jPanel3Layout.createSequentialGroup()
+                .add(jToolBar1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 0, Short.MAX_VALUE)
+            .add(jPanel3Layout.createSequentialGroup()
+                .add(jToolBar1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 487, Short.MAX_VALUE)
+                .addContainerGap())
         );
+
+        getContentPane().add(jPanel3);
 
         fileMenu.setMnemonic('f');
         fileMenu.setText("File");
@@ -336,24 +391,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         setJMenuBar(menuBar);
 
-        org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(layout.createSequentialGroup()
-                .add(jP_Server, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .add(6, 6, 6)
-                .add(jPanel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(6, 6, 6)
-                .add(jPanel3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jP_Server, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .add(jPanel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .add(jPanel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -388,7 +425,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void toolBarSx_RemoveTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_RemoveTypeActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_toolBarSx_RemoveTypeActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem connectMenuItem;
@@ -401,14 +437,18 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenu helpMenu;
+    private javax.swing.JEditorPane jE_output;
     private javax.swing.JMenu jM_Connects;
+    private javax.swing.JPanel jP_Output;
+    private javax.swing.JPanel jP_Query;
     private javax.swing.JPanel jP_Server;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JSlider jS_Level;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JTree jT_SchemaServer;
+    private javax.swing.JToolBar jToolBar1;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem pasteMenuItem;
     private javax.swing.JToolBar toolBarServer;
