@@ -4,6 +4,10 @@
  */
 package viewer;
 
+import com.apple.eawt.AppEvent;
+import com.apple.eawt.Application;
+import com.apple.eawt.QuitHandler;
+import com.apple.eawt.QuitResponse;
 import com.jolbox.bonecp.BoneCP;
 import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
@@ -18,6 +22,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -58,17 +63,41 @@ public class Main {
     private static final String urlXml = "settings.xml";        // File di Configurazione
     private static Timer tm = new Timer();
     private static final double VERSION_Manuzio = 3.1;
+    private static final String APP_NAME = "ManuzioViewer";
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
-       try {
-            if (System.getProperty("os.name").toLowerCase().indexOf("mac") != -1) {
-                System.setProperty("com.apple.mrj.application.apple.menu.about.name", "ManuzioViewer");
+        try {
+            if (isOSX()) {  // Se siamo su Mac
+                System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_NAME); // Funziona solo su 10.6 in giù editare file info.plist per 
+                System.setProperty("apple.awt.graphics.EnableQ2DX", "true");
                 System.setProperty("apple.laf.useScreenMenuBar", "true");
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+
+                Application macApp = Application.getApplication();
+
+                macApp.setAboutHandler(null);                   // Questi eventi vengono usati solo su os x
+                macApp.setPreferencesHandler(null);             // vengono usati per spostare gli eventi di 
+                macApp.setQuitHandler(new QuitHandler() {       // chiusura, about e preference sulla Menubar di Os X
+                    @Override
+                    public void handleQuitRequestWith(AppEvent.QuitEvent qe, QuitResponse qr) {
+                        int showConfirmDialog = JOptionPane.showConfirmDialog(mw, null, "Sei Sicuro?", JOptionPane.YES_NO_OPTION);
+                        switch (showConfirmDialog) {
+                            case JOptionPane.YES_OPTION:
+                                Main.shutdownProgram();
+                                break;
+                            case JOptionPane.NO_OPTION:
+                                qr.cancelQuit();
+                                break;
+                            default:
+                                qr.cancelQuit();
+                                break;
+                        }
+                    }
+                });
             } else {
                 for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                     if ("Nimbus".equals(info.getName())) {
@@ -91,6 +120,11 @@ public class Main {
 
     }
 
+    public static boolean isOSX() {
+        String osName = System.getProperty("os.name");
+        return osName.contains("OS X");
+    }
+
     /**
      * <p>Fornisce indicazione se è disponibile la connessione ad un server</p>
      *
@@ -105,7 +139,7 @@ public class Main {
      * necessario chiamare il metodo
      * <code>viewer.Main.shutdownConnectionPool</code></p>
      *
-     * @param url Indirizzo al server secondo la * * * * *
+     * @param url Indirizzo al server secondo la * * * * * * * *
      * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
      * @param user
      * @param password
@@ -153,7 +187,6 @@ public class Main {
         shutdownConnectionPool();
         setting.saveOnFile();
         System.exit(0);
-
     }
 
     /**
@@ -172,7 +205,7 @@ public class Main {
      * <code>override = true</code> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
-     * @param url the server path -either of the * * * * * * * *
+     * @param url the server path -either of the * * * * * * * * * * *
      * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
      * itself
      * @param dbName the name given to the new database
@@ -360,7 +393,7 @@ public class Main {
      * name, this method could be used to delete any database, not only a
      * Manuzio one.</p>
      *
-     * @param url the server path -either of the * * * * * * * *
+     * @param url the server path -either of the * * * * * * * * * * *
      * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
      * itself
      * @param dbName - the name of the database to delete

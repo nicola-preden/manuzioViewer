@@ -6,7 +6,9 @@ package viewer;
 
 import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -16,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import viewer.manuzioParser.Schema;
 import viewer.setting.NodeSettingInterface;
 import viewer.setting.SettingXML;
@@ -77,8 +80,8 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     /**
-     * Disabilità o abilità i menu per la connessione/disconnessione, le toolbar
-     * e tutti i JPanel inerenti questa classe.
+     * <p>Disabilità o abilità i menu per la connessione/disconnessione, le toolbar
+     * e tutti i JPanel inerenti questa classe.</p>
      * <code>javax.swing.JMenu</code> relativo alle connessioni a un db
      *
      * @param set
@@ -148,7 +151,6 @@ public class MainWindow extends javax.swing.JFrame {
         pasteMenuItem = new javax.swing.JMenuItem();
         deleteMenuItem = new javax.swing.JMenuItem();
         helpMenu = new javax.swing.JMenu();
-        contentsMenuItem = new javax.swing.JMenuItem();
         aboutMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -225,7 +227,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .add(jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(jP_ServerLayout.createSequentialGroup()
                         .add(toolBarServer, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 380, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(0, 0, Short.MAX_VALUE))
+                        .add(0, 5, Short.MAX_VALUE))
                     .add(jP_ServerLayout.createSequentialGroup()
                         .addContainerGap()
                         .add(jScrollPane1)))
@@ -271,7 +273,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .add(jP_OutputLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(jP_Query, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE))
+                    .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jP_OutputLayout.setVerticalGroup(
@@ -318,80 +320,82 @@ public class MainWindow extends javax.swing.JFrame {
 
         jM_Connects.setText("Connetti ....");
 
-        connectMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.ALT_MASK));
-        connectMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/16px/040.png"))); // NOI18N
-        connectMenuItem.setMnemonic('o');
-        connectMenuItem.setText("Nuovo ...");
-        connectMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                connectMenuItemActionPerformed(evt);
-            }
-        });
-        jM_Connects.add(connectMenuItem);
-        jM_Connects.add(jSeparator1);
+        connectMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+            Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+    connectMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/16px/040.png"))); // NOI18N
+    connectMenuItem.setMnemonic('o');
+    connectMenuItem.setText("Nuovo ...");
+    connectMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            connectMenuItemActionPerformed(evt);
+        }
+    });
+    jM_Connects.add(connectMenuItem);
+    jM_Connects.add(jSeparator1);
 
-        fileMenu.add(jM_Connects);
+    fileMenu.add(jM_Connects);
 
-        disconnectMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/16px/038.png"))); // NOI18N
-        disconnectMenuItem.setMnemonic('s');
-        disconnectMenuItem.setText("Disconnetti");
-        disconnectMenuItem.setEnabled(false);
-        disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                disconnectMenuItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(disconnectMenuItem);
+    disconnectMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D,
+        Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+disconnectMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/16px/038.png"))); // NOI18N
+disconnectMenuItem.setMnemonic('s');
+disconnectMenuItem.setText("Disconnetti");
+disconnectMenuItem.setEnabled(false);
+disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        disconnectMenuItemActionPerformed(evt);
+    }
+    });
+    fileMenu.add(disconnectMenuItem);
 
-        exitMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.META_MASK));
-        exitMenuItem.setMnemonic('x');
-        exitMenuItem.setText("Exit");
-        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitMenuItemActionPerformed(evt);
-            }
-        });
+    exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
+        Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+exitMenuItem.setMnemonic('x');
+exitMenuItem.setText("Exit");
+exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        exitMenuItemActionPerformed(evt);
+    }
+    });
+    if (!Main.isOSX()){
         fileMenu.add(exitMenuItem);
+    }
 
-        menuBar.add(fileMenu);
+    menuBar.add(fileMenu);
 
-        editMenu.setMnemonic('e');
-        editMenu.setText("Edit");
+    editMenu.setMnemonic('e');
+    editMenu.setText("Edit");
 
-        cutMenuItem.setMnemonic('t');
-        cutMenuItem.setText("Cut");
-        editMenu.add(cutMenuItem);
+    cutMenuItem.setMnemonic('t');
+    cutMenuItem.setText("Cut");
+    editMenu.add(cutMenuItem);
 
-        copyMenuItem.setMnemonic('y');
-        copyMenuItem.setText("Copy");
-        editMenu.add(copyMenuItem);
+    copyMenuItem.setMnemonic('y');
+    copyMenuItem.setText("Copy");
+    editMenu.add(copyMenuItem);
 
-        pasteMenuItem.setMnemonic('p');
-        pasteMenuItem.setText("Paste");
-        editMenu.add(pasteMenuItem);
+    pasteMenuItem.setMnemonic('p');
+    pasteMenuItem.setText("Paste");
+    editMenu.add(pasteMenuItem);
 
-        deleteMenuItem.setMnemonic('d');
-        deleteMenuItem.setText("Delete");
-        editMenu.add(deleteMenuItem);
+    deleteMenuItem.setMnemonic('d');
+    deleteMenuItem.setText("Delete");
+    editMenu.add(deleteMenuItem);
 
-        menuBar.add(editMenu);
+    menuBar.add(editMenu);
 
-        helpMenu.setMnemonic('h');
-        helpMenu.setText("Help");
+    helpMenu.setMnemonic('h');
+    helpMenu.setText("Help");
 
-        contentsMenuItem.setMnemonic('c');
-        contentsMenuItem.setText("Contents");
-        helpMenu.add(contentsMenuItem);
+    aboutMenuItem.setMnemonic('a');
+    aboutMenuItem.setText("About");
+    helpMenu.add(aboutMenuItem);
 
-        aboutMenuItem.setMnemonic('a');
-        aboutMenuItem.setText("About");
-        helpMenu.add(aboutMenuItem);
+    menuBar.add(helpMenu);
 
-        menuBar.add(helpMenu);
+    setJMenuBar(menuBar);
 
-        setJMenuBar(menuBar);
-
-        pack();
+    pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
@@ -428,7 +432,6 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem connectMenuItem;
-    private javax.swing.JMenuItem contentsMenuItem;
     private javax.swing.JMenuItem copyMenuItem;
     private javax.swing.JMenuItem cutMenuItem;
     private javax.swing.JMenuItem deleteMenuItem;
