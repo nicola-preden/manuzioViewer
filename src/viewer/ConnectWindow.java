@@ -87,6 +87,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                         Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
                         mainWindow.updateMenu();
                         mainWindow.setEnableConnectStatus(true);
+                        Main.mw.startTreeThread();
                         setProgress(100 * 5 / MAX);
                     } catch (ConnectionPoolException ex) {
                         Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
@@ -141,6 +142,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                         mainWindow.updateMenu();
                         mainWindow.setEnableConnectStatus(true);
                         setProgress(100 * 4 / MAX);
+                        Main.mw.startTreeThread();
                     } catch (ConnectionPoolException ex) {
                         Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                         JOptionPane.showMessageDialog(Main.cw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);

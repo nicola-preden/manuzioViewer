@@ -83,19 +83,6 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
      */
     private int level = 0;
 
-    @Override
-    public void valueChanged(TreeSelectionEvent e) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-
-        /* if nothing is selected */
-        if (node == null) {
-            return;
-        }
-        TreeNodeObject data = (TreeNodeObject) node.getUserObject();
-        this.sendMessage(data);
-
-    }
-
     /**
      * <p>Crea un oggetto contenenti i dati per identificare univocamente un
      * text object nel database. Il quale ha un metodo
@@ -156,6 +143,31 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
         this.attesa = 60;
         this.end = false;
         this.queue = new LinkedTransferQueue<TreeNodeObject>();
+    }
+
+    /**
+     * Avvia il Thread
+     */
+    public void startThread() {
+        this.start();
+    }
+
+    @Override
+    public void valueChanged(TreeSelectionEvent e) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+
+        /* if nothing is selected */
+        if (node == null) {
+            return;
+        }
+
+        TreeNodeObject data;
+        Object userObject = node.getUserObject();
+        if (userObject instanceof String) {
+        } else {
+            data = (TreeNodeObject) node.getUserObject();
+            this.sendMessage(data);
+        }
     }
 
     @Override
@@ -236,15 +248,15 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                                 + "  attribute_values.id_att_value, "
                                 + "  attribute_types.label, "
                                 + "  attribute_values.content AS value, "
-                                + "  attribute_types.editable"
+                                + "  attribute_types.editable "
                                 + "FROM "
                                 + "  public.attribute_types, "
-                                + "  public.attribute_values"
+                                + "  public.attribute_values "
                                 + "WHERE "
                                 + "  attribute_types.id_att_type = attribute_values.id_att_type AND"
                                 + "  attribute_values.id_tex_obj = ?;";
                         query = conn.prepareStatement(q);
-                        query.setInt(poll.getId(), 1);
+                        query.setInt(1, poll.getId());
                         res = query.executeQuery();
                         while (res.next()) {
                             text += "id_value= " + res.getInt("id_att_value") + " editable= " + res.getBoolean("editable")
@@ -296,6 +308,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
         slider.setMaximum(10);
         slider.setEnabled(false);
         slider.setValue(1);
+        output.setText(null);
     }
 
     /**
@@ -451,7 +464,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
     }
 
     /**
-     * <p>Richiede un Refrash sulla struttura dell albero.</p>
+     * <p>Richiede un refrash sulla struttura dell albero.</p>
      *
      * @param sec
      */

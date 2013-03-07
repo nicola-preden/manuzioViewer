@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.text.JTextComponent;
 import viewer.manuzioParser.Schema;
 import viewer.setting.SettingXML;
 import viewer.taskThread.TaskTree;
@@ -59,7 +60,7 @@ public class Main {
     static ConnectWindow cw = null;                             // Finestra di login
     static SettingXML setting = null;                           // Struttura configurazione
     static Schema schema = null;
-    private TaskTree taskTree = null;
+    static TaskTree taskTree = null;
     private static final String urlXml = "settings.xml";        // File di Configurazione
     private static Timer tm = new Timer();
     private static final double VERSION_Manuzio = 3.1;
@@ -84,7 +85,7 @@ public class Main {
                 macApp.setQuitHandler(new QuitHandler() {       // chiusura, about e preference sulla Menubar di Os X
                     @Override
                     public void handleQuitRequestWith(AppEvent.QuitEvent qe, QuitResponse qr) {
-                        int showConfirmDialog = JOptionPane.showConfirmDialog(mw, null, "Sei Sicuro?", JOptionPane.YES_NO_OPTION);
+                        int showConfirmDialog = JOptionPane.showConfirmDialog(mw, "Vuoi davvero chiudere il programma?", "Sei Sicuro?", JOptionPane.YES_NO_OPTION);
                         switch (showConfirmDialog) {
                             case JOptionPane.YES_OPTION:
                                 Main.shutdownProgram();
@@ -120,11 +121,19 @@ public class Main {
 
     }
 
-    public static boolean isOSX() {
+    static boolean isOSX() {
         String osName = System.getProperty("os.name");
         return osName.contains("OS X");
     }
 
+    /**
+     * <p>Setta il il puntatore al thread riguardante l'aggiornamento della 
+     * rappresentazione grafica del server</p>
+     * @param tree 
+     */
+    static synchronized void setTaskTree(TaskTree tree) {
+        taskTree = tree;
+    }
     /**
      * <p>Fornisce indicazione se è disponibile la connessione ad un server</p>
      *
@@ -139,8 +148,7 @@ public class Main {
      * necessario chiamare il metodo
      * <code>viewer.Main.shutdownConnectionPool</code></p>
      *
-     * @param url Indirizzo al server secondo la * * * * * * * *
-     * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
+     * @param url Indirizzo al server secondo la * * * * * * * *      * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
      * @param user
      * @param password
      * @throws ConnectionPoolException
@@ -174,6 +182,15 @@ public class Main {
      */
     static synchronized boolean shutdownConnectionPool() {
         if (isConnect) {
+            if (taskTree != null) {
+                taskTree.stopThread();
+                try {
+                    taskTree.join();
+                    taskTree = null;
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
             connPool.shutdown();
             isConnect = false;
             connPool = null;
@@ -182,7 +199,7 @@ public class Main {
             return false;
         }
     }
-
+    
     static void shutdownProgram() {
         shutdownConnectionPool();
         setting.saveOnFile();
@@ -205,9 +222,8 @@ public class Main {
      * <code>override = true</code> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
-     * @param url the server path -either of the * * * * * * * * * * *
-     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
-     * itself
+     * @param url the server path -either of the * * * * * * * * * * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * serverPath itself
      * @param dbName the name given to the new database
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
@@ -393,9 +409,8 @@ public class Main {
      * name, this method could be used to delete any database, not only a
      * Manuzio one.</p>
      *
-     * @param url the server path -either of the * * * * * * * * * * *
-     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
-     * itself
+     * @param url the server path -either of the * * * * * * * * * * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
+     * serverPath itself
      * @param dbName - the name of the database to delete
      * @param user the username to connect to the server
      * @param password the password related to the <code>user</code> to connect
