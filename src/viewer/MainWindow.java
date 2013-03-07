@@ -151,11 +151,10 @@ public class MainWindow extends javax.swing.JFrame {
         jT_SchemaServer = new javax.swing.JTree();
         jT_SchemaServer.setToggleClickCount(2);
         jP_Output = new javax.swing.JPanel();
+        toolBarGeneral = new javax.swing.JToolBar();
+        jButton1 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jE_output = new javax.swing.JEditorPane();
-        jP_Query = new javax.swing.JPanel();
-        jP_toolPanel = new javax.swing.JPanel();
-        toolBarGeneral = new javax.swing.JToolBar();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         jM_Connects = new javax.swing.JMenu();
@@ -175,9 +174,8 @@ public class MainWindow extends javax.swing.JFrame {
         setTitle("ManuzioViewer");
         setLocationByPlatform(true);
         setResizable(false);
-        getContentPane().setLayout(new javax.swing.BoxLayout(getContentPane(), javax.swing.BoxLayout.LINE_AXIS));
 
-        jP_Server.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
+        jP_Server.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         toolBarServer.setFloatable(false);
         toolBarServer.setRollover(true);
@@ -187,6 +185,8 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarSx_Disconnect.setBorderPainted(false);
         toolBarSx_Disconnect.setFocusable(false);
         toolBarSx_Disconnect.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        toolBarSx_Disconnect.setMaximumSize(new java.awt.Dimension(40, 40));
+        toolBarSx_Disconnect.setMinimumSize(new java.awt.Dimension(30, 30));
         toolBarSx_Disconnect.setPreferredSize(new java.awt.Dimension(40, 40));
         toolBarSx_Disconnect.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBarSx_Disconnect.addActionListener(new java.awt.event.ActionListener() {
@@ -198,10 +198,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         toolBarSx_Refrash.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/32px/033.png"))); // NOI18N
         toolBarSx_Refrash.setToolTipText("Aggiorna");
+        toolBarSx_Refrash.setBorderPainted(false);
         toolBarSx_Refrash.setFocusable(false);
         toolBarSx_Refrash.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        toolBarSx_Refrash.setMaximumSize(new java.awt.Dimension(44, 36));
-        toolBarSx_Refrash.setMinimumSize(new java.awt.Dimension(44, 36));
+        toolBarSx_Refrash.setMaximumSize(new java.awt.Dimension(40, 40));
+        toolBarSx_Refrash.setMinimumSize(new java.awt.Dimension(30, 30));
         toolBarSx_Refrash.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBarSx_Refrash.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -215,6 +216,8 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarSx_NewType.setBorderPainted(false);
         toolBarSx_NewType.setFocusable(false);
         toolBarSx_NewType.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        toolBarSx_NewType.setMaximumSize(new java.awt.Dimension(40, 40));
+        toolBarSx_NewType.setMinimumSize(new java.awt.Dimension(30, 30));
         toolBarSx_NewType.setPreferredSize(new java.awt.Dimension(40, 40));
         toolBarSx_NewType.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBarSx_NewType.addActionListener(new java.awt.event.ActionListener() {
@@ -229,6 +232,8 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarSx_RemoveType.setBorderPainted(false);
         toolBarSx_RemoveType.setFocusable(false);
         toolBarSx_RemoveType.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        toolBarSx_RemoveType.setMaximumSize(new java.awt.Dimension(40, 40));
+        toolBarSx_RemoveType.setMinimumSize(new java.awt.Dimension(30, 30));
         toolBarSx_RemoveType.setPreferredSize(new java.awt.Dimension(40, 40));
         toolBarSx_RemoveType.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         toolBarSx_RemoveType.addActionListener(new java.awt.event.ActionListener() {
@@ -259,11 +264,9 @@ public class MainWindow extends javax.swing.JFrame {
             .add(jP_ServerLayout.createSequentialGroup()
                 .add(jP_ServerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(jP_ServerLayout.createSequentialGroup()
-                        .add(toolBarServer, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 380, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(0, 5, Short.MAX_VALUE))
-                    .add(jP_ServerLayout.createSequentialGroup()
                         .addContainerGap()
-                        .add(jScrollPane1)))
+                        .add(jScrollPane1))
+                    .add(toolBarServer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jP_ServerLayout.setVerticalGroup(
@@ -271,13 +274,23 @@ public class MainWindow extends javax.swing.JFrame {
             .add(jP_ServerLayout.createSequentialGroup()
                 .add(toolBarServer, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .add(18, 18, 18)
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 417, Short.MAX_VALUE)
+                .add(jScrollPane1)
                 .addContainerGap())
         );
 
-        getContentPane().add(jP_Server);
+        jP_Output.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jP_Output.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
+        toolBarGeneral.setFloatable(false);
+        toolBarGeneral.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/32px/035.png"))); // NOI18N
+        jButton1.setFocusable(false);
+        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton1.setMaximumSize(new java.awt.Dimension(40, 40));
+        jButton1.setMinimumSize(new java.awt.Dimension(30, 30));
+        jButton1.setPreferredSize(new java.awt.Dimension(40, 40));
+        jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBarGeneral.add(jButton1);
 
         jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane2.setViewportBorder(javax.swing.BorderFactory.createTitledBorder("OutPut Area"));
@@ -288,68 +301,26 @@ public class MainWindow extends javax.swing.JFrame {
         jE_output.setEnabled(false);
         jScrollPane2.setViewportView(jE_output);
 
-        org.jdesktop.layout.GroupLayout jP_QueryLayout = new org.jdesktop.layout.GroupLayout(jP_Query);
-        jP_Query.setLayout(jP_QueryLayout);
-        jP_QueryLayout.setHorizontalGroup(
-            jP_QueryLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 505, Short.MAX_VALUE)
-        );
-        jP_QueryLayout.setVerticalGroup(
-            jP_QueryLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 167, Short.MAX_VALUE)
-        );
-
         org.jdesktop.layout.GroupLayout jP_OutputLayout = new org.jdesktop.layout.GroupLayout(jP_Output);
         jP_Output.setLayout(jP_OutputLayout);
         jP_OutputLayout.setHorizontalGroup(
             jP_OutputLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_OutputLayout.createSequentialGroup()
+            .add(jP_OutputLayout.createSequentialGroup()
                 .addContainerGap()
-                .add(jP_OutputLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jP_Query, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE))
-                .addContainerGap())
+                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 579, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(toolBarGeneral, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 46, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
         jP_OutputLayout.setVerticalGroup(
             jP_OutputLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(jP_OutputLayout.createSequentialGroup()
+                .add(toolBarGeneral, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 495, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(0, 15, Short.MAX_VALUE))
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_OutputLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(jP_Query, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(18, 18, 18)
-                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 358, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
-
-        getContentPane().add(jP_Output);
-
-        jP_toolPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(153, 153, 153), new java.awt.Color(153, 153, 153)));
-        jP_toolPanel.setDoubleBuffered(false);
-        jP_toolPanel.setEnabled(false);
-        jP_toolPanel.setMinimumSize(new java.awt.Dimension(50, 50));
-        jP_toolPanel.setPreferredSize(new java.awt.Dimension(37, 58));
-
-        toolBarGeneral.setFloatable(false);
-        toolBarGeneral.setOrientation(javax.swing.SwingConstants.VERTICAL);
-        toolBarGeneral.setRollover(true);
-        toolBarGeneral.setMaximumSize(new java.awt.Dimension(40, 40));
-        toolBarGeneral.setMinimumSize(new java.awt.Dimension(40, 40));
-
-        org.jdesktop.layout.GroupLayout jP_toolPanelLayout = new org.jdesktop.layout.GroupLayout(jP_toolPanel);
-        jP_toolPanel.setLayout(jP_toolPanelLayout);
-        jP_toolPanelLayout.setHorizontalGroup(
-            jP_toolPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jP_toolPanelLayout.createSequentialGroup()
-                .add(toolBarGeneral, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jP_toolPanelLayout.setVerticalGroup(
-            jP_toolPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jP_toolPanelLayout.createSequentialGroup()
-                .add(toolBarGeneral, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 491, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        getContentPane().add(jP_toolPanel);
 
         fileMenu.setMnemonic('f');
         fileMenu.setText("File");
@@ -431,6 +402,25 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     setJMenuBar(menuBar);
 
+    org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
+    getContentPane().setLayout(layout);
+    layout.setHorizontalGroup(
+        layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+        .add(layout.createSequentialGroup()
+            .add(jP_Server, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+            .add(jP_Output, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 647, Short.MAX_VALUE)
+            .addContainerGap())
+    );
+    layout.setVerticalGroup(
+        layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+        .add(layout.createSequentialGroup()
+            .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_Output, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 514, Short.MAX_VALUE)
+                .add(jP_Server, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addContainerGap())
+    );
+
     pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -484,12 +474,11 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenu helpMenu;
+    private javax.swing.JButton jButton1;
     private javax.swing.JEditorPane jE_output;
     private javax.swing.JMenu jM_Connects;
     private javax.swing.JPanel jP_Output;
-    private javax.swing.JPanel jP_Query;
     private javax.swing.JPanel jP_Server;
-    private javax.swing.JPanel jP_toolPanel;
     private javax.swing.JSlider jS_Level;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
