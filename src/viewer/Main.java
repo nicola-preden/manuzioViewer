@@ -4,8 +4,10 @@
  */
 package viewer;
 
+import com.apple.eawt.AboutHandler;
 import com.apple.eawt.AppEvent;
 import com.apple.eawt.Application;
+import com.apple.eawt.PreferencesHandler;
 import com.apple.eawt.QuitHandler;
 import com.apple.eawt.QuitResponse;
 import com.jolbox.bonecp.BoneCP;
@@ -78,10 +80,24 @@ public class Main {
 
 
                 Application macApp = Application.getApplication();
-
-                macApp.setAboutHandler(null);                   // Questi eventi vengono usati solo su os x
-                macApp.setPreferencesHandler(null);             // vengono usati per spostare gli eventi di 
-                macApp.setQuitHandler(new QuitHandler() {       // chiusura, about e preference sulla Menubar di Os X
+                // Questi eventi vengono usati solo su os x
+                // vengono usati per spostare gli eventi di 
+                // chiusura, about e preference sulla Menubar di Os X
+                macApp.setAboutHandler(new AboutHandler() {
+                    @Override
+                    public void handleAbout(AppEvent.AboutEvent ae) {
+                        AboutWindow aboutWindow = new viewer.AboutWindow();
+                        aboutWindow.setVisible(true);
+                    }
+                });
+                macApp.setPreferencesHandler(new PreferencesHandler() {
+                    @Override
+                    public void handlePreferences(AppEvent.PreferencesEvent pe) {
+                        PreferenceWindow preferenceWindow = new viewer.PreferenceWindow();
+                        preferenceWindow.setVisible(true);
+                    }
+                });
+                macApp.setQuitHandler(new QuitHandler() {
                     @Override
                     public void handleQuitRequestWith(AppEvent.QuitEvent qe, QuitResponse qr) {
                         int showConfirmDialog = JOptionPane.showConfirmDialog(mw, "Vuoi davvero chiudere il programma?", "Sei Sicuro?", JOptionPane.YES_NO_OPTION);
@@ -126,13 +142,15 @@ public class Main {
     }
 
     /**
-     * <p>Setta il il puntatore al thread riguardante l'aggiornamento della 
+     * <p>Setta il il puntatore al thread riguardante l'aggiornamento della
      * rappresentazione grafica del server</p>
-     * @param tree 
+     *
+     * @param tree
      */
     static synchronized void setTaskTree(TaskTree tree) {
         taskTree = tree;
     }
+
     /**
      * <p>Fornisce indicazione se è disponibile la connessione ad un server</p>
      *
@@ -147,7 +165,8 @@ public class Main {
      * necessario chiamare il metodo
      * <code>viewer.Main.shutdownConnectionPool</code></p>
      *
-     * @param url Indirizzo al server secondo la * * * * * * * *      * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
+     * @param url Indirizzo al server secondo la * * * * * * * * * *
+     * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
      * @param user
      * @param password
      * @throws ConnectionPoolException
@@ -198,7 +217,7 @@ public class Main {
             return false;
         }
     }
-    
+
     static void shutdownProgram() {
         shutdownConnectionPool();
         setting.saveOnFile();
@@ -221,8 +240,9 @@ public class Main {
      * <code>override = true</code> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
-     * @param url the server path -either of the * * * * * * * * * * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
-     * serverPath itself
+     * @param url the server path -either of the * * * * * * * * * * * * *
+     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
+     * itself
      * @param dbName the name given to the new database
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
@@ -408,8 +428,9 @@ public class Main {
      * name, this method could be used to delete any database, not only a
      * Manuzio one.</p>
      *
-     * @param url the server path -either of the * * * * * * * * * * *      * form <code>jdbc:subprotocol:serverPath</code>, or only the
-     * serverPath itself
+     * @param url the server path -either of the * * * * * * * * * * * * *
+     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
+     * itself
      * @param dbName - the name of the database to delete
      * @param user the username to connect to the server
      * @param password the password related to the <code>user</code> to connect

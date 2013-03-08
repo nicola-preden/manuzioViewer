@@ -168,6 +168,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
             data = (TreeNodeObject) node.getUserObject();
             this.sendMessage(data);
         }
+        tree.clearSelection();
     }
 
     @Override
@@ -227,8 +228,6 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                 slider.setMaximum(level);
                 slider.setEnabled(true);
                 slider.setValue(1);
-
-
             }
             try {
                 // Attendo un tempo prefissato per riaggiornare l'albero ed attendo un comando

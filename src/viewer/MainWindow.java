@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Enumeration;
 import java.util.ListIterator;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -19,6 +20,8 @@ import java.util.logging.Logger;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import viewer.manuzioParser.Schema;
 import viewer.setting.NodeSettingInterface;
 import viewer.setting.SettingXML;
@@ -122,12 +125,32 @@ public class MainWindow extends javax.swing.JFrame {
      * <p>Avvia i thread relativi all'aggiornamento del
      * <code>javax.swing.JTree</code></p>
      */
-    public void startTreeThread() {
+    void startTreeThread() {
         if (Main.connectionIsSet()) {
             TaskTree tree;
             tree = new TaskTree(jT_SchemaServer, jE_output, Main.schema, jS_Level);
             tree.startThread();
             Main.setTaskTree(tree);
+        }
+    }
+
+    /**
+     * <p>Fa collassare tutti i nodi che hanno un altezza maggiore di
+     * <code>level</code>. Questo metodo esegue le operazioni ricorsivamente</p>
+     *
+     * @param node nodo dell'albero
+     * @param level livello massimo visualizzabile
+     */
+    void collapseLevelTree(DefaultMutableTreeNode node, int level) {
+        int x = node.getLevel();
+
+        if (x >= level) {
+            jT_SchemaServer.collapsePath(new TreePath(node.getPath()));
+        } else {
+            Enumeration children = node.children();
+            while (children.hasMoreElements()) {
+                collapseLevelTree((DefaultMutableTreeNode) children.nextElement(), level);
+            }
         }
     }
 
@@ -161,6 +184,8 @@ public class MainWindow extends javax.swing.JFrame {
         connectMenuItem = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         disconnectMenuItem = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        preferenceMenuItem = new javax.swing.JMenuItem();
         exitMenuItem = new javax.swing.JMenuItem();
         editMenu = new javax.swing.JMenu();
         cutMenuItem = new javax.swing.JMenuItem();
@@ -251,6 +276,11 @@ public class MainWindow extends javax.swing.JFrame {
         jS_Level.setToolTipText("Livello di dettaglio");
         jS_Level.setValue(1);
         jS_Level.setEnabled(false);
+        jS_Level.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jS_LevelStateChanged(evt);
+            }
+        });
         toolBarServer.add(jS_Level);
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Server Disconnesso");
@@ -354,6 +384,17 @@ disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }
     });
     fileMenu.add(disconnectMenuItem);
+    fileMenu.add(jSeparator3);
+
+    preferenceMenuItem.setText("Preferenze");
+    preferenceMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            preferenceMenuItemActionPerformed(evt);
+        }
+    });
+    if (!Main.isOSX()) {
+        fileMenu.add(preferenceMenuItem);
+    }
 
     exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
         Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -396,6 +437,11 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     aboutMenuItem.setMnemonic('a');
     aboutMenuItem.setText("About");
+    aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            aboutMenuItemActionPerformed(evt);
+        }
+    });
     helpMenu.add(aboutMenuItem);
 
     menuBar.add(helpMenu);
@@ -409,14 +455,14 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
         .add(layout.createSequentialGroup()
             .add(jP_Server, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
             .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-            .add(jP_Output, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 647, Short.MAX_VALUE)
+            .add(jP_Output, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addContainerGap())
     );
     layout.setVerticalGroup(
         layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
         .add(layout.createSequentialGroup()
             .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_Output, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 514, Short.MAX_VALUE)
+                .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_Output, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .add(jP_Server, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addContainerGap())
     );
@@ -425,7 +471,14 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
-        Main.shutdownProgram();
+        int showConfirmDialog = JOptionPane.showConfirmDialog(this, "Vuoi davvero chiudere il programma?", "Sei Sicuro?", JOptionPane.YES_NO_OPTION);
+        switch (showConfirmDialog) {
+            case JOptionPane.YES_OPTION:
+                Main.shutdownProgram();
+                break;
+            default:
+                break;
+        }
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
     private void connectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectMenuItemActionPerformed
@@ -463,6 +516,24 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
         }
     }//GEN-LAST:event_toolBarSx_RefrashActionPerformed
 
+    private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
+        // TODO add your handling code here:
+        AboutWindow aboutWindow = new viewer.AboutWindow();
+        aboutWindow.setVisible(true);
+    }//GEN-LAST:event_aboutMenuItemActionPerformed
+
+    private void preferenceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_preferenceMenuItemActionPerformed
+        // TODO add your handling code here:
+        PreferenceWindow preferenceWindow = new viewer.PreferenceWindow();
+        preferenceWindow.setVisible(true);
+    }//GEN-LAST:event_preferenceMenuItemActionPerformed
+
+    private void jS_LevelStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jS_LevelStateChanged
+        // TODO add your handling code here:
+        int value = jS_Level.getValue();
+        jT_SchemaServer.expandPath(new TreePath((DefaultMutableTreeNode) jT_SchemaServer.getModel().getRoot()));
+        collapseLevelTree((DefaultMutableTreeNode) jT_SchemaServer.getModel().getRoot(), value);
+    }//GEN-LAST:event_jS_LevelStateChanged
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem connectMenuItem;
@@ -483,9 +554,11 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JTree jT_SchemaServer;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem pasteMenuItem;
+    private javax.swing.JMenuItem preferenceMenuItem;
     private javax.swing.JToolBar toolBarGeneral;
     private javax.swing.JToolBar toolBarServer;
     private javax.swing.JButton toolBarSx_Disconnect;

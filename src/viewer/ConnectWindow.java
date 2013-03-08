@@ -222,7 +222,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
         jPr_create = new javax.swing.JProgressBar();
         jB_cancel = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Connetti");
         setAlwaysOnTop(true);
         setResizable(false);
