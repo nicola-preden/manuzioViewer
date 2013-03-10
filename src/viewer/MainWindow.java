@@ -216,6 +216,7 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("ManuzioViewer");
         setLocationByPlatform(true);
+        setMinimumSize(new java.awt.Dimension(1052, 542));
         setResizable(false);
 
         jP_Server.setBorder(javax.swing.BorderFactory.createEtchedBorder());

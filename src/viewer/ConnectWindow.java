@@ -504,7 +504,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
             }
             if (!jb_Connect.isEnabled()) { // modifica barra di progressione per connessione ad un server gia configurato
                 int progress = (Integer) evt.getNewValue();
-                jPr_create.setValue(progress);
+                jPr_connect.setValue(progress);
             }
         }
 
