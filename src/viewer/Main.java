@@ -218,6 +218,9 @@ public class Main {
         }
     }
 
+    /**
+     * <p>Chiude il programma. </p>
+     */
     static void shutdownProgram() {
         shutdownConnectionPool();
         setting.saveOnFile();

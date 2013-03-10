@@ -32,7 +32,8 @@ import viewer.manuzioParser.Schema;
 import viewer.setting.SettingXML;
 
 /**
- *
+ * <p>JFrame responsabile della connessione ad un nuovo database e/o la sua 
+ * eventuale creazione. </p>
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
@@ -85,7 +86,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                         prop.setProperty("user", user);
                         prop.setProperty("password", password);
                         Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
-                        mainWindow.updateMenu();
+                        mainWindow.updateConnectMenu();
                         mainWindow.setEnableConnectStatus(true);
                         Main.mw.startTreeThread();
                         setProgress(100 * 5 / MAX);
@@ -139,7 +140,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                         prop.setProperty("user", user);
                         prop.setProperty("password", password);
                         Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
-                        mainWindow.updateMenu();
+                        mainWindow.updateConnectMenu();
                         mainWindow.setEnableConnectStatus(true);
                         setProgress(100 * 4 / MAX);
                         Main.mw.startTreeThread();

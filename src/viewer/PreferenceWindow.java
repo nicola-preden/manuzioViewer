@@ -8,7 +8,8 @@ import javax.swing.JPanel;
 import viewer.setting.PreferencesPane;
 
 /**
- *
+ * <p>JFrame responsabile della visualizzazione e modifica delle enventuali 
+ * Preferences dell'applicazione. </p>
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
@@ -25,6 +26,11 @@ public class PreferenceWindow extends javax.swing.JFrame {
         public void resetToDefaultPreferences() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public boolean isModified() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
     private class JPanelTextGraphics extends JPanel implements PreferencesPane {       
 
@@ -36,6 +42,11 @@ public class PreferenceWindow extends javax.swing.JFrame {
         @Override
         public void resetToDefaultPreferences() {
             throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean isModified() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
     /**
@@ -97,6 +108,11 @@ public class PreferenceWindow extends javax.swing.JFrame {
         });
 
         jB_CloseAndSave.setText("Salva");
+        jB_CloseAndSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jB_CloseAndSaveActionPerformed(evt);
+            }
+        });
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -132,6 +148,18 @@ public class PreferenceWindow extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.setVisible(false);
     }//GEN-LAST:event_jB_closeActionPerformed
+
+    private void jB_CloseAndSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_CloseAndSaveActionPerformed
+        // TODO add your handling code here:
+        JPanelLanguages lang = (JPanelLanguages)jP_Languages;
+        JPanelTextGraphics text = (JPanelTextGraphics)jP_TextLayout;
+        if (lang.isModified()) {
+            lang.savePreferences();
+        }
+        if (text.isModified()) {
+            text.savePreferences();
+        }
+    }//GEN-LAST:event_jB_CloseAndSaveActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jB_CloseAndSave;

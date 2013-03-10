@@ -34,9 +34,13 @@ import org.xml.sax.SAXException;
 public class SettingXML {
 
     /**
-     * <p>markup xml lista connessioni recenti</p>
+     * <p>markup xml lista connessioni recenti. </p>
      */
     public static final String CONNECTION_LIST = "ConnectionsList";
+    /**
+     * <p>markup xml lingua selezionata. </p>
+     */
+    public static final String LANGUAGE_SELECT = "Language";
     private ArrayList<NodeSetting> setting;
     private String url;
 
@@ -45,7 +49,6 @@ public class SettingXML {
      * base</p>
      *
      * @param url indirizzo del file xml di configurazione
-     * @param desc
      */
     public SettingXML(String url) {
         this.url = url;
@@ -123,10 +126,8 @@ public class SettingXML {
     }
 
     /**
-     * <p>Ritona un
-     * <code>viewer.setting.NodeSettingInterface</code> se trova l'oggetto
-     * altrimenti
-     * <code>NULL</code>
+     * <p>Ritona un <code>viewer.setting.NodeSettingInterface</code> 
+     * se trova l'oggetto altrimenti <code>NULL</code>. </p>
      *
      * @param desc
      * @return
