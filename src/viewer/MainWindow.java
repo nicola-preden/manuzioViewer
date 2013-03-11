@@ -6,6 +6,7 @@ package viewer;
 
 import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
+import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -17,6 +18,7 @@ import java.util.ListIterator;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
@@ -29,6 +31,7 @@ import viewer.taskThread.TaskTree;
 
 /**
  * <p>JFrame principale dell'applicazione. </p>
+ *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
@@ -82,6 +85,7 @@ public class MainWindow extends javax.swing.JFrame {
     public MainWindow() {
         initComponents();
         this.updateConnectMenu();
+        setEnableConnectStatus(false);
     }
 
     /**
@@ -93,10 +97,17 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public synchronized void setEnableConnectStatus(boolean set) {
         jM_Connects.setEnabled(!set);
-        disconnectMenuItem.setEnabled(set);
-        toolBarServer.setEnabled(set);
+        disconnectMenuItem.setEnabled(set);    
         jE_output.setEnabled(set);
-        toolBarGeneral.setEnabled(set);
+        Component[] components;
+        components = toolBarServer.getComponents();
+        for (int i = 0; i < components.length; i++) {
+            components[i].setEnabled(set);
+        }
+        components = toolBarGeneral.getComponents();
+        for (int i = 0; i < components.length; i++) {
+            components[i].setEnabled(set);
+        }
     }
 
     /**
@@ -159,10 +170,13 @@ public class MainWindow extends javax.swing.JFrame {
 
     /**
      * <p>Avvia il wizard necessario per aggiungere nuovi textual object al
-     * server. In caso il valore di <code>id</code> sia <code>-1</code> il testo
-     * verra aggiunto al server usando come tipo il MaxTypeUnit dello schema, in
-     * caso contrario il testo verrà agginto come component del textual object 
-     * con identificativo <code>id</code></p>
+     * server. In caso il valore di
+     * <code>id</code> sia
+     * <code>-1</code> il testo verra aggiunto al server usando come tipo il
+     * MaxTypeUnit dello schema, in caso contrario il testo verrà agginto come
+     * component del textual object con identificativo
+     * <code>id</code></p>
+     *
      * @param id intero indentificativo di un textual object
      */
     void addToServer(int id) {
@@ -172,6 +186,7 @@ public class MainWindow extends javax.swing.JFrame {
             // Avvia wizard per append
         }
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -212,6 +227,7 @@ public class MainWindow extends javax.swing.JFrame {
         deleteMenuItem = new javax.swing.JMenuItem();
         helpMenu = new javax.swing.JMenu();
         aboutMenuItem = new javax.swing.JMenuItem();
+        errorLogMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("ManuzioViewer");
@@ -339,6 +355,11 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarGen_AddtoDB.setMinimumSize(new java.awt.Dimension(30, 30));
         toolBarGen_AddtoDB.setPreferredSize(new java.awt.Dimension(40, 40));
         toolBarGen_AddtoDB.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        toolBarGen_AddtoDB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolBarGen_AddtoDBActionPerformed(evt);
+            }
+        });
         toolBarGeneral.add(toolBarGen_AddtoDB);
 
         jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -463,6 +484,9 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     });
     helpMenu.add(aboutMenuItem);
 
+    errorLogMenuItem.setText("Log Errori");
+    helpMenu.add(errorLogMenuItem);
+
     menuBar.add(helpMenu);
 
     setJMenuBar(menuBar);
@@ -553,6 +577,12 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private void toolBarSx_NewTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_NewTypeActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_toolBarSx_NewTypeActionPerformed
+
+    private void toolBarGen_AddtoDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarGen_AddtoDBActionPerformed
+        // TODO add your handling code here:
+        AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, this);
+        addToServerWizard.setVisible(true);
+    }//GEN-LAST:event_toolBarGen_AddtoDBActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem connectMenuItem;
@@ -561,6 +591,7 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JMenuItem deleteMenuItem;
     private javax.swing.JMenuItem disconnectMenuItem;
     private javax.swing.JMenu editMenu;
+    private javax.swing.JMenuItem errorLogMenuItem;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenu helpMenu;

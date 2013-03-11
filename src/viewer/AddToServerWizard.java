@@ -5,7 +5,15 @@
 package viewer;
 
 import java.awt.CardLayout;
+import java.awt.LayoutManager;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -17,31 +25,88 @@ import viewer.taskThread.TaskRawInput;
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
-public class AddToServerWizard extends javax.swing.JFrame {
+public class AddToServerWizard extends javax.swing.JFrame implements PropertyChangeListener {
 
-    private final String firstStep = "firstStep";
-    private final String file = "file";
-    private final String regex = "regex";
-    private final String confirm = "confirm";
-    private final String secondStep = "secondStep";
-    private final int COMPLETE_PROCEDURE = -1;
+    private static final String firstStep = "firstStep"; // nome primo gruppo di pannelli
+    private static final String file = "file";
+    private static final String regex = "regex";
+    private static final String confirm = "confirm";
+    private static final String secondStep = "secondStep"; // nome secondo gruppo di panelli
+    public static final int COMPLETE_PROCEDURE = -1;
     private int idx_to;
     private String currentStep;
     private String currentCard;
     private TaskRawInput taskRawInput = null;
     private MainWindow mw;
+    private ArrayList<String> filetext;
 
     /**
-     * Creates new form AddToServerWizard
+     * <p>Crea una nuovo AddToServerWizard. Se
+     * <code>id</code> è uguale a
+     * <code>AddToServerWizard.COMPLETE_PROCEDURE</code> allora il nuovo testo
+     * verra un nuovo texual object avente come type il maxType dello schema
+     * corrente</p>
+     *
+     * @param id intero indicante id di un textual object
+     * @param mw jframe padre
      */
     public AddToServerWizard(int id, MainWindow mw) {
         initComponents();
         idx_to = id;
         jB_previous.setEnabled(false);
+        jProgressBar.setVisible(false);
         currentStep = firstStep;
         currentCard = file;
         this.mw = mw;
 
+    }
+
+    /**
+     * Carica i dati nel JFrame successivo
+     *
+     * @param name stringa contenete il nome del jpanel da preparare
+     */
+    private void prepareFirstStepCard(String name) {
+        switch (name) {
+            case file: // inizializza la finesta 
+            case regex:
+            case confirm:
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (currentStep.compareTo(firstStep) == 0) { // Se vero stiamo caricando il file
+            if ("progress".equals(evt.getPropertyName())) {
+                int progress = (Integer) evt.getNewValue();
+                jProgressBar.setValue(progress);
+                if (progress == 100) {
+                    try {
+                        filetext = taskRawInput.get();
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(AddToServerWizard.class.getName()).log(Level.SEVERE, null, ex);
+                    } finally {
+                        taskRawInput.removePropertyChangeListener(this);
+                        if (!filetext.isEmpty()) {
+                            // è stato caricato qualcosa dal file
+                            taskRawInput = null;
+                            jB_next.setEnabled(true);
+                            jB_previous.setEnabled(true);
+                            jProgressBar.setVisible(false);
+                            CardLayout layout = (CardLayout) cards.getLayout();
+                            prepareFirstStepCard(regex);
+                            layout.next(cards);
+                        } else {
+                            // c'e stato un errore di qualche tipo
+                            taskRawInput = null;
+                            jB_next.setEnabled(true);
+                            jProgressBar.setVisible(false);
+                            JOptionPane.showMessageDialog(this, "Errore nel caricamento del file", "Errore", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -70,6 +135,7 @@ public class AddToServerWizard extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Aggiunta");
+        setAlwaysOnTop(true);
         setMinimumSize(new java.awt.Dimension(400, 300));
         setResizable(false);
 
@@ -165,6 +231,8 @@ public class AddToServerWizard extends javax.swing.JFrame {
             }
         });
 
+        jProgressBar.setStringPainted(true);
+
         org.jdesktop.layout.GroupLayout jP_controlLayout = new org.jdesktop.layout.GroupLayout(jP_control);
         jP_control.setLayout(jP_controlLayout);
         jP_controlLayout.setHorizontalGroup(
@@ -184,9 +252,9 @@ public class AddToServerWizard extends javax.swing.JFrame {
         jP_controlLayout.setVerticalGroup(
             jP_controlLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_controlLayout.createSequentialGroup()
-                .addContainerGap(39, Short.MAX_VALUE)
+                .addContainerGap(33, Short.MAX_VALUE)
                 .add(jProgressBar, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(jP_controlLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(jB_close)
                     .add(jB_next)
@@ -201,16 +269,21 @@ public class AddToServerWizard extends javax.swing.JFrame {
 
     private void jB_nextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_nextActionPerformed
         // TODO add your handling code here:
-        CardLayout cl = (CardLayout) cards.getLayout();
         if (currentStep.compareTo(firstStep) == 0) { // Se siamo nella prima fase di selezione
             switch (currentCard) {
                 case file: {    // Seleziono il file da aggiungere
                     File selectedFile = jFileChooser.getSelectedFile();
-                    if (selectedFile == null){
+                    if (selectedFile == null || !selectedFile.isFile()) {
                         JOptionPane.showMessageDialog(this, "Selezionare un file", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        // Aggiungo il contenuto del file in un oggetto.
+                        taskRawInput = new TaskRawInput(selectedFile.getPath());
+                        jProgressBar.setVisible(true);
+                        jProgressBar.setValue(0);
+                        taskRawInput.addPropertyChangeListener(this);
+                        jB_next.setEnabled(false);
+                        taskRawInput.execute();
                     }
-                // Aggiungo il contenuto del file in un oggetto.
-                taskRawInput = new TaskRawInput(selectedFile);
                 }
                 case regex:
                 case confirm:
@@ -220,7 +293,7 @@ public class AddToServerWizard extends javax.swing.JFrame {
         }
         if (currentStep.compareTo(secondStep) == 0) {
             switch (currentCard) {
-                
+
             }
         }
 
@@ -240,7 +313,7 @@ public class AddToServerWizard extends javax.swing.JFrame {
         }
         if (currentStep.compareTo(secondStep) == 0) {
             switch (currentCard) {
-                
+
             }
         }
     }//GEN-LAST:event_jB_previousActionPerformed
@@ -252,7 +325,9 @@ public class AddToServerWizard extends javax.swing.JFrame {
                 case file:
                     if (taskRawInput == null) {
                         this.setVisible(false);
-                        
+                    } else {
+                        taskRawInput.cancel(true);
+                        this.setVisible(false);
                     }
                 case regex:
                 case confirm:
@@ -262,7 +337,7 @@ public class AddToServerWizard extends javax.swing.JFrame {
         }
         if (currentStep.compareTo(secondStep) == 0) {
             switch (currentCard) {
-                
+
             }
         }
     }//GEN-LAST:event_jB_closeActionPerformed
