@@ -5,15 +5,12 @@
 package viewer.taskThread;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingWorker;
@@ -30,7 +27,6 @@ import javax.swing.SwingWorker;
 public class TaskRawInput extends SwingWorker<ArrayList<String>, Void> {
 
     // Le classi usate per le operazioni su disco sfruttano le nuove api per Java 1.7
-    private Scanner scan;
     private Path p;
     private long size;
     private long current;
@@ -72,9 +68,5 @@ public class TaskRawInput extends SwingWorker<ArrayList<String>, Void> {
             return fun;
         }
 
-    }
-
-    @Override
-    protected void done() {
     }
 }

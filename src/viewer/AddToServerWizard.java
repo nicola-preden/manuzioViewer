@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.GroupLayout;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -28,10 +29,11 @@ import viewer.taskThread.TaskRawInput;
 public class AddToServerWizard extends javax.swing.JFrame implements PropertyChangeListener {
 
     /**
-     * <p>Classe ausigliaria per creare una struttura contennente tutti i 
+     * <p>Classe ausigliaria per creare una struttura contennente tutti i
      * componenti del pannello regex. </p>
      */
-    private class AuxBean {
+    private class AuxJP_regex {
+
         private viewer.manuzioParser.Type type;
         private javax.swing.JComponent jcomponent;
         private javax.swing.JComboBox<String> jComboBox;
@@ -59,14 +61,36 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         public void setjComboBox(JComboBox<String> jComboBox) {
             this.jComboBox = jComboBox;
         }
-        
     }
     private static final String firstStep = "firstStep"; // nome primo gruppo di pannelli
     private static final String file = "file";
     private static final String regex = "regex";
-    private static final String confirm = "confirm";
+    private static final String regexLarge = "regexLarge";
     private static final String secondStep = "secondStep"; // nome secondo gruppo di panelli
+    /**
+     * <p>Esegue l'inserimento usando tutti i type disponibili</p>
+     */
     public static final int COMPLETE_PROCEDURE = -1;
+    /**
+     * <p>Stringhe da visualzzare nei combobox del pannello jP_regex e indicano
+     * i tipi comunemente usati di formattazione nei testi
+     */
+    private static final String tab_type[] = {
+        "Carattere",
+        "Parola",
+        "Frase",
+        "Paragrafo",
+        "Oggetto Complesso",
+        "Altro"
+    };
+    private static final String tab_typeToolTips[] = {
+        "<html><p>Un semplice carattere/simbolo</p></html>",
+        "<html><p>Un insieme di \"caratteri\"</p></html>", 
+        "<html><p>Un insieme di \"Parole\" che <br />iniziano con una lettera maiuscola e teminano <br /> con un \".\" e senza un capoverso</p></html>",
+        "<html><p>Un insieme di \"Frasi\" terminanti con un capoverso</p></html>",
+        "<html><p>Un oggetto/testo rappresentabile solo attraverso la selezione diretta,<br /> come ad esempio un capitolo</p></html>",
+        "<html><p>Un oggetto rappresentabile attraverso una Espressione Regolare.<br /> una guida alla sibologia supportata da questo programma <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html\">è in questa pagina</a></p></html>"
+    };
     private int idx_to;
     private String currentStep;
     private String currentCard;
@@ -75,8 +99,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private ArrayList<String> filetext;
 
     /**
-     * <p>Crea una nuovo AddToServerWizard. Se
-     * <code>id</code> è uguale a
+     * <p>Crea una nuovo AddToServerWizard. Se id è uguale a
      * <code>AddToServerWizard.COMPLETE_PROCEDURE</code> allora il nuovo testo
      * verra un nuovo texual object avente come type il maxType dello schema
      * corrente</p>
@@ -92,11 +115,41 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         currentStep = firstStep;
         currentCard = file;
         this.mw = mw;
+        // inizianuzzo il pannello jP_regex
 
     }
 
     /**
-     * Carica i dati nel JFrame successivo
+     * <p>Inizializza in particolare il 3° panello,
+     * <code>jP_regex</code>, in base ai parametri usati per costruire la
+     * classe. </p>
+     */
+    private void initRegex() {
+        GroupLayout layout = new GroupLayout(jP_regexInner);
+        jP_regexInner.setLayout(layout);
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
+        
+        // Vedi appunti http://docs.oracle.com/javase/tutorial/uiswing/layout/group.html
+        GroupLayout.SequentialGroup extGroup; // gruppo esterno
+        extGroup = layout.createSequentialGroup();
+        GroupLayout.ParallelGroup midGroup; // Allina verso destra gruppo mediano
+        midGroup = layout.createParallelGroup(GroupLayout.Alignment.TRAILING);
+        GroupLayout.SequentialGroup innGroup; // gruppo interno
+        innGroup = layout.createSequentialGroup();
+        
+        innGroup.addComponent(null); // ComboBox
+        innGroup.addComponent(null); // JTextField
+        
+        midGroup.addComponent(null); // aggounta label
+        midGroup.addGroup(innGroup);
+        
+        extGroup.addGroup(midGroup);
+    }
+
+    /**
+     * <p>Attiva e disattiva i JButton e predispone se necessario le variabili
+     * per eseguire i possibili cambiamenti. </p>
      *
      * @param name stringa contenete il nome del jpanel da preparare
      */
@@ -108,15 +161,16 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 jB_previous.setEnabled(false);
                 jB_next.setEnabled(false);
                 jFileChooser.setSelectedFile(null);
+                break;
             case regex:
                 currentCard = regex;
                 jB_previous.setEnabled(true);
                 jB_next.setEnabled(true);
                 // resetto tutti gli oggetti del pannello regex in base ai dati 
-                // di input ottenuti dal pannello file
-                
-                
-            case confirm:
+                // di input ottenuti dal pannello file se necessario
+                break;
+            case regexLarge:
+                break;
         }
     }
 
@@ -137,9 +191,9 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                             // è stato caricato qualcosa dal file
                             taskRawInput = null;
                             jProgressBar.setVisible(false);
-                            CardLayout layout = (CardLayout) cards.getLayout();
+                            CardLayout layout = (CardLayout) jP_firstStep.getLayout();;
                             prepareFirstStepCard(regex);
-                            layout.next(cards);
+                            layout.next(jP_firstStep);
                         } else {
                             // c'e stato un errore di qualche tipo
                             taskRawInput = null;
@@ -165,11 +219,14 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         cards = new javax.swing.JPanel();
         jP_firstStep = new javax.swing.JPanel();
         jP_file = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
+        jL_fileTittle = new javax.swing.JLabel();
         jP_fileInner = new javax.swing.JPanel();
         jFileChooser = new JFileChooser(FileSystemView.getFileSystemView());
         jP_regex = new javax.swing.JPanel();
-        jP_confirm = new javax.swing.JPanel();
+        jL_regexTittle = new javax.swing.JLabel();
+        jScroll_regex = new javax.swing.JScrollPane();
+        jP_regexInner = new javax.swing.JPanel();
+        jP_regexLarge = new javax.swing.JPanel();
         jP_secondStep = new javax.swing.JPanel();
         jP_control = new javax.swing.JPanel();
         jB_close = new javax.swing.JButton();
@@ -187,11 +244,15 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
         jP_firstStep.setLayout(new java.awt.CardLayout());
 
+        jP_file.setMaximumSize(new java.awt.Dimension(595, 363));
         jP_file.setLayout(new java.awt.BorderLayout());
 
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("<html><b>Scegli un file</b></html>");
-        jP_file.add(jLabel2, java.awt.BorderLayout.PAGE_START);
+        jL_fileTittle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jL_fileTittle.setText("<html><b>Scegli un file</b></html>");
+        jL_fileTittle.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 0, 0)));
+        jP_file.add(jL_fileTittle, java.awt.BorderLayout.PAGE_START);
+
+        jP_fileInner.setMaximumSize(new java.awt.Dimension(595, 346));
 
         jFileChooser.setAcceptAllFileFilterUsed(false);
         jFileChooser.setControlButtonsAreShown(false);
@@ -210,7 +271,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jP_fileInnerLayout.setVerticalGroup(
             jP_fileInnerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_fileInnerLayout.createSequentialGroup()
-                .addContainerGap(7, Short.MAX_VALUE)
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .add(jFileChooser, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 334, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -219,31 +280,49 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
         jP_firstStep.add(jP_file, "file");
 
-        org.jdesktop.layout.GroupLayout jP_regexLayout = new org.jdesktop.layout.GroupLayout(jP_regex);
-        jP_regex.setLayout(jP_regexLayout);
-        jP_regexLayout.setHorizontalGroup(
-            jP_regexLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 595, Short.MAX_VALUE)
+        jP_regex.setMaximumSize(new java.awt.Dimension(595, 363));
+        jP_regex.setMinimumSize(new java.awt.Dimension(595, 363));
+        jP_regex.setLayout(new java.awt.BorderLayout());
+
+        jL_regexTittle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jL_regexTittle.setText("<html><b>Associazione Manuzio's Type</b></html>");
+        jL_regexTittle.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 0, 0)));
+        jP_regex.add(jL_regexTittle, java.awt.BorderLayout.PAGE_START);
+
+        jScroll_regex.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScroll_regex.setMaximumSize(new java.awt.Dimension(595, 346));
+        jScroll_regex.setMinimumSize(new java.awt.Dimension(595, 346));
+        jScroll_regex.setPreferredSize(new java.awt.Dimension(595, 346));
+
+        org.jdesktop.layout.GroupLayout jP_regexInnerLayout = new org.jdesktop.layout.GroupLayout(jP_regexInner);
+        jP_regexInner.setLayout(jP_regexInnerLayout);
+        jP_regexInnerLayout.setHorizontalGroup(
+            jP_regexInnerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 591, Short.MAX_VALUE)
         );
-        jP_regexLayout.setVerticalGroup(
-            jP_regexLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 363, Short.MAX_VALUE)
+        jP_regexInnerLayout.setVerticalGroup(
+            jP_regexInnerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 342, Short.MAX_VALUE)
         );
+
+        jScroll_regex.setViewportView(jP_regexInner);
+
+        jP_regex.add(jScroll_regex, java.awt.BorderLayout.CENTER);
 
         jP_firstStep.add(jP_regex, "regex");
 
-        org.jdesktop.layout.GroupLayout jP_confirmLayout = new org.jdesktop.layout.GroupLayout(jP_confirm);
-        jP_confirm.setLayout(jP_confirmLayout);
-        jP_confirmLayout.setHorizontalGroup(
-            jP_confirmLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+        org.jdesktop.layout.GroupLayout jP_regexLargeLayout = new org.jdesktop.layout.GroupLayout(jP_regexLarge);
+        jP_regexLarge.setLayout(jP_regexLargeLayout);
+        jP_regexLargeLayout.setHorizontalGroup(
+            jP_regexLargeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(0, 595, Short.MAX_VALUE)
         );
-        jP_confirmLayout.setVerticalGroup(
-            jP_confirmLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+        jP_regexLargeLayout.setVerticalGroup(
+            jP_regexLargeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(0, 363, Short.MAX_VALUE)
         );
 
-        jP_firstStep.add(jP_confirm, "confirm");
+        jP_firstStep.add(jP_regexLarge, "regexLarge");
 
         cards.add(jP_firstStep, "firstStep");
 
@@ -315,7 +394,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         // TODO add your handling code here:
         if (currentStep.compareTo(firstStep) == 0) { // Se siamo nella prima fase di selezione
             switch (currentCard) {
-                case file: {    // Seleziono il file da aggiungere
+                case file:    // Seleziono il file da aggiungere
                     File selectedFile = jFileChooser.getSelectedFile();
                     if (selectedFile == null || !selectedFile.isFile()) {
                         JOptionPane.showMessageDialog(this, "Selezionare un file", "Attenzione", JOptionPane.WARNING_MESSAGE);
@@ -327,10 +406,14 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                         taskRawInput.addPropertyChangeListener(this);
                         jB_next.setEnabled(false);
                         taskRawInput.execute();
+                        // le chiamate alle funzioni successive da prendere
+                        // in questa fase sono all'interno del listener per una
+                        // questione di pura praticità
                     }
-                }
+                    break;
                 case regex:
-                case confirm:
+                    break;
+                case regexLarge:
                 default:
                     break;
             }
@@ -349,8 +432,12 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             switch (currentCard) {
                 case file: // Impossibile dovrei essere disattivato
                     break;
-                case regex:
-                case confirm:
+                case regex: // torno a file
+                    CardLayout layout = (CardLayout) jP_firstStep.getLayout();
+                    prepareFirstStepCard(file);
+                    layout.previous(jP_firstStep);
+                    break;
+                case regexLarge:
                 default:
                     break;
             }
@@ -373,8 +460,11 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                         taskRawInput.cancel(true);
                         this.setVisible(false);
                     }
+                    break;
                 case regex:
-                case confirm:
+                    this.setVisible(false);
+                    break;
+                case regexLarge:
                 default:
                     break;
             }
@@ -391,14 +481,17 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private javax.swing.JButton jB_next;
     private javax.swing.JButton jB_previous;
     private javax.swing.JFileChooser jFileChooser;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JPanel jP_confirm;
+    private javax.swing.JLabel jL_fileTittle;
+    private javax.swing.JLabel jL_regexTittle;
     private javax.swing.JPanel jP_control;
     private javax.swing.JPanel jP_file;
     private javax.swing.JPanel jP_fileInner;
     private javax.swing.JPanel jP_firstStep;
     private javax.swing.JPanel jP_regex;
+    private javax.swing.JPanel jP_regexInner;
+    private javax.swing.JPanel jP_regexLarge;
     private javax.swing.JPanel jP_secondStep;
     private javax.swing.JProgressBar jProgressBar;
+    private javax.swing.JScrollPane jScroll_regex;
     // End of variables declaration//GEN-END:variables
 }

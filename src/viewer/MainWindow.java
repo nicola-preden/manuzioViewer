@@ -182,6 +182,8 @@ public class MainWindow extends javax.swing.JFrame {
     void addToServer(int id) {
         if (id == -1) {
             // Avvia wizard per caricamento totale
+        AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, this);
+        addToServerWizard.setVisible(true);
         } else {
             // Avvia wizard per append
         }
@@ -580,8 +582,7 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void toolBarGen_AddtoDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarGen_AddtoDBActionPerformed
         // TODO add your handling code here:
-        AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, this);
-        addToServerWizard.setVisible(true);
+        this.addToServer(AddToServerWizard.COMPLETE_PROCEDURE);
     }//GEN-LAST:event_toolBarGen_AddtoDBActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
