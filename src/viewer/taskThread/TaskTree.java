@@ -24,7 +24,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
-import viewer.Main;
+import viewer.ManuzioViewer;
 import viewer.manuzioParser.Schema;
 
 /**
@@ -182,7 +182,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
             ResultSet res = null;
             try {
                 // Carico la Radice dell'albero
-                conn = Main.getConnection();
+                conn = ManuzioViewer.getConnection();
                 if (conn != null) {  // Se è ancora disponibile una connessione al database
                     // Creo la Radice
                     String[] temp = conn.getMetaData().getURL().split("://");
@@ -197,7 +197,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                 Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
-                    Main.close(conn);
+                    ManuzioViewer.close(conn);
                 } catch (SQLException ex) {
                     Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -236,7 +236,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                     }
                     try {
                         // aggiorno contenuto finestra di output
-                        conn = Main.getConnection();
+                        conn = ManuzioViewer.getConnection();
 
                         // lettura attributi
                         String text = "id= " + poll.getId() + " type= " + poll.getType() + "\n"
@@ -260,8 +260,8 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                                     + "\tlabel= " + res.getString("label") + " value=" + res.getString("value") + "\n";
                         }
                         text += "Fine Attributi\n INIZIO TESTO \n";
-                        Main.close(res);
-                        Main.close(query);
+                        ManuzioViewer.close(res);
+                        ManuzioViewer.close(query);
                         // lettura text object
 
                         Object[] arr = {poll.getId()};
@@ -286,9 +286,9 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                         Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
                     } finally {
                         try {
-                            Main.close(conn);
-                            Main.close(function);
-                            Main.close(res);
+                            ManuzioViewer.close(conn);
+                            ManuzioViewer.close(function);
+                            ManuzioViewer.close(res);
                         } catch (SQLException ex) {
                             Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -331,7 +331,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
 
         // Genero il primo livello dell'albero contenente i maxUnit
         try {
-            conn = Main.getConnection();
+            conn = ManuzioViewer.getConnection();
             query = conn.prepareStatement(q);
             query.setString(1, schema.getMaximalUnit().getTypeName());
             res = query.executeQuery();
@@ -348,9 +348,9 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
             Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                Main.close(res);
-                Main.close(query);
-                Main.close(conn);
+                ManuzioViewer.close(res);
+                ManuzioViewer.close(query);
+                ManuzioViewer.close(conn);
             } catch (SQLException ex) {
                 Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -403,7 +403,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
         }
         try {
             // Eseguo la query per ottenere tutti i figli di head
-            conn = Main.getConnection();
+            conn = ManuzioViewer.getConnection();
             query = conn.prepareStatement(q);
             query.setInt(1, headId);
             res = query.executeQuery();
@@ -421,9 +421,9 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
             Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                Main.close(res);
-                Main.close(query);
-                Main.close(conn);
+                ManuzioViewer.close(res);
+                ManuzioViewer.close(query);
+                ManuzioViewer.close(conn);
             } catch (SQLException ex) {
                 Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import viewer.Main;
+import viewer.ManuzioViewer;
 import viewer.manuzioParser.Type.number;
 
 /**
@@ -210,8 +210,8 @@ public class Schema {
                 throw new ParseException("Invalid database format:\nNo Schema definition found.", -1);
             }
             version = res.getDouble("db_version");
-            if (version != Main.getVersion()) {
-                throw new ParseException("Invalid database format:\nSupported version is " + Main.getVersion() + ".\nDatabase version is " + version + ".", -1);
+            if (version != ManuzioViewer.getVersion()) {
+                throw new ParseException("Invalid database format:\nSupported version is " + ManuzioViewer.getVersion() + ".\nDatabase version is " + version + ".", -1);
             }
 
             //builds the schema
@@ -222,9 +222,9 @@ public class Schema {
             }
         } catch (SQLException e) {
             //closes resources
-            Main.close(res);
-            Main.close(stat);
-            Main.close(conn);
+            ManuzioViewer.close(res);
+            ManuzioViewer.close(stat);
+            ManuzioViewer.close(conn);
             throw new ParseException("Invalid database format:\n" + e.getMessage(), -1);
         }
 
@@ -282,9 +282,9 @@ public class Schema {
             throw e;
         } finally {
             //closes resources
-            Main.close(res);
-            Main.close(stat);
-            Main.close(conn);
+            ManuzioViewer.close(res);
+            ManuzioViewer.close(stat);
+            ManuzioViewer.close(conn);
         }
     }
 
@@ -314,7 +314,7 @@ public class Schema {
         Set<ComponentProperty> compSet = new HashSet<ComponentProperty>();	//memorizes the type's structure
         Map<String, String> supertype = new HashMap<String, String>();	//memorizes the type's extensions
 
-        // conn = Main.buildManuzioDB(url, dbName, user, password, override); //builds the database (creato attraverso l'interfaccia grafica)
+        // conn = ManuzioViewer.buildManuzioDB(url, dbName, user, password, override); //builds the database (creato attraverso l'interfaccia grafica)
 
         try {
             //prepare the statements 
@@ -382,18 +382,18 @@ public class Schema {
             query_schema.setString(1, this.getName());
             query_schema.setString(2, this.getMaximalUnit().getTypeName());
             query_schema.setString(3, this.getMinimalUnit().getTypeName());
-            query_schema.setDouble(4, Main.getVersion());
+            query_schema.setDouble(4, ManuzioViewer.getVersion());
             query_schema.executeUpdate();
 
             //closes resources
-            Main.close(query_schema, query_type_comp, query_ins_type, query_ins_att, query_ins_met, query_supertype);
-            Main.close(conn);
+            ManuzioViewer.close(query_schema, query_type_comp, query_ins_type, query_ins_att, query_ins_met, query_supertype);
+            ManuzioViewer.close(conn);
 
         } catch (SQLException e) {
             //closes resources
-            Main.close(query_schema, query_type_comp, query_ins_type, query_ins_att, query_ins_met, query_supertype);
-            Main.close(conn);
-            Main.deleteManuzioDB(url, dbName, user, password); //to not leave the DB in a inconsistent status
+            ManuzioViewer.close(query_schema, query_type_comp, query_ins_type, query_ins_att, query_ins_met, query_supertype);
+            ManuzioViewer.close(conn);
+            ManuzioViewer.deleteManuzioDB(url, dbName, user, password); //to not leave the DB in a inconsistent status
             throw e;
         }
     }

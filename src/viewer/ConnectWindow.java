@@ -58,41 +58,41 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
             try {
                 setProgress(0);
                 if (jRb_loadFromFile.isSelected()) {
-                    Main.schema = Schema.loadFromFile(f);
+                    ManuzioViewer.schema = Schema.loadFromFile(f);
                 }
                 if (jRb_loadFromString.isSelected()) {
-                    Main.schema = Schema.buildFromSourceCode(text);
+                    ManuzioViewer.schema = Schema.buildFromSourceCode(text);
                 }
                 setProgress(100 * 1 / MAX);
-                conn = Main.buildManuzioDB(url, dbName, user, password, true);
+                conn = ManuzioViewer.buildManuzioDB(url, dbName, user, password, true);
                 setProgress(100 * 2 / MAX);
-                Main.schema.saveToDB(url, dbName, user, password);
+                ManuzioViewer.schema.saveToDB(url, dbName, user, password);
                 setProgress(100 * 3 / MAX);
             } catch (IOException | ParseException ex) {
                 Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                Main.schema = null;
-                JOptionPane.showMessageDialog(Main.cw, "Errore Caricamento Schema", "Errore", JOptionPane.ERROR_MESSAGE);
+                ManuzioViewer.schema = null;
+                JOptionPane.showMessageDialog(ManuzioViewer.cw, "Errore Caricamento Schema", "Errore", JOptionPane.ERROR_MESSAGE);
             } catch (SQLException ex) {
                 Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(Main.cw, "Impossibile Creare il DataBase", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ManuzioViewer.cw, "Impossibile Creare il DataBase", "Errore", JOptionPane.ERROR_MESSAGE);
                 conn = false;
             } finally {
                 if (conn) {
                     try {
-                        Main.setConnectionPool(url + "/" + dbName, user, password);
+                        ManuzioViewer.setConnectionPool(url + "/" + dbName, user, password);
                         setProgress(100 * 4 / MAX);
                         Properties prop = new Properties();
                         prop.setProperty("url", url + "/" + dbName);
                         prop.setProperty("user", user);
                         prop.setProperty("password", password);
-                        Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
+                        ManuzioViewer.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
                         mainWindow.updateConnectMenu();
                         mainWindow.setEnableConnectStatus(true);
-                        Main.mw.startTreeThread();
+                        ManuzioViewer.mw.startTreeThread();
                         setProgress(100 * 5 / MAX);
                     } catch (ConnectionPoolException ex) {
                         Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                        JOptionPane.showMessageDialog(Main.cw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ManuzioViewer.cw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -104,10 +104,10 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
             Toolkit.getDefaultToolkit().beep();
             setCursor(null);
             jb_Connect_new.setEnabled(true);
-            this.removePropertyChangeListener(Main.cw);
-            if (Main.connectionIsSet()) {
-                Main.cw.setVisible(false);
-                Main.cw = null;
+            this.removePropertyChangeListener(ManuzioViewer.cw);
+            if (ManuzioViewer.connectionIsSet()) {
+                ManuzioViewer.cw.setVisible(false);
+                ManuzioViewer.cw = null;
             } else {
                 jPr_create.setVisible(false);
             }
@@ -125,28 +125,28 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                 setProgress(0);
                 conn = ConnectionPoolFactory.getConnection(url, user, password);
                 setProgress(100 * 1 / MAX);
-                Main.schema = Schema.loadFromDB(conn);
+                ManuzioViewer.schema = Schema.loadFromDB(conn);
                 setProgress(100 * 2 / MAX);
             } catch (SQLException ex) {
                 Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(Main.cw, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ManuzioViewer.cw, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
             } finally {
                 if (conn != null) {
                     try {
-                        Main.setConnectionPool(url, user, password);
+                        ManuzioViewer.setConnectionPool(url, user, password);
                         setProgress(100 * 3 / MAX);
                         Properties prop = new Properties();
                         prop.setProperty("url", url);
                         prop.setProperty("user", user);
                         prop.setProperty("password", password);
-                        Main.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
+                        ManuzioViewer.setting.addSettingAtTop(SettingXML.CONNECTION_LIST, prop);
                         mainWindow.updateConnectMenu();
                         mainWindow.setEnableConnectStatus(true);
                         setProgress(100 * 4 / MAX);
-                        Main.mw.startTreeThread();
+                        ManuzioViewer.mw.startTreeThread();
                     } catch (ConnectionPoolException ex) {
                         Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                        JOptionPane.showMessageDialog(Main.cw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ManuzioViewer.cw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -158,10 +158,10 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
             Toolkit.getDefaultToolkit().beep();
             setCursor(null);
             jb_Connect.setEnabled(true);
-            this.removePropertyChangeListener(Main.cw);
-            if (Main.connectionIsSet()) {
-                Main.cw.setVisible(false);
-                Main.cw = null;
+            this.removePropertyChangeListener(ManuzioViewer.cw);
+            if (ManuzioViewer.connectionIsSet()) {
+                ManuzioViewer.cw.setVisible(false);
+                ManuzioViewer.cw = null;
             } else {
                 jPr_connect.setVisible(false);
             }
@@ -559,7 +559,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
     private void jB_cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_cancelActionPerformed
         // TODO add your handling code here:
         this.setVisible(false);
-        Main.cw = null;
+        ManuzioViewer.cw = null;
     }//GEN-LAST:event_jB_cancelActionPerformed
 
     private void jB_loadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_loadActionPerformed

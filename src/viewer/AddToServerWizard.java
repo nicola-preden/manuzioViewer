@@ -5,15 +5,15 @@
 package viewer;
 
 import java.awt.CardLayout;
-import java.awt.LayoutManager;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -27,6 +27,40 @@ import viewer.taskThread.TaskRawInput;
  */
 public class AddToServerWizard extends javax.swing.JFrame implements PropertyChangeListener {
 
+    /**
+     * <p>Classe ausigliaria per creare una struttura contennente tutti i 
+     * componenti del pannello regex. </p>
+     */
+    private class AuxBean {
+        private viewer.manuzioParser.Type type;
+        private javax.swing.JComponent jcomponent;
+        private javax.swing.JComboBox<String> jComboBox;
+
+        public viewer.manuzioParser.Type getType() {
+            return type;
+        }
+
+        public void setType(viewer.manuzioParser.Type type) {
+            this.type = type;
+        }
+
+        public JComponent getJcomponent() {
+            return jcomponent;
+        }
+
+        public void setJcomponent(JComponent jcomponent) {
+            this.jcomponent = jcomponent;
+        }
+
+        public JComboBox<String> getjComboBox() {
+            return jComboBox;
+        }
+
+        public void setjComboBox(JComboBox<String> jComboBox) {
+            this.jComboBox = jComboBox;
+        }
+        
+    }
     private static final String firstStep = "firstStep"; // nome primo gruppo di pannelli
     private static final String file = "file";
     private static final String regex = "regex";
@@ -69,7 +103,19 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private void prepareFirstStepCard(String name) {
         switch (name) {
             case file: // inizializza la finesta 
+                currentCard = file;
+                taskRawInput = null;
+                jB_previous.setEnabled(false);
+                jB_next.setEnabled(false);
+                jFileChooser.setSelectedFile(null);
             case regex:
+                currentCard = regex;
+                jB_previous.setEnabled(true);
+                jB_next.setEnabled(true);
+                // resetto tutti gli oggetti del pannello regex in base ai dati 
+                // di input ottenuti dal pannello file
+                
+                
             case confirm:
         }
     }
@@ -90,8 +136,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                         if (!filetext.isEmpty()) {
                             // è stato caricato qualcosa dal file
                             taskRawInput = null;
-                            jB_next.setEnabled(true);
-                            jB_previous.setEnabled(true);
                             jProgressBar.setVisible(false);
                             CardLayout layout = (CardLayout) cards.getLayout();
                             prepareFirstStepCard(regex);

@@ -57,22 +57,22 @@ public class MainWindow extends javax.swing.JFrame {
             Connection conn = null;
             try {
                 conn = ConnectionPoolFactory.getConnection(url, user, passw);
-                Main.schema = Schema.loadFromDB(conn);
+                ManuzioViewer.schema = Schema.loadFromDB(conn);
             } catch (ParseException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(Main.mw, "Impossibile Scaricare lo schema", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ManuzioViewer.mw, "Impossibile Scaricare lo schema", "Errore", JOptionPane.ERROR_MESSAGE);
             } catch (SQLException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(Main.mw, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ManuzioViewer.mw, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
             } finally {
                 if (conn != null) {
                     try {
-                        Main.setConnectionPool(url, user, passw);
+                        ManuzioViewer.setConnectionPool(url, user, passw);
                         setEnableConnectStatus(true);
                         startTreeThread();
                     } catch (ConnectionPoolException ex) {
                         Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                        JOptionPane.showMessageDialog(Main.mw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ManuzioViewer.mw, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -119,7 +119,7 @@ public class MainWindow extends javax.swing.JFrame {
                 jM_Connects.remove(i);
             }
         }
-        NodeSettingInterface setting = Main.setting.getSetting(SettingXML.CONNECTION_LIST);
+        NodeSettingInterface setting = ManuzioViewer.setting.getSetting(SettingXML.CONNECTION_LIST);
         if (setting != null) {
             ListIterator<Properties> readProp = setting.readProp();
             while (readProp.hasNext()) {
@@ -140,11 +140,11 @@ public class MainWindow extends javax.swing.JFrame {
      * <code>javax.swing.JTree</code>. </p>
      */
     void startTreeThread() {
-        if (Main.connectionIsSet()) {
+        if (ManuzioViewer.connectionIsSet()) {
             TaskTree tree;
-            tree = new TaskTree(jT_SchemaServer, jE_output, Main.schema, jS_Level);
+            tree = new TaskTree(jT_SchemaServer, jE_output, ManuzioViewer.schema, jS_Level);
             tree.startThread();
-            Main.setTaskTree(tree);
+            ManuzioViewer.setTaskTree(tree);
         }
     }
 
@@ -432,7 +432,7 @@ disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
             preferenceMenuItemActionPerformed(evt);
         }
     });
-    if (!Main.isOSX()) {
+    if (!ManuzioViewer.isOSX()) {
         fileMenu.add(preferenceMenuItem);
     }
 
@@ -445,7 +445,7 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
         exitMenuItemActionPerformed(evt);
     }
     });
-    if (!Main.isOSX()){
+    if (!ManuzioViewer.isOSX()){
         fileMenu.add(exitMenuItem);
     }
 
@@ -517,7 +517,7 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
         int showConfirmDialog = JOptionPane.showConfirmDialog(this, "Vuoi davvero chiudere il programma?", "Sei Sicuro?", JOptionPane.YES_NO_OPTION);
         switch (showConfirmDialog) {
             case JOptionPane.YES_OPTION:
-                Main.shutdownProgram();
+                ManuzioViewer.shutdownProgram();
                 break;
             default:
                 break;
@@ -526,20 +526,20 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void connectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectMenuItemActionPerformed
         // TODO add your handling code here:
-        Main.cw = new ConnectWindow(this);
-        Main.cw.setVisible(true);
+        ManuzioViewer.cw = new ConnectWindow(this);
+        ManuzioViewer.cw.setVisible(true);
     }//GEN-LAST:event_connectMenuItemActionPerformed
 
     private void disconnectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectMenuItemActionPerformed
         // TODO add your handling code here:
-        if (Main.shutdownConnectionPool()) {
+        if (ManuzioViewer.shutdownConnectionPool()) {
             this.setEnableConnectStatus(false);
         }
     }//GEN-LAST:event_disconnectMenuItemActionPerformed
 
     private void toolBarSx_DisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_DisconnectActionPerformed
         // TODO add your handling code here:
-        if (Main.shutdownConnectionPool()) {
+        if (ManuzioViewer.shutdownConnectionPool()) {
             this.setEnableConnectStatus(false);
         }
     }//GEN-LAST:event_toolBarSx_DisconnectActionPerformed
@@ -550,8 +550,8 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void toolBarSx_RefrashActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_RefrashActionPerformed
         // TODO add your handling code here:
-        if (Main.taskTree != null) {
-            Main.taskTree.refresh();
+        if (ManuzioViewer.taskTree != null) {
+            ManuzioViewer.taskTree.refresh();
         }
     }//GEN-LAST:event_toolBarSx_RefrashActionPerformed
 

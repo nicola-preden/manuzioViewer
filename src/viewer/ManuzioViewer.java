@@ -38,7 +38,7 @@ import viewer.taskThread.TaskTree;
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
-public class Main {
+public class ManuzioViewer {
 
     private static class Timer extends Thread {
 
@@ -50,7 +50,7 @@ public class Main {
                     Thread.sleep(10000);
                     System.gc();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -74,7 +74,9 @@ public class Main {
         // TODO code application logic here
         try {
             if (isOSX()) {  // Se siamo su Mac
-                System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_NAME); // Funziona solo su 10.6 in giù editare file info.plist per 
+                // Per risolvere il bug relativo alla prima property è stato 
+                // semplicemente cambiato il nome della classe
+                System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_NAME); 
                 System.setProperty("apple.awt.graphics.EnableQ2DX", "true");
                 System.setProperty("apple.laf.useScreenMenuBar", "true");
 
@@ -103,7 +105,7 @@ public class Main {
                         int showConfirmDialog = JOptionPane.showConfirmDialog(mw, "Vuoi davvero chiudere il programma?", "Sei Sicuro?", JOptionPane.YES_NO_OPTION);
                         switch (showConfirmDialog) {
                             case JOptionPane.YES_OPTION:
-                                Main.shutdownProgram();
+                                ManuzioViewer.shutdownProgram();
                                 break;
                             case JOptionPane.NO_OPTION:
                                 qr.cancelQuit();
@@ -124,7 +126,7 @@ public class Main {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
 
@@ -163,7 +165,7 @@ public class Main {
     /**
      * <p>Imposta un nuovo ConnectionPool per generare un nuovo ConnectionPool è
      * necessario chiamare il metodo
-     * <code>viewer.Main.shutdownConnectionPool</code></p>
+     * <code>viewer.ManuzioViewer.shutdownConnectionPool</code></p>
      *
      * @param url Indirizzo al server secondo la * * * * * * * * * *
      * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
@@ -206,7 +208,7 @@ public class Main {
                     taskTree.join();
                     taskTree = null;
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             connPool.shutdown();
@@ -233,7 +235,7 @@ public class Main {
      * @return - a double representing the version
      */
     public static double getVersion() {
-        return (Main.VERSION_Manuzio);
+        return (ManuzioViewer.VERSION_Manuzio);
     }
 
     /**
