@@ -5,9 +5,17 @@
 package viewer;
 
 import java.awt.CardLayout;
+import java.awt.Desktop;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -16,7 +24,10 @@ import javax.swing.GroupLayout;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import viewer.taskThread.TaskRawInput;
@@ -37,6 +48,12 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         private viewer.manuzioParser.Type type;
         private javax.swing.JComponent jcomponent;
         private javax.swing.JComboBox<String> jComboBox;
+
+        public AuxJP_regex(viewer.manuzioParser.Type type, JComponent jcomponent, JComboBox<String> jComboBox) {
+            this.type = type;
+            this.jcomponent = jcomponent;
+            this.jComboBox = jComboBox;
+        }
 
         public viewer.manuzioParser.Type getType() {
             return type;
@@ -62,11 +79,34 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             this.jComboBox = jComboBox;
         }
     }
-    private static final String firstStep = "firstStep"; // nome primo gruppo di pannelli
+
+    /**
+     * ActionListener delle JComboBox presenti nel pannello jP_regex
+     */
+    private static class JComboBoxActionListener implements ActionListener {
+
+        private JTextField jtf;
+
+        private JComboBoxActionListener(JTextField c3) {
+            jtf = c3;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (((JComboBox) (e.getSource())).getSelectedIndex() == 5) {
+                jtf.setEnabled(true);
+                jtf.setText("Inserire una stringa Regex");
+            } else {
+                jtf.setEditable(false);
+                jtf.setText("");
+            }
+        }
+    }
+    private static final String firstStep = "firstStep"; // nome primo gruppo di pannelli (caricamento dati)
     private static final String file = "file";
     private static final String regex = "regex";
     private static final String regexLarge = "regexLarge";
-    private static final String secondStep = "secondStep"; // nome secondo gruppo di panelli
+    private static final String secondStep = "secondStep"; // nome secondo gruppo di panelli (Caricamento attributi)
     /**
      * <p>Esegue l'inserimento usando tutti i type disponibili</p>
      */
@@ -75,7 +115,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      * <p>Stringhe da visualzzare nei combobox del pannello jP_regex e indicano
      * i tipi comunemente usati di formattazione nei testi
      */
-    private static final String tab_type[] = {
+    public static final String tab_type[] = {
         "Carattere",
         "Parola",
         "Frase",
@@ -85,11 +125,11 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     };
     private static final String tab_typeToolTips[] = {
         "<html><p>Un semplice carattere/simbolo</p></html>",
-        "<html><p>Un insieme di \"caratteri\"</p></html>", 
+        "<html><p>Un insieme di \"caratteri\"</p></html>",
         "<html><p>Un insieme di \"Parole\" che <br />iniziano con una lettera maiuscola e teminano <br /> con un \".\" e senza un capoverso</p></html>",
         "<html><p>Un insieme di \"Frasi\" terminanti con un capoverso</p></html>",
         "<html><p>Un oggetto/testo rappresentabile solo attraverso la selezione diretta,<br /> come ad esempio un capitolo</p></html>",
-        "<html><p>Un oggetto rappresentabile attraverso una Espressione Regolare.<br /> una guida alla sibologia supportata da questo programma <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html\">è in questa pagina</a></p></html>"
+        "<html><p>Un oggetto rappresentabile attraverso una Espressione Regolare.</p></html>"
     };
     private int idx_to;
     private String currentStep;
@@ -116,6 +156,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         currentCard = file;
         this.mw = mw;
         // inizianuzzo il pannello jP_regex
+        initRegex();
+        pack();
 
     }
 
@@ -125,26 +167,92 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      * classe. </p>
      */
     private void initRegex() {
-        GroupLayout layout = new GroupLayout(jP_regexInner);
-        jP_regexInner.setLayout(layout);
-        layout.setAutoCreateGaps(true);
-        layout.setAutoCreateContainerGaps(true);
-        
-        // Vedi appunti http://docs.oracle.com/javase/tutorial/uiswing/layout/group.html
-        GroupLayout.SequentialGroup extGroup; // gruppo esterno
-        extGroup = layout.createSequentialGroup();
-        GroupLayout.ParallelGroup midGroup; // Allina verso destra gruppo mediano
-        midGroup = layout.createParallelGroup(GroupLayout.Alignment.TRAILING);
-        GroupLayout.SequentialGroup innGroup; // gruppo interno
-        innGroup = layout.createSequentialGroup();
-        
-        innGroup.addComponent(null); // ComboBox
-        innGroup.addComponent(null); // JTextField
-        
-        midGroup.addComponent(null); // aggounta label
-        midGroup.addGroup(innGroup);
-        
-        extGroup.addGroup(midGroup);
+        int rowN = ManuzioViewer.schema.sizeTypes(); // Numero di tipi presenti
+        // Creo un layout a griglia e lo aggiungo al pannello interno
+        GridLayout gL_regIn = new GridLayout(rowN + 1, 1);
+        jP_regexInner.setLayout(gL_regIn);
+
+        // Creo il primo pannello variabile a secodo del valore di idx_to
+        JPanel jPsub_comment = new JPanel();
+        // Aggiunta JLabel commenti
+        String commentText = "<html><p>Ora è necesssario associare per ogni textual object, specificato nello Schema, <br />"
+                + "il relativo testo che lo compone. Per facilitare l'operazione per i tipi più semplici basterà <br />"
+                + "scegliere tra le tipologie già suggerite, usare una <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html\">Espressione Regolare</a> oppure selezionare il <br />"
+                + "testo scelto attreverso un editor. Si noti che i simboli di punteggiatura quali, punti, <br />"
+                + "virgole e similari, verranno automaricamente separati dal testo ed inseriti con il tipo <br />"
+                + "minimo presente nello schema. Se è stata scelta l'aggiunta ad un textual object verranno <br />"
+                + "presentati solo i sottotipi interessati</p></html>";
+        javax.swing.JLabel comment = new javax.swing.JLabel(commentText);
+        comment.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (Desktop.isDesktopSupported()) {
+                    try {
+                        Desktop desktop = Desktop.getDesktop();
+                        desktop.browse(new java.net.URI("http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html"));
+                    } catch (URISyntaxException | IOException ex) {
+                        Logger.getLogger(AddToServerWizard.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        });
+        jPsub_comment.add(comment);
+        // Aggiungo il pannello dei commenti
+        jP_regexInner.add(jPsub_comment);
+
+        // array valori combobox
+        JLabel c_label[] = {null, null, null, null, null, null};
+
+        for (int i = 0; i < c_label.length; i++) {
+            c_label[i] = new JLabel(tab_type[i]);
+            c_label[i].setToolTipText(tab_typeToolTips[i]);
+        }
+
+        if (idx_to == -1) {
+            // inserisco tutti i tipi
+            viewer.manuzioParser.Type[] typeSet = ManuzioViewer.schema.getTypeSet();
+            for (viewer.manuzioParser.Type type : typeSet) {
+                JPanel tmp = new JPanel();
+                GroupLayout layout = new GroupLayout(tmp);
+                tmp.setLayout(layout);
+                layout.setAutoCreateGaps(true);
+                layout.setAutoCreateContainerGaps(true);
+                JLabel c1 = new JLabel("Tipo: " + type.getTypeName());
+                JComboBox c2 = new JComboBox(c_label);
+                c2.setEditable(false);
+                JTextField c3 = new JTextField();
+                c3.setEditable(true);
+                c3.setEnabled(false);
+                c2.addActionListener(new JComboBoxActionListener(c3));
+                layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addComponent(c1)
+                        .addGroup(layout.createSequentialGroup()
+                        .addComponent(c2)
+                        .addComponent(c3)));
+                // Aggiungo il pannello a qello interno
+                jP_regexInner.add(tmp);
+            }
+
+        } else {
+            // inserisco solo i sotto tipi di idx_to
+        }
+
     }
 
     /**
@@ -169,7 +277,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 // resetto tutti gli oggetti del pannello regex in base ai dati 
                 // di input ottenuti dal pannello file se necessario
                 break;
-            case regexLarge:
+            case regexLarge: // Inizializza il 3 pannello aggiungendolo al CardLayer se non presente
                 break;
         }
     }

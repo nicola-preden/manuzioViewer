@@ -97,7 +97,7 @@ public class MainWindow extends javax.swing.JFrame {
      */
     public synchronized void setEnableConnectStatus(boolean set) {
         jM_Connects.setEnabled(!set);
-        disconnectMenuItem.setEnabled(set);    
+        disconnectMenuItem.setEnabled(set);
         jE_output.setEnabled(set);
         Component[] components;
         components = toolBarServer.getComponents();
@@ -180,12 +180,14 @@ public class MainWindow extends javax.swing.JFrame {
      * @param id intero indentificativo di un textual object
      */
     void addToServer(int id) {
-        if (id == -1) {
+        if (id == AddToServerWizard.COMPLETE_PROCEDURE) {
             // Avvia wizard per caricamento totale
-        AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, this);
-        addToServerWizard.setVisible(true);
+            AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, this);
+            addToServerWizard.setVisible(true);
         } else {
             // Avvia wizard per append
+            AddToServerWizard addToServerWizard = new AddToServerWizard(id, this);
+            addToServerWizard.setVisible(true);
         }
     }
 
