@@ -391,8 +391,8 @@ public class MainWindow extends javax.swing.JFrame {
                 .add(toolBarGeneral, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 495, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .add(0, 15, Short.MAX_VALUE))
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_OutputLayout.createSequentialGroup()
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 358, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -436,7 +436,7 @@ disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
             preferenceMenuItemActionPerformed(evt);
         }
     });
-    if (!ManuzioViewer.isOSX()) {
+    if (!viewer.ManuzioViewer.isOSX()) {
         fileMenu.add(preferenceMenuItem);
     }
 
@@ -449,7 +449,7 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
         exitMenuItemActionPerformed(evt);
     }
     });
-    if (!ManuzioViewer.isOSX()){
+    if (!viewer.ManuzioViewer.isOSX()){
         fileMenu.add(exitMenuItem);
     }
 

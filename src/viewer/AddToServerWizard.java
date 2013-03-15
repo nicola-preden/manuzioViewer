@@ -49,7 +49,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         private javax.swing.JComponent jcomponent;
         private javax.swing.JComboBox<String> jComboBox;
 
-        public AuxJP_regex(viewer.manuzioParser.Type type, JComponent jcomponent, JComboBox<String> jComboBox) {
+        public AuxJP_regex(viewer.manuzioParser.Type type, JComboBox<String> jComboBox, JComponent jcomponent) {
             this.type = type;
             this.jcomponent = jcomponent;
             this.jComboBox = jComboBox;
@@ -81,9 +81,9 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     }
 
     /**
-     * ActionListener delle JComboBox presenti nel pannello jP_regex
+     * <p>ActionListener delle JComboBox presenti nel pannello jP_regex. </p>
      */
-    private static class JComboBoxActionListener implements ActionListener {
+    private class JComboBoxActionListener implements ActionListener {
 
         private JTextField jtf;
 
@@ -95,8 +95,10 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         public void actionPerformed(ActionEvent e) {
             if (((JComboBox) (e.getSource())).getSelectedIndex() == 5) {
                 jtf.setEnabled(true);
+                jtf.setEditable(true);
                 jtf.setText("Inserire una stringa Regex");
             } else {
+                jtf.setEnabled(false);
                 jtf.setEditable(false);
                 jtf.setText("");
             }
@@ -108,12 +110,12 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private static final String regexLarge = "regexLarge";
     private static final String secondStep = "secondStep"; // nome secondo gruppo di panelli (Caricamento attributi)
     /**
-     * <p>Esegue l'inserimento usando tutti i type disponibili</p>
+     * <p>Esegue l'inserimento usando tutti i type disponibili. </p>
      */
     public static final int COMPLETE_PROCEDURE = -1;
     /**
      * <p>Stringhe da visualzzare nei combobox del pannello jP_regex e indicano
-     * i tipi comunemente usati di formattazione nei testi
+     * i tipi comunemente usati di formattazione nei testi. </p>
      */
     public static final String tab_type[] = {
         "Carattere",
@@ -121,23 +123,18 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         "Frase",
         "Paragrafo",
         "Oggetto Complesso",
-        "Altro"
-    };
-    private static final String tab_typeToolTips[] = {
-        "<html><p>Un semplice carattere/simbolo</p></html>",
-        "<html><p>Un insieme di \"caratteri\"</p></html>",
-        "<html><p>Un insieme di \"Parole\" che <br />iniziano con una lettera maiuscola e teminano <br /> con un \".\" e senza un capoverso</p></html>",
-        "<html><p>Un insieme di \"Frasi\" terminanti con un capoverso</p></html>",
-        "<html><p>Un oggetto/testo rappresentabile solo attraverso la selezione diretta,<br /> come ad esempio un capitolo</p></html>",
-        "<html><p>Un oggetto rappresentabile attraverso una Espressione Regolare.</p></html>"
+        "Espressione Regolare"
     };
     private int idx_to;
     private String currentStep;
     private String currentCard;
     private TaskRawInput taskRawInput = null;
     private MainWindow mw;
+    /**
+     * <p>Il file diviso i paragrafi. </p>
+     */
     private ArrayList<String> filetext;
-
+    private ArrayList<AuxJP_regex> type_setting;
     /**
      * <p>Crea una nuovo AddToServerWizard. Se id è uguale a
      * <code>AddToServerWizard.COMPLETE_PROCEDURE</code> allora il nuovo testo
@@ -181,7 +178,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 + "testo scelto attreverso un editor. Si noti che i simboli di punteggiatura quali, punti, <br />"
                 + "virgole e similari, verranno automaricamente separati dal testo ed inseriti con il tipo <br />"
                 + "minimo presente nello schema. Se è stata scelta l'aggiunta ad un textual object verranno <br />"
-                + "presentati solo i sottotipi interessati</p></html>";
+                + "presentati solo i sottotipi interessati.</p></html>";
         javax.swing.JLabel comment = new javax.swing.JLabel(commentText);
         comment.addMouseListener(new MouseListener() {
             @Override
@@ -216,13 +213,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         // Aggiungo il pannello dei commenti
         jP_regexInner.add(jPsub_comment);
 
-        // array valori combobox
-        JLabel c_label[] = {null, null, null, null, null, null};
-
-        for (int i = 0; i < c_label.length; i++) {
-            c_label[i] = new JLabel(tab_type[i]);
-            c_label[i].setToolTipText(tab_typeToolTips[i]);
-        }
 
         if (idx_to == -1) {
             // inserisco tutti i tipi
@@ -234,21 +224,30 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 layout.setAutoCreateGaps(true);
                 layout.setAutoCreateContainerGaps(true);
                 JLabel c1 = new JLabel("Tipo: " + type.getTypeName());
-                JComboBox c2 = new JComboBox(c_label);
+                JComboBox c2 = new JComboBox(tab_type);
                 c2.setEditable(false);
-                JTextField c3 = new JTextField();
-                c3.setEditable(true);
+                JTextField c3 = new JTextField(30);
                 c3.setEnabled(false);
+
                 c2.addActionListener(new JComboBoxActionListener(c3));
-                layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                // http://docs.oracle.com/javase/tutorial/uiswing/layout/groupExample.html
+                // layout Orizzontale
+                layout.setHorizontalGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addComponent(c1)
-                        .addGroup(layout.createSequentialGroup()
+                        .addComponent(c2))
+                        .addComponent(c3));
+                // layout Verticale
+                layout.setVerticalGroup(layout.createSequentialGroup()
+                        .addComponent(c1)
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(c2)
                         .addComponent(c3)));
+                // Aggiunto i controlli
+                type_setting.add(new AuxJP_regex(type,c2,c3));
                 // Aggiungo il pannello a qello interno
                 jP_regexInner.add(tmp);
             }
-
         } else {
             // inserisco solo i sotto tipi di idx_to
         }
@@ -267,7 +266,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 currentCard = file;
                 taskRawInput = null;
                 jB_previous.setEnabled(false);
-                jB_next.setEnabled(false);
+                jB_next.setEnabled(true);
                 jFileChooser.setSelectedFile(null);
                 break;
             case regex:
@@ -299,7 +298,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                             // è stato caricato qualcosa dal file
                             taskRawInput = null;
                             jProgressBar.setVisible(false);
-                            CardLayout layout = (CardLayout) jP_firstStep.getLayout();;
+                            CardLayout layout = (CardLayout) jP_firstStep.getLayout();
                             prepareFirstStepCard(regex);
                             layout.next(jP_firstStep);
                         } else {

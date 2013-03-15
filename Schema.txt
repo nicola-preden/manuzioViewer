@@ -17,10 +17,6 @@ Schema Collection
             words: Words
     end
     type Word Words
-        has
-            characters: Characters
-    end
-    type Character Characters
     end
 End
         
