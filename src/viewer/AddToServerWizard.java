@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,24 +60,12 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             return type;
         }
 
-        public void setType(viewer.manuzioParser.Type type) {
-            this.type = type;
-        }
-
         public JComponent getJcomponent() {
             return jcomponent;
         }
 
-        public void setJcomponent(JComponent jcomponent) {
-            this.jcomponent = jcomponent;
-        }
-
         public JComboBox<String> getjComboBox() {
             return jComboBox;
-        }
-
-        public void setjComboBox(JComboBox<String> jComboBox) {
-            this.jComboBox = jComboBox;
         }
     }
 
@@ -93,7 +82,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (((JComboBox) (e.getSource())).getSelectedIndex() == 5) {
+            if (((JComboBox) (e.getSource())).getSelectedIndex() == 6) {
                 jtf.setEnabled(true);
                 jtf.setEditable(true);
                 jtf.setText("Inserire una stringa Regex");
@@ -113,21 +102,29 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      * <p>Esegue l'inserimento usando tutti i type disponibili. </p>
      */
     public static final int COMPLETE_PROCEDURE = -1;
+    private int idX_to; // id della testa
+    private String stringX_to; // type della testa
+    private viewer.manuzioParser.Type[] orderType; // l'elenco dei soli tipi da utilizzare
     /**
      * <p>Stringhe da visualzzare nei combobox del pannello jP_regex e indicano
      * i tipi comunemente usati di formattazione nei testi. </p>
      */
-    public static final String tab_type[] = {
+    private static final String tab_type[] = {
         "Carattere",
         "Parola",
         "Frase",
         "Paragrafo",
-        "Oggetto Complesso",
+        "Tutto il testo",
+        "Una Selezione personalizzata",
         "Espressione Regolare"
     };
-    private int idx_to;
-    private String currentStep;
-    private String currentCard;
+    /**
+     * <p>Elenco delle espressioni regolari comunemete usate per definire i tipi
+     * basilari. </p>
+     */
+    private static final String tab_type_reg[] = {};
+    private String currentStep; // step attuale
+    private String currentCard; // carta raggiunta
     private TaskRawInput taskRawInput = null;
     private MainWindow mw;
     /**
@@ -135,6 +132,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      */
     private ArrayList<String> filetext;
     private ArrayList<AuxJP_regex> type_setting;
+
     /**
      * <p>Crea una nuovo AddToServerWizard. Se id è uguale a
      * <code>AddToServerWizard.COMPLETE_PROCEDURE</code> allora il nuovo testo
@@ -142,11 +140,24 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      * corrente</p>
      *
      * @param id intero indicante id di un textual object
+     * @param type il tipo dell'id spassato come input
      * @param mw jframe padre
+     * @throws IllegalArgumentException se i parametri sono incoerenti
      */
-    public AddToServerWizard(int id, MainWindow mw) {
+    public AddToServerWizard(int id, String type, MainWindow mw) {
         initComponents();
-        idx_to = id;
+        idX_to = id;
+        if (idX_to == AddToServerWizard.COMPLETE_PROCEDURE) {
+            stringX_to = null;
+        } else {
+            if (type == null) {
+                // type mancante thrown exception
+                throw new IllegalArgumentException();
+            } else {
+                stringX_to = type;
+            }
+        }
+
         jB_previous.setEnabled(false);
         jProgressBar.setVisible(false);
         currentStep = firstStep;
@@ -169,7 +180,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         GridLayout gL_regIn = new GridLayout(rowN + 1, 1);
         jP_regexInner.setLayout(gL_regIn);
 
-        // Creo il primo pannello variabile a secodo del valore di idx_to
+        // Creo il primo pannello variabile a secodo del valore di idX_to
         JPanel jPsub_comment = new JPanel();
         // Aggiunta JLabel commenti
         String commentText = "<html><p>Ora è necesssario associare per ogni textual object, specificato nello Schema, <br />"
@@ -213,45 +224,82 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         // Aggiungo il pannello dei commenti
         jP_regexInner.add(jPsub_comment);
 
-
-        if (idx_to == -1) {
-            // inserisco tutti i tipi
-            viewer.manuzioParser.Type[] typeSet = ManuzioViewer.schema.getTypeSet();
-            for (viewer.manuzioParser.Type type : typeSet) {
-                JPanel tmp = new JPanel();
-                GroupLayout layout = new GroupLayout(tmp);
-                tmp.setLayout(layout);
-                layout.setAutoCreateGaps(true);
-                layout.setAutoCreateContainerGaps(true);
-                JLabel c1 = new JLabel("Tipo: " + type.getTypeName());
-                JComboBox c2 = new JComboBox(tab_type);
-                c2.setEditable(false);
-                JTextField c3 = new JTextField(30);
-                c3.setEnabled(false);
-
-                c2.addActionListener(new JComboBoxActionListener(c3));
-                // http://docs.oracle.com/javase/tutorial/uiswing/layout/groupExample.html
-                // layout Orizzontale
-                layout.setHorizontalGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addComponent(c1)
-                        .addComponent(c2))
-                        .addComponent(c3));
-                // layout Verticale
-                layout.setVerticalGroup(layout.createSequentialGroup()
-                        .addComponent(c1)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(c2)
-                        .addComponent(c3)));
-                // Aggiunto i controlli
-                type_setting.add(new AuxJP_regex(type,c2,c3));
-                // Aggiungo il pannello a qello interno
-                jP_regexInner.add(tmp);
-            }
+        // creo contenitore configurazioni temporanee
+        type_setting = new ArrayList<AuxJP_regex>(rowN);
+        if (idX_to == AddToServerWizard.COMPLETE_PROCEDURE) { // elenco tipi utilizzabili
+            orderType = getOrderType(ManuzioViewer.schema.getMaximalUnit());
         } else {
-            // inserisco solo i sotto tipi di idx_to
+            orderType = getOrderType(ManuzioViewer.schema.getType(stringX_to));
+        }
+        // caricamento grafica
+        for (viewer.manuzioParser.Type type : orderType) {
+            JPanel tmp = new JPanel();
+            GroupLayout layout = new GroupLayout(tmp);
+            tmp.setLayout(layout);
+            layout.setAutoCreateGaps(true);
+            layout.setAutoCreateContainerGaps(true);
+            JLabel c1 = new JLabel("Tipo: " + type.getTypeName());
+            JComboBox c2 = new JComboBox(tab_type);
+            c2.setEditable(false);
+            JTextField c3 = new JTextField(30);
+            c3.setEnabled(false);
+
+            c2.addActionListener(new JComboBoxActionListener(c3));
+            // http://docs.oracle.com/javase/tutorial/uiswing/layout/groupExample.html
+            // layout Orizzontale
+            layout.setHorizontalGroup(layout.createSequentialGroup()
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addComponent(c1)
+                    .addComponent(c2))
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addComponent(c3)));
+            // layout Verticale
+            layout.setVerticalGroup(layout.createSequentialGroup()
+                    .addComponent(c1)
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(c2)
+                    .addComponent(c3)));
+            // Aggiunto i controlli
+            type_setting.add(new AuxJP_regex(type, c2, c3));
+            // Aggiungo il pannello a qello interno
+            jP_regexInner.add(tmp);
         }
 
+
+    }
+
+    /**
+     * <p> Ritorna un array ordinato contenente i tipi disponibili a partire da
+     * quello indicato. </p>
+     *
+     * @param max iniziale per creare l'array
+     * @return un array contenente i tipi disponibili
+     */
+    private viewer.manuzioParser.Type[] getOrderType(viewer.manuzioParser.Type max) {
+        ArrayList<viewer.manuzioParser.Type> a = new ArrayList<viewer.manuzioParser.Type>();
+        int idx = 0;
+        a.add(max);
+        boolean test;
+        while (idx < a.size()) {
+            viewer.manuzioParser.Type get = a.get(idx);
+            if (get.hasComponents()) {
+                viewer.manuzioParser.Type[] componentTypes = get.getComponentTypes();
+                for (int i = 0; i < componentTypes.length; i++) { // per ogni nuovo type
+                    test = true;
+                    String s = componentTypes[i].getTypeName();
+                    for (int j = 0; j < idx && test; j++) {
+                        if (s.compareTo(a.get(j).getTypeName()) == 0) {
+                            test = false;
+                        }
+                    }
+                    if (test) {
+                        a.add(componentTypes[i]);
+                    }
+                }
+            }
+            idx++;
+        }
+        return a.toArray(new viewer.manuzioParser.Type[0]);
     }
 
     /**
@@ -276,7 +324,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 // resetto tutti gli oggetti del pannello regex in base ai dati 
                 // di input ottenuti dal pannello file se necessario
                 break;
-            case regexLarge: // Inizializza il 3 pannello aggiungendolo al CardLayer se non presente
+            case regexLarge: // Inizializza il 3 pannello aggiungendo un nuovo se necessario
                 break;
         }
     }
@@ -519,6 +567,25 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     }
                     break;
                 case regex:
+                    Iterator<AuxJP_regex> iterator = type_setting.iterator();
+                    boolean err = false;
+                    boolean allText = false;
+                    String notReg = "Inserire una stringa Regex";
+                    while (iterator.hasNext()) { // controllo la corretteza di tutti i campi e conto i tipi
+                        AuxJP_regex next = iterator.next();
+                        // un solo allText
+                        JComboBox<String> jComboBox = next.getjComboBox();
+                        int x = jComboBox.getSelectedIndex();
+                        if (x == 4) {
+                            if (!allText) {
+                                allText = true;
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Attenzione ci può essere un solo tipo per inserimento che contenga l'intero file", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                            }
+                        }
+                    }
+                    if (!err) { // esecuzione script per dividione del testo grezzo in tipi
+                    }
                     break;
                 case regexLarge:
                 default:
@@ -527,7 +594,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         }
         if (currentStep.compareTo(secondStep) == 0) {
             switch (currentCard) {
-
+                default:
+                    break;
             }
         }
 

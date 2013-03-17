@@ -174,19 +174,20 @@ public class MainWindow extends javax.swing.JFrame {
      * <code>id</code> sia
      * <code>-1</code> il testo verra aggiunto al server usando come tipo il
      * MaxTypeUnit dello schema, in caso contrario il testo verrà agginto come
-     * component del textual object con identificativo
-     * <code>id</code></p>
+     * component del textual object con identificativo< code>id</code> e
+     * <code>type</code> dovrà essere diverso da null. </p>
      *
      * @param id intero indentificativo di un textual object
+     * @param type stringa nome del tipo su cui si aggiunge testo
      */
-    void addToServer(int id) {
+    void addToServer(int id, String type) {
         if (id == AddToServerWizard.COMPLETE_PROCEDURE) {
             // Avvia wizard per caricamento totale
-            AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, this);
+            AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, null, this);
             addToServerWizard.setVisible(true);
         } else {
             // Avvia wizard per append
-            AddToServerWizard addToServerWizard = new AddToServerWizard(id, this);
+            AddToServerWizard addToServerWizard = new AddToServerWizard(id, type, this);
             addToServerWizard.setVisible(true);
         }
     }
@@ -584,7 +585,7 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
 
     private void toolBarGen_AddtoDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarGen_AddtoDBActionPerformed
         // TODO add your handling code here:
-        this.addToServer(AddToServerWizard.COMPLETE_PROCEDURE);
+        this.addToServer(AddToServerWizard.COMPLETE_PROCEDURE, null);
     }//GEN-LAST:event_toolBarGen_AddtoDBActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
