@@ -53,6 +53,7 @@ public class TaskRawInput extends SwingWorker<ArrayList<String>, Void> {
             size = Files.size(p); // dimensione totale del file
             current = 0;
             // uso classi java 1.7
+            
             BufferedReader nbr = Files.newBufferedReader(p, StandardCharsets.UTF_8);
 
             while ((s = nbr.readLine()) != null && !this.isCancelled()) {

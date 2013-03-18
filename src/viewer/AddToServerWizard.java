@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -82,22 +83,27 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (((JComboBox) (e.getSource())).getSelectedIndex() == 6) {
-                jtf.setEnabled(true);
-                jtf.setEditable(true);
-                jtf.setText("Inserire una stringa Regex");
-            } else {
-                jtf.setEnabled(false);
-                jtf.setEditable(false);
-                jtf.setText("");
+            int x = ((JComboBox) (e.getSource())).getSelectedIndex();
+            switch (x) {
+                case 6:
+                    jtf.setEnabled(true);
+                    jtf.setEditable(true);
+                    jtf.setText("Inserire una stringa Regex");
+                    break;
+                default:
+                    jtf.setEnabled(false);
+                    jtf.setEditable(false);
+                    jtf.setText("");
+                    break;
             }
         }
     }
-    private static final String firstStep = "firstStep"; // nome primo gruppo di pannelli (caricamento dati)
+    private static final String firstStep = "firstStep";    // nome primo gruppo di pannelli (caricamento dati)
     private static final String file = "file";
     private static final String regex = "regex";
-    private static final String regexLarge = "regexLarge";
-    private static final String secondStep = "secondStep"; // nome secondo gruppo di panelli (Caricamento attributi)
+    private static final String regexLarge = "regexLarge";  // Corferma dati
+    private static final String secondStep = "secondStep";  // nome secondo gruppo di panelli (Caricamento oggetti)
+    private static final String thirdStep = "thirdStep";    // nome terzo gruppo di pannelli (Caricamento attributi)
     /**
      * <p>Esegue l'inserimento usando tutti i type disponibili. </p>
      */
@@ -118,11 +124,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         "Una Selezione personalizzata",
         "Espressione Regolare"
     };
-    /**
-     * <p>Elenco delle espressioni regolari comunemete usate per definire i tipi
-     * basilari. </p>
-     */
-    private static final String tab_type_reg[] = {};
     private String currentStep; // step attuale
     private String currentCard; // carta raggiunta
     private TaskRawInput taskRawInput = null;
@@ -170,7 +171,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     }
 
     /**
-     * <p>Inizializza in particolare il 3° panello,
+     * <p>Inizializza in particolare il panello
      * <code>jP_regex</code>, in base ai parametri usati per costruire la
      * classe. </p>
      */
@@ -264,8 +265,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             // Aggiungo il pannello a qello interno
             jP_regexInner.add(tmp);
         }
-
-
     }
 
     /**
@@ -275,10 +274,14 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      * @param max iniziale per creare l'array
      * @return un array contenente i tipi disponibili
      */
-    private viewer.manuzioParser.Type[] getOrderType(viewer.manuzioParser.Type max) {
+    protected viewer.manuzioParser.Type[] getOrderType(viewer.manuzioParser.Type max) {
         ArrayList<viewer.manuzioParser.Type> a = new ArrayList<viewer.manuzioParser.Type>();
         int idx = 0;
-        a.add(max);
+        if (max.isMaximalUnit()) { // se è maximalUnit inserisco anche lui
+            a.add(max);
+        } else {                    // se non maximal inserisco solo le sue componenti
+            a.addAll(Arrays.asList(max.getComponentTypes()));
+        }
         boolean test;
         while (idx < a.size()) {
             viewer.manuzioParser.Type get = a.get(idx);
@@ -303,8 +306,52 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     }
 
     /**
+     * <p> Inizializza il pannello
+     * <code>jP_RegexLarge</code>, in base ai dati ottenuti dal pannello
+     * precedente. Il metodo non va chiamato al memento dell'inializzazione del
+     * oggetto, ma runtime</p>
+     */
+    private void initRegexLarge() {
+        String path = jFileChooser.getSelectedFile().getPath();
+        jTA_confirmOutput.setText("");
+        jTA_confirmOutput.append("File: " + path + "\n\nType List: \n");
+        Iterator<AuxJP_regex> iterator = type_setting.iterator();
+        while (iterator.hasNext()) { // scorre tutti gli oggetti inseriti
+            AuxJP_regex next = iterator.next();
+            JComboBox<String> jComboBox = next.getjComboBox();
+            int x = jComboBox.getSelectedIndex();
+            jTA_confirmOutput.append(next.getType().getTypeName() + ": ");
+
+            switch (x) {
+                case 0:
+                    jTA_confirmOutput.append(tab_type[x] + "\n");
+                    break;
+                case 1:
+                    jTA_confirmOutput.append(tab_type[x] + "\n");
+                    break;
+                case 2:
+                    jTA_confirmOutput.append(tab_type[x] + "\n");
+                    break;
+                case 3:
+                    jTA_confirmOutput.append(tab_type[x] + "\n");
+                    break;
+                case 4:
+                    jTA_confirmOutput.append(tab_type[x] + "\n");
+                    break;
+                case 5:
+                    jTA_confirmOutput.append(tab_type[x] + "\n");
+                    break;
+                case 6:
+                    jTA_confirmOutput.append(tab_type[x] + "\n\t" + ((JTextField) next.getJcomponent()).getText() + "\n");
+                    break;
+            }
+        }
+    }
+
+    /**
      * <p>Attiva e disattiva i JButton e predispone se necessario le variabili
-     * per eseguire i possibili cambiamenti. </p>
+     * per eseguire i possibili cambiamenti, ma non cambia il pannello da 
+     * visualizzare. </p>
      *
      * @param name stringa contenete il nome del jpanel da preparare
      */
@@ -315,17 +362,42 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 taskRawInput = null;
                 jB_previous.setEnabled(false);
                 jB_next.setEnabled(true);
+                jB_next.setText("Avanti");
                 jFileChooser.setSelectedFile(null);
                 break;
             case regex:
                 currentCard = regex;
                 jB_previous.setEnabled(true);
                 jB_next.setEnabled(true);
-                // resetto tutti gli oggetti del pannello regex in base ai dati 
-                // di input ottenuti dal pannello file se necessario
+                jB_next.setText("Avanti");
                 break;
-            case regexLarge: // Inizializza il 3 pannello aggiungendo un nuovo se necessario
+            case regexLarge: // Inizializza il 3 pannello per la conferma dei dati
+                currentCard = regexLarge;
+                jB_previous.setEnabled(true); // Ora non si torna più indietro
+                jB_next.setEnabled(true);
+                jB_next.setText("Conferma");
+                initRegexLarge();
                 break;
+        }
+    }
+
+    /**
+     * <p>Esegue le operazioni relative al nextButtom una volta raggiunto il
+     * pannello jP_regexLarge, comprese il cambio di JPanel. </p>
+     */
+    private void prepareSecondStepCard() {
+        jB_previous.setEnabled(false);
+        CardLayout layout;
+        if (currentStep.compareTo(firstStep) == 0) { // se devo ancora inizializzare la struttura dati
+            // creazione struttura dati per l'inserimento
+            
+            // Aggiorno Grafica
+            layout = (CardLayout) cards.getLayout();
+            layout.next(cards);
+            layout = (CardLayout) jP_secondStep.getLayout();
+            layout.first(jP_secondStep);
+        }
+        if (currentStep.compareTo(secondStep) == 0) { // se siamo al secodo step
         }
     }
 
@@ -382,6 +454,9 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jScroll_regex = new javax.swing.JScrollPane();
         jP_regexInner = new javax.swing.JPanel();
         jP_regexLarge = new javax.swing.JPanel();
+        jL_regexLargeTittle = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTA_confirmOutput = new javax.swing.JTextArea();
         jP_secondStep = new javax.swing.JPanel();
         jP_control = new javax.swing.JPanel();
         jB_close = new javax.swing.JButton();
@@ -466,16 +541,19 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
         jP_firstStep.add(jP_regex, "regex");
 
-        org.jdesktop.layout.GroupLayout jP_regexLargeLayout = new org.jdesktop.layout.GroupLayout(jP_regexLarge);
-        jP_regexLarge.setLayout(jP_regexLargeLayout);
-        jP_regexLargeLayout.setHorizontalGroup(
-            jP_regexLargeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 595, Short.MAX_VALUE)
-        );
-        jP_regexLargeLayout.setVerticalGroup(
-            jP_regexLargeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 363, Short.MAX_VALUE)
-        );
+        jP_regexLarge.setLayout(new java.awt.BorderLayout());
+
+        jL_regexLargeTittle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jL_regexLargeTittle.setText("<html><b>Conferma Dati Inseriti</b></html>");
+        jL_regexLargeTittle.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 0, 0)));
+        jP_regexLarge.add(jL_regexLargeTittle, java.awt.BorderLayout.PAGE_START);
+
+        jTA_confirmOutput.setEditable(false);
+        jTA_confirmOutput.setColumns(20);
+        jTA_confirmOutput.setRows(5);
+        jScrollPane1.setViewportView(jTA_confirmOutput);
+
+        jP_regexLarge.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
         jP_firstStep.add(jP_regexLarge, "regexLarge");
 
@@ -547,6 +625,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
     private void jB_nextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_nextActionPerformed
         // TODO add your handling code here:
+        CardLayout layout;
         if (currentStep.compareTo(firstStep) == 0) { // Se siamo nella prima fase di selezione
             switch (currentCard) {
                 case file:    // Seleziono il file da aggiungere
@@ -571,23 +650,39 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     boolean err = false;
                     boolean allText = false;
                     String notReg = "Inserire una stringa Regex";
-                    while (iterator.hasNext()) { // controllo la corretteza di tutti i campi e conto i tipi
+                    while (iterator.hasNext() && !err) { // controllo la corretteza di tutti i campi e conto i tipi
                         AuxJP_regex next = iterator.next();
                         // un solo allText
                         JComboBox<String> jComboBox = next.getjComboBox();
                         int x = jComboBox.getSelectedIndex();
-                        if (x == 4) {
+                        if (x == 4) { // seleziona tutto il testo
                             if (!allText) {
                                 allText = true;
                             } else {
+                                err = true;
                                 JOptionPane.showMessageDialog(this, "Attenzione ci può essere un solo tipo per inserimento che contenga l'intero file", "Attenzione", JOptionPane.WARNING_MESSAGE);
                             }
                         }
+                        if (x == 6) { // campi regex
+                            JTextField jtf = (JTextField) next.getJcomponent();
+                            String text = jtf.getText();
+                            if (text.compareTo(notReg) == 0) {
+                                err = true;
+                                JOptionPane.showMessageDialog(this, "Attenzione un campo è incompleto", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                            }
+                        }
                     }
-                    if (!err) { // esecuzione script per dividione del testo grezzo in tipi
+                    if (!err) { // passo al riepilogo
+                        layout = (CardLayout) jP_firstStep.getLayout();
+                        prepareFirstStepCard(regexLarge);
+                        layout.next(jP_firstStep);
                     }
                     break;
                 case regexLarge:
+                    int x = JOptionPane.showConfirmDialog(this, "Confermi i dati inseriti?", "Conferma?", JOptionPane.YES_NO_OPTION);
+                    if (x == JOptionPane.YES_OPTION) {
+                        prepareSecondStepCard();
+                    }
                 default:
                     break;
             }
@@ -603,16 +698,21 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
     private void jB_previousActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_previousActionPerformed
         // TODO add your handling code here:
+        CardLayout layout;
         if (currentStep.compareTo(firstStep) == 0) { // Se siamo nella prima fase di selezione
             switch (currentCard) {
                 case file: // Impossibile dovrei essere disattivato
                     break;
                 case regex: // torno a file
-                    CardLayout layout = (CardLayout) jP_firstStep.getLayout();
+                    layout = (CardLayout) jP_firstStep.getLayout();
                     prepareFirstStepCard(file);
                     layout.previous(jP_firstStep);
                     break;
-                case regexLarge:
+                case regexLarge:    // 
+                    layout = (CardLayout) jP_firstStep.getLayout();
+                    prepareFirstStepCard(regex);
+                    layout.previous(jP_firstStep);
+                    break;
                 default:
                     break;
             }
@@ -640,6 +740,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     this.setVisible(false);
                     break;
                 case regexLarge:
+                    this.setVisible(false);
+                //chiudi possibili task già avviati
                 default:
                     break;
             }
@@ -657,6 +759,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private javax.swing.JButton jB_previous;
     private javax.swing.JFileChooser jFileChooser;
     private javax.swing.JLabel jL_fileTittle;
+    private javax.swing.JLabel jL_regexLargeTittle;
     private javax.swing.JLabel jL_regexTittle;
     private javax.swing.JPanel jP_control;
     private javax.swing.JPanel jP_file;
@@ -667,6 +770,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private javax.swing.JPanel jP_regexLarge;
     private javax.swing.JPanel jP_secondStep;
     private javax.swing.JProgressBar jProgressBar;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScroll_regex;
+    private javax.swing.JTextArea jTA_confirmOutput;
     // End of variables declaration//GEN-END:variables
 }
