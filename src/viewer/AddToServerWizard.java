@@ -98,6 +98,127 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             }
         }
     }
+
+    /**
+     * <p>Classe interna, si occupa di generare dinamicamente, intercambiare i
+     * pannello del secondo step. </p>
+     */
+    private class SecondStepStrategy {
+
+        private JPanel cards;
+        private int idx;
+        private volatile boolean isEnd;
+        /**
+         * <p>Indica tutto il testo caricato è da associare al tipo. </p>
+         */
+        public static final int ALLTEXT = 1;
+        /**
+         * <p>Indica che solo una selezione è da associare al testo. </p>
+         */
+        public static final int SELECTEDTEXT = 2;
+        /**
+         * <p>Indica che un espressione regolare è da associare al testo. </p>
+         */
+        public static final int REGULAR_EXP = 3;
+        /**
+         * <p>Indica che solo una paragrafo è da associare al testo. </p>
+         */
+        public static final int PARAGRAPH = 4;
+        /**
+         * <p>Indica che solo una frase è da associare al testo. </p>
+         */
+        public static final int SENTENCE = 5;
+        /**
+         * <p>Indica che solo una parola è da associare al testo. </p>
+         */
+        public static final int WORD = 6;
+        /**
+         * <p>Indica che solo un carattere è da associare al testo. </p>
+         */
+        public static final int CHAR = 7;
+
+        /**
+         * <p>Costruttore, crea la classe alla quale è necessario passare tra i
+         * parametri il JPanel al quale aggiungere un CardLayout. È necessario
+         * specificare l'id del oggetto padre. </p>
+         *
+         * @param cards JPanel al quale legare tutti le successive finestre
+         * @param idx id del padre se <tt>-1</tt> se condidera il tipo usato il maxType e 
+         * aggiunto in coda al db
+         */
+        public SecondStepStrategy(JPanel cards, int idx) {
+            this.cards = cards;
+            this.idx = idx;
+        }
+
+        /**
+         * <p>Agginge un nuovo tipo specificandone il tipo attraverso le
+         * costanti della classe. </p>
+         * <ul>
+         * <li><tt>SecondStepStrategy.ALLTEXT</tt></li>
+         * <li><tt>SecondStepStrategy.SELECTEDTEXT</tt></li>
+         * <li><tt>SecondStepStrategy.REGULAR_EXP</tt></li>
+         * <li><tt>SecondStepStrategy.PARAGRAPH</tt></li>
+         * <li><tt>SecondStepStrategy.SENTENCE</tt></li>
+         * <li><tt>SecondStepStrategy.WORD</tt></li>
+         * <li><tt>SecondStepStrategy.CHAR</tt></li>
+         * </ul>
+         * <p>In caso di espressioni regolari personalizzate usare il medodo con 3
+         * parametri. </p>
+         *
+         * @param type nome del tipo di textual Object da inserire,
+         * preferibilmente singolare
+         * @param commontype constante da associare al tipo
+         */
+        public void addType(String type, int commontype) {
+            addtype(type,commontype,null);
+        }
+
+        /**
+         * <p>Agginge un nuovo tipo specificandone il tipo attraverso le
+         * costanti della classe. </p>
+         * <ul>
+         * <li><tt>SecondStepStrategy.ALLTEXT</tt></li>
+         * <li><tt>SecondStepStrategy.SELECTEDTEXT</tt></li>
+         * <li><tt>SecondStepStrategy.REGULAR_EXP</tt></li>
+         * <li><tt>SecondStepStrategy.PARAGRAPH</tt></li>
+         * <li><tt>SecondStepStrategy.SENTENCE</tt></li>
+         * <li><tt>SecondStepStrategy.WORD</tt></li>
+         * <li><tt>SecondStepStrategy.CHAR</tt></li>
+         * </ul>
+         * <p>Questo metodo è consigliato usarlo solo nel caso il tipo sia 
+         * identificabile solo attraverso espressioni regolari</p>
+         *
+         * @param type nome del tipo di textual Object da inserire,
+         * preferibilmente singolare
+         * @param commontype constante da associare al tipo
+         * @param regex espressione regolare personalizzata
+         */
+        public void addtype(String type, int commontype, String regex) {
+            if (commontype == SecondStepStrategy.REGULAR_EXP && regex == null) {
+                throw new IllegalArgumentException();
+            }
+            
+        }
+
+        /**
+         * <p>Mostra il nuovo pannello
+         *
+         * @return <tt>TRUE</tt> se esite
+         */
+        public synchronized boolean next() {
+            return false;
+        }
+
+        public synchronized boolean previus() {
+            return false;
+        }
+
+        public synchronized ArrayList[] getResult() {
+            return null;
+        }
+    }
+    
     private static final String firstStep = "firstStep";    // nome primo gruppo di pannelli (caricamento dati)
     private static final String file = "file";
     private static final String regex = "regex";
@@ -136,8 +257,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
     /**
      * <p>Crea una nuovo AddToServerWizard. Se id è uguale a
-     * <code>AddToServerWizard.COMPLETE_PROCEDURE</code> allora il nuovo testo
-     * verra un nuovo texual object avente come type il maxType dello schema
+     * <tt>AddToServerWizard.COMPLETE_PROCEDURE</tt> allora il nuovo testo verra
+     * un nuovo texual object avente come type il maxType dello schema
      * corrente</p>
      *
      * @param id intero indicante id di un textual object
@@ -172,8 +293,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
     /**
      * <p>Inizializza in particolare il panello
-     * <code>jP_regex</code>, in base ai parametri usati per costruire la
-     * classe. </p>
+     * <tt>jP_regex</tt>, in base ai parametri usati per costruire la classe.
+     * </p>
      */
     private void initRegex() {
         int rowN = ManuzioViewer.schema.sizeTypes(); // Numero di tipi presenti
@@ -307,9 +428,9 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
     /**
      * <p> Inizializza il pannello
-     * <code>jP_RegexLarge</code>, in base ai dati ottenuti dal pannello
-     * precedente. Il metodo non va chiamato al memento dell'inializzazione del
-     * oggetto, ma runtime</p>
+     * <tt>jP_RegexLarge</tt>, in base ai dati ottenuti dal pannello precedente.
+     * Il metodo non va chiamato al memento dell'inializzazione del oggetto, ma
+     * runtime</p>
      */
     private void initRegexLarge() {
         String path = jFileChooser.getSelectedFile().getPath();
@@ -350,7 +471,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
     /**
      * <p>Attiva e disattiva i JButton e predispone se necessario le variabili
-     * per eseguire i possibili cambiamenti, ma non cambia il pannello da 
+     * per eseguire i possibili cambiamenti, ma non cambia il pannello da
      * visualizzare. </p>
      *
      * @param name stringa contenete il nome del jpanel da preparare
@@ -373,7 +494,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 break;
             case regexLarge: // Inizializza il 3 pannello per la conferma dei dati
                 currentCard = regexLarge;
-                jB_previous.setEnabled(true); // Ora non si torna più indietro
+                jB_previous.setEnabled(true);
                 jB_next.setEnabled(true);
                 jB_next.setText("Conferma");
                 initRegexLarge();
@@ -382,23 +503,31 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     }
 
     /**
-     * <p>Esegue le operazioni relative al nextButtom una volta raggiunto il
-     * pannello jP_regexLarge, comprese il cambio di JPanel. </p>
+     * <p>Una volta raggiunto il pannello jP_regexLarge, inizializza un oggetto
+     * responsabile di muoversi attraverso i pannelli e generarli sino a creare
+     * una struttura delle query da eseguire per l'inserimeto. </p>
+     *
      */
-    private void prepareSecondStepCard() {
+    private SecondStepStrategy prepareSecondStepCard() {
         jB_previous.setEnabled(false);
         CardLayout layout;
         if (currentStep.compareTo(firstStep) == 0) { // se devo ancora inizializzare la struttura dati
             // creazione struttura dati per l'inserimento
-            
+            int sizeTypes = ManuzioViewer.schema.sizeTypes();
+            jB_previous.setEnabled(false); // Ora non si torna più indietro
+            jB_next.setEnabled(true);
+            jB_next.setText("Avanti");
+
+
             // Aggiorno Grafica
+
+            currentStep = secondStep;
             layout = (CardLayout) cards.getLayout();
             layout.next(cards);
             layout = (CardLayout) jP_secondStep.getLayout();
             layout.first(jP_secondStep);
         }
-        if (currentStep.compareTo(secondStep) == 0) { // se siamo al secodo step
-        }
+        return null;
     }
 
     @Override
@@ -624,7 +753,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     }// </editor-fold>//GEN-END:initComponents
 
     private void jB_nextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_nextActionPerformed
-        // TODO add your handling code here:
         CardLayout layout;
         if (currentStep.compareTo(firstStep) == 0) { // Se siamo nella prima fase di selezione
             switch (currentCard) {
@@ -697,7 +825,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     }//GEN-LAST:event_jB_nextActionPerformed
 
     private void jB_previousActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_previousActionPerformed
-        // TODO add your handling code here:
         CardLayout layout;
         if (currentStep.compareTo(firstStep) == 0) { // Se siamo nella prima fase di selezione
             switch (currentCard) {
@@ -725,7 +852,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     }//GEN-LAST:event_jB_previousActionPerformed
 
     private void jB_closeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_closeActionPerformed
-        // TODO add your handling code here:
         if (currentStep.compareTo(firstStep) == 0) { // Se siamo nella prima fase di selezione
             switch (currentCard) {
                 case file:

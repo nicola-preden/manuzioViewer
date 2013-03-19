@@ -91,7 +91,7 @@ public class MainWindow extends javax.swing.JFrame {
     /**
      * <p>Disabilità o abilità i menu per la connessione/disconnessione, le
      * toolbar e tutti i JPanel inerenti questa classe.</p>
-     * <code>javax.swing.JMenu</code> relativo alle connessioni a un db
+     * <tt>javax.swing.JMenu</tt> relativo alle connessioni a un db
      *
      * @param set
      */
@@ -137,7 +137,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     /**
      * <p>Avvia i thread relativi all'aggiornamento della struttura
-     * <code>javax.swing.JTree</code>. </p>
+     * <tt>javax.swing.JTree</tt>. </p>
      */
     void startTreeThread() {
         if (ManuzioViewer.connectionIsSet()) {
@@ -150,7 +150,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     /**
      * <p>Fa collassare tutti i nodi che hanno un altezza maggiore di
-     * <code>level</code>. Questo metodo esegue le operazioni ricorsivamente</p>
+     * <tt>level</tt>. Questo metodo esegue le operazioni ricorsivamente</p>
      *
      * @param node nodo dell'albero
      * @param level livello massimo visualizzabile
@@ -171,11 +171,11 @@ public class MainWindow extends javax.swing.JFrame {
     /**
      * <p>Avvia il wizard necessario per aggiungere nuovi textual object al
      * server. In caso il valore di
-     * <code>id</code> sia
-     * <code>-1</code> il testo verra aggiunto al server usando come tipo il
+     * <tt>id</tt> sia
+     * <tt>-1</tt> il testo verra aggiunto al server usando come tipo il
      * MaxTypeUnit dello schema, in caso contrario il testo verrà agginto come
-     * component del textual object con identificativo< code>id</code> e
-     * <code>type</code> dovrà essere diverso da null. </p>
+     * component del textual object con identificativo< tt>id</tt> e
+     * <tt>type</tt> dovrà essere diverso da null. </p>
      *
      * @param id intero indentificativo di un textual object
      * @param type stringa nome del tipo su cui si aggiunge testo
@@ -530,20 +530,17 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
     private void connectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectMenuItemActionPerformed
-        // TODO add your handling code here:
         ManuzioViewer.cw = new ConnectWindow(this);
         ManuzioViewer.cw.setVisible(true);
     }//GEN-LAST:event_connectMenuItemActionPerformed
 
     private void disconnectMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectMenuItemActionPerformed
-        // TODO add your handling code here:
         if (ManuzioViewer.shutdownConnectionPool()) {
             this.setEnableConnectStatus(false);
         }
     }//GEN-LAST:event_disconnectMenuItemActionPerformed
 
     private void toolBarSx_DisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_DisconnectActionPerformed
-        // TODO add your handling code here:
         if (ManuzioViewer.shutdownConnectionPool()) {
             this.setEnableConnectStatus(false);
         }
@@ -554,26 +551,22 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_toolBarSx_RemoveTypeActionPerformed
 
     private void toolBarSx_RefrashActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarSx_RefrashActionPerformed
-        // TODO add your handling code here:
         if (ManuzioViewer.taskTree != null) {
             ManuzioViewer.taskTree.refresh();
         }
     }//GEN-LAST:event_toolBarSx_RefrashActionPerformed
 
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
-        // TODO add your handling code here:
         AboutWindow aboutWindow = new viewer.AboutWindow();
         aboutWindow.setVisible(true);
     }//GEN-LAST:event_aboutMenuItemActionPerformed
 
     private void preferenceMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_preferenceMenuItemActionPerformed
-        // TODO add your handling code here:
         PreferenceWindow preferenceWindow = new viewer.PreferenceWindow();
         preferenceWindow.setVisible(true);
     }//GEN-LAST:event_preferenceMenuItemActionPerformed
 
     private void jS_LevelStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jS_LevelStateChanged
-        // TODO add your handling code here:
         int value = jS_Level.getValue();
         jT_SchemaServer.expandPath(new TreePath((DefaultMutableTreeNode) jT_SchemaServer.getModel().getRoot()));
         collapseLevelTree((DefaultMutableTreeNode) jT_SchemaServer.getModel().getRoot(), value);
@@ -584,7 +577,6 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_toolBarSx_NewTypeActionPerformed
 
     private void toolBarGen_AddtoDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarGen_AddtoDBActionPerformed
-        // TODO add your handling code here:
         this.addToServer(AddToServerWizard.COMPLETE_PROCEDURE, null);
     }//GEN-LAST:event_toolBarGen_AddtoDBActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -11,4 +11,6 @@ package viewer.taskThread;
  */
 public interface TextStructure {
     
+    
+    
 }

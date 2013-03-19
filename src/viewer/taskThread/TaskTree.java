@@ -28,13 +28,13 @@ import viewer.ManuzioViewer;
 import viewer.manuzioParser.Schema;
 
 /**
- * <p> Si occupa di aggiornare e gestire un <code>javax.swing.JTree</code> 
- * ed eseguire l'output in un <code>T extends JTextComponent</code> delle query 
+ * <p> Si occupa di aggiornare e gestire un <tt>javax.swing.JTree</tt> 
+ * ed eseguire l'output in un <tt>T extends JTextComponent</tt> delle query 
  * automatiche eseguite attraverso gli eventi associati. </p>
  * <p>Il Thread termina automaticamente in caso che la Connessione al DB
  * termini.</p>
  * <p>Si ricorda che per eseguire questo Thread è necessario invocare il metodo
- * <code>start()</code></p>
+ * <tt>start()</tt></p>
  *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
@@ -84,8 +84,8 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
 
     /**
      * <p>Crea un oggetto contenenti i dati per identificare univocamente un
-     * text object nel database. Il quale ha un metodo <code>toString()</code> 
-     * oppurtunamente modificato per poter essere usato nel <code>JTree</code> 
+     * text object nel database. Il quale ha un metodo <tt>toString()</tt> 
+     * oppurtunamente modificato per poter essere usato nel <tt>JTree</tt> 
      * come etichetta dei nodi.</p>
      */
     protected class TreeNodeObject {
@@ -309,7 +309,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
     }
 
     /**
-     * <p>Popola l'albero inserendo i vari <code>textual object</code> come 
+     * <p>Popola l'albero inserendo i vari <tt>textual object</tt> come 
      * figli della radiece dell albero, rispettando la loro struttura. </p>
      *
      */
@@ -369,9 +369,9 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
     }
 
     /**
-     * <p>Inserisce tutti i figli di <code>head</code> fino a raggiungere le 
+     * <p>Inserisce tutti i figli di <tt>head</tt> fino a raggiungere le 
      * foglie ricorsivamente. </p> <p>Il metodo si ferma se si ha raggiunto il 
-     * minimo dello schema oppure se <code>head</code> non ha figli</p>
+     * minimo dello schema oppure se <tt>head</tt> non ha figli</p>
      *
      * @param head un nodo dell'albero
      */
@@ -444,7 +444,7 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
 
     /**
      * <p>Ferma il Thread, deassocia tutti gli eventi aggiunti e azzera il 
-     * contenuto dell'albero <code>javax.swing.JTree</code> e chiude la 
+     * contenuto dell'albero <tt>javax.swing.JTree</tt> e chiude la 
      * connessione al DB. </p>
      */
     public synchronized void stopThread() {

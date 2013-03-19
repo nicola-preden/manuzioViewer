@@ -8,14 +8,15 @@ import javax.swing.JPanel;
 import viewer.setting.PreferencesPane;
 
 /**
- * <p>JFrame responsabile della visualizzazione e modifica delle enventuali 
+ * <p>JFrame responsabile della visualizzazione e modifica delle enventuali
  * Preferences dell'applicazione. </p>
+ *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
 public class PreferenceWindow extends javax.swing.JFrame {
 
-    private class JPanelLanguages extends JPanel implements PreferencesPane {        
+    private class JPanelLanguages extends JPanel implements PreferencesPane {
 
         @Override
         public void savePreferences() {
@@ -32,7 +33,8 @@ public class PreferenceWindow extends javax.swing.JFrame {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
-    private class JPanelTextGraphics extends JPanel implements PreferencesPane {       
+
+    private class JPanelTextGraphics extends JPanel implements PreferencesPane {
 
         @Override
         public void savePreferences() {
@@ -49,6 +51,7 @@ public class PreferenceWindow extends javax.swing.JFrame {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
+
     /**
      * Creates new form PreferenceWindow
      */
@@ -145,14 +148,12 @@ public class PreferenceWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jB_closeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_closeActionPerformed
-        // TODO add your handling code here:
         this.setVisible(false);
     }//GEN-LAST:event_jB_closeActionPerformed
 
     private void jB_CloseAndSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_CloseAndSaveActionPerformed
-        // TODO add your handling code here:
-        JPanelLanguages lang = (JPanelLanguages)jP_Languages;
-        JPanelTextGraphics text = (JPanelTextGraphics)jP_TextLayout;
+        JPanelLanguages lang = (JPanelLanguages) jP_Languages;
+        JPanelTextGraphics text = (JPanelTextGraphics) jP_TextLayout;
         if (lang.isModified()) {
             lang.savePreferences();
         }
@@ -160,7 +161,6 @@ public class PreferenceWindow extends javax.swing.JFrame {
             text.savePreferences();
         }
     }//GEN-LAST:event_jB_CloseAndSaveActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jB_CloseAndSave;
     private javax.swing.JButton jB_close;

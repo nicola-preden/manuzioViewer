@@ -71,7 +71,6 @@ public class ManuzioViewer {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
         try {
             if (isOSX()) {  // Se siamo su Mac
                 // Per risolvere il bug relativo alla prima property è stato 
@@ -156,7 +155,7 @@ public class ManuzioViewer {
     /**
      * <p>Fornisce indicazione se è disponibile la connessione ad un server</p>
      *
-     * @return <code>TRUE</code> se connesso altrimenti <code>FALSE</code>
+     * @return <tt>TRUE</tt> se connesso altrimenti <tt>FALSE</tt>
      */
     static synchronized boolean connectionIsSet() {
         return isConnect;
@@ -165,10 +164,10 @@ public class ManuzioViewer {
     /**
      * <p>Imposta un nuovo ConnectionPool per generare un nuovo ConnectionPool è
      * necessario chiamare il metodo
-     * <code>viewer.ManuzioViewer.shutdownConnectionPool</code></p>
+     * <tt>viewer.ManuzioViewer.shutdownConnectionPool</tt></p>
      *
      * @param url Indirizzo al server secondo la * * * * * * * * * *
-     * struttura <code>jdbc:postgresql://IP:PORT/DB_NAME</code>
+     * struttura <tt>jdbc:postgresql://IP:PORT/DB_NAME</tt>
      * @param user
      * @param password
      * @throws ConnectionPoolException
@@ -198,7 +197,7 @@ public class ManuzioViewer {
      * <p>Chiude il connectionPool e chiude tutte le connessioni aperte al
      * momento della chimata</p>
      *
-     * @return <code>TRUE</code> se l'operazione ha successo
+     * @return <tt>TRUE</tt> se l'operazione ha successo
      */
     static synchronized boolean shutdownConnectionPool() {
         if (isConnect) {
@@ -240,18 +239,18 @@ public class ManuzioViewer {
 
     /**
      * <p>Builds an empty Manuzio database version 3.1 on the server
-     * <code>url</code> with the given name
-     * <code>dbName</code></p> <p>If
-     * <code>override = true</code> and already exists a database with the given
+     * <tt>url</tt> with the given name
+     * <tt>dbName</tt></p> <p>If
+     * <tt>override = true</tt> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
      * @param url the server path -either of the * * * * * * * * * * * * *
-     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
+     * form <tt>jdbc:subprotocol:serverPath</tt>, or only the serverPath
      * itself
      * @param dbName the name given to the new database
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
-     * account of <code>user</code>
+     * account of <tt>user</tt>
      * @param override specifies if a database already existing with the given
      * has to be overridden or not.
      * @return a Connection Object with the database just created
@@ -429,16 +428,16 @@ public class ManuzioViewer {
 
     /**
      * <p>Deletes the database with the given name
-     * <code>dbName</code> from the server.</p> <p>Despite to this method's
+     * <tt>dbName</tt> from the server.</p> <p>Despite to this method's
      * name, this method could be used to delete any database, not only a
      * Manuzio one.</p>
      *
      * @param url the server path -either of the * * * * * * * * * * * * *
-     * form <code>jdbc:subprotocol:serverPath</code>, or only the serverPath
+     * form <tt>jdbc:subprotocol:serverPath</tt>, or only the serverPath
      * itself
      * @param dbName - the name of the database to delete
      * @param user the username to connect to the server
-     * @param password the password related to the <code>user</code> to connect
+     * @param password the password related to the <tt>user</tt> to connect
      * to the server
      * @throws SQLException if the database couldn't be deleted for any reason
      */
@@ -460,7 +459,7 @@ public class ManuzioViewer {
      * @param url - the location and the name of the DB to empty
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
-     * account of <code>user</code>
+     * account of <tt>user</tt>
      * @throws SQLException - can't connect to the given DB. Maybe the path, the
      * user or the password are wrong
      * @throws ParseException - the given DB hasn't a Manuzio 3.1 structure
@@ -502,7 +501,7 @@ public class ManuzioViewer {
 
     /**
      * <p>Closes any open
-     * <code>ResultSet</code>.</p>
+     * <tt>ResultSet</tt>.</p>
      *
      * @param resultSets the ResultSets to close
      * @throws SQLException if a database error occurs
@@ -524,7 +523,7 @@ public class ManuzioViewer {
 
     /**
      * <p>Closes any open
-     * <code>Statement</code>.</p>
+     * <tt>Statement</tt>.</p>
      *
      * @param statements the Statement to close
      * @throws SQLException if a database error occurs
@@ -546,7 +545,7 @@ public class ManuzioViewer {
 
     /**
      * <p>Closes any open
-     * <code>Connection</code>.</p>
+     * <tt>Connection</tt>.</p>
      *
      * @param connections the Connection to close
      * @throws SQLException if a database error occurs

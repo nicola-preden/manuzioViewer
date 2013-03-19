@@ -11,7 +11,7 @@ import java.util.Properties;
 
 /**
  * Implementazione dell'interfaccia
- * <code>viewer.setting.NodeSettingInterface</code>
+ * <tt>viewer.setting.NodeSettingInterface</tt>
  *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice

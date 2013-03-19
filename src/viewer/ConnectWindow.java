@@ -32,8 +32,9 @@ import viewer.manuzioParser.Schema;
 import viewer.setting.SettingXML;
 
 /**
- * <p>JFrame responsabile della connessione ad un nuovo database e/o la sua 
+ * <p>JFrame responsabile della connessione ad un nuovo database e/o la sua
  * eventuale creazione. </p>
+ *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
@@ -536,7 +537,6 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
     }//GEN-LAST:event_jb_Connect_newActionPerformed
 
     private void jb_ConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jb_ConnectActionPerformed
-        // TODO add your handling code here:
         Connection conn = null;
         user = this.jtf_usr.getText();
         password = new String(this.jtf_passw.getPassword());
@@ -557,13 +557,11 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
     }//GEN-LAST:event_jb_ConnectActionPerformed
 
     private void jB_cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_cancelActionPerformed
-        // TODO add your handling code here:
         this.setVisible(false);
         ManuzioViewer.cw = null;
     }//GEN-LAST:event_jB_cancelActionPerformed
 
     private void jB_loadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_loadActionPerformed
-        // TODO add your handling code here:
         if (jRb_loadFromFile.isSelected()) { // scelta del file contenente lo schema
             int showOpenDialog = chooser.showOpenDialog(this);
             if (showOpenDialog == JFileChooser.APPROVE_OPTION) {
@@ -596,12 +594,10 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
     }//GEN-LAST:event_jB_loadActionPerformed
 
     private void jRb_loadFromFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRb_loadFromFileActionPerformed
-        // TODO add your handling code here:
         jB_load.setEnabled(true);
     }//GEN-LAST:event_jRb_loadFromFileActionPerformed
 
     private void jRb_loadFromStringActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRb_loadFromStringActionPerformed
-        // TODO add your handling code here:
         jB_load.setEnabled(true);
     }//GEN-LAST:event_jRb_loadFromStringActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

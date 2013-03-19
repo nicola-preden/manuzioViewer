@@ -15,14 +15,14 @@ public class ConnectionPoolException extends SQLException {
 
     /**
      * Creates a new instance of
-     * <code>ConnectionPoolFactoryA</code> without detail message.
+     * <tt>ConnectionPoolFactoryA</tt> without detail message.
      */
     public ConnectionPoolException() {
     }
 
     /**
      * Constructs an instance of
-     * <code>ConnectionPoolFactoryA</code> with the specified detail message.
+     * <tt>ConnectionPoolFactoryA</tt> with the specified detail message.
      *
      * @param msg the detail message.
      */

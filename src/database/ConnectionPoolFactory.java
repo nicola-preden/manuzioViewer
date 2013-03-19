@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 /**
  * <p>La classe crea un pool di conessioni a un db PostgreSQL oppure ad un atro
  * qualsiaasi DBMS se viene fornito un oggetto
- * <code>com.jolbox.bonecp.BoneCPConfig</code></p>
+ * <tt>com.jolbox.bonecp.BoneCPConfig</tt></p>
  *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
@@ -82,8 +82,8 @@ public class ConnectionPoolFactory {
      * uno dei possibli costruttore, in caso contrario il driver non verra
      * caricato.</p>
      *
-     * @param driverName nuovo nome della classe *      * e.s <code>org.postgresql.Driver</code>
-     * @param driverPrefix nuovo prefisso per esegure la *      * connessione <code>jdbc:postgresql://</code>
+     * @param driverName nuovo nome della classe *      * e.s <tt>org.postgresql.Driver</tt>
+     * @param driverPrefix nuovo prefisso per esegure la *      * connessione <tt>jdbc:postgresql://</tt>
      */
     public static void addDriver(String driverName, String driverPrefix) {
         ConnectionPoolFactory.driverName = Arrays.copyOf(ConnectionPoolFactory.driverName, ConnectionPoolFactory.driverName.length + 1);
@@ -94,7 +94,7 @@ public class ConnectionPoolFactory {
 
     /**
      * Crea un nuovo oggetto
-     * <code>com.jolbox.bonecp.BoneCP</code> ed in caso ne sia gia generato uno
+     * <tt>com.jolbox.bonecp.BoneCP</tt> ed in caso ne sia gia generato uno
      * chiude tutte le connessioni esistenti e lo ricrea.
      *
      * @return a pool
@@ -137,7 +137,7 @@ public class ConnectionPoolFactory {
 
     /**
      * <p>Ritorna l'ultimo
-     * <code>com.jolbox.bonecp.BoneCP</code> creato o se non presente ne crea
+     * <tt>com.jolbox.bonecp.BoneCP</tt> creato o se non presente ne crea
      * uno di nuovo
      *
      * @return

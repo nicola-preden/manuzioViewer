@@ -106,7 +106,7 @@ public class SettingXML {
      * <p>Rimuove un singola configurazione o tutto un blocco</p>
      *
      * @param desc descrittore
-     * @param prop se <code>NULL</code> rimuove tutto il blocco
+     * @param prop se <tt>NULL</tt> rimuove tutto il blocco
      */
     public synchronized boolean removeSetting(String desc, Properties prop) {
         if (desc == null || desc.isEmpty()) {
@@ -126,8 +126,8 @@ public class SettingXML {
     }
 
     /**
-     * <p>Ritona un <code>viewer.setting.NodeSettingInterface</code> 
-     * se trova l'oggetto altrimenti <code>NULL</code>. </p>
+     * <p>Ritona un <tt>viewer.setting.NodeSettingInterface</tt> 
+     * se trova l'oggetto altrimenti <tt>NULL</tt>. </p>
      *
      * @param desc
      * @return
