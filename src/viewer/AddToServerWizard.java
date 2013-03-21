@@ -383,7 +383,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      */
     private SecondStepStrategy prepareSecondStepCard() {
         // creazione struttura dati per l'inserimento
-        SecondStepStrategy sss = new SecondStepStrategy(jP_secondStep, idX_to, stringX_to, filetext, jB_previous, jB_next, jB_close);
+        sss = new SecondStepStrategy(jP_secondStep, idX_to, stringX_to, filetext, jB_previous, jB_next, jB_close);
         Iterator<AuxJP_regex> iterator = type_setting.iterator();
         while (iterator.hasNext()) {
             AuxJP_regex next = iterator.next();
@@ -415,6 +415,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         }
         currentStep = secondStep;
         sss.start();
+        sss.next();
         return sss;
     }
 

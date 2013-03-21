@@ -5,10 +5,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JPanel;
 import viewer.manuzioParser.ComponentProperty;
+import viewer.manuzioParser.Type;
 
 /**
  * <p>Classe si occupa di generare dinamicamente, intercambiare dei pannelli per
@@ -17,11 +21,12 @@ import viewer.manuzioParser.ComponentProperty;
 class SecondStepStrategy {
 
     class TextType {
+
         /**
          * <p>Descrittore del schema manuzio per stabilire le relazioni da usare
          * durante l'inserimeto. </p>
          */
-        private ComponentProperty type = null;
+        private Type type = null;
         /**
          * <p>Eventuali sottotipo dell'oggetto corrente. <p>
          */
@@ -39,7 +44,7 @@ class SecondStepStrategy {
          */
         private String allText = null;
 
-        public TextType(ComponentProperty type, TextType conteiner, TextType superType, String allText) {
+        public TextType(Type type, TextType conteiner, TextType superType, String allText) {
             this.type = type;
             this.conteiner = conteiner;
             this.superType = superType;
@@ -47,8 +52,8 @@ class SecondStepStrategy {
             this.subType = new HashSet<TextType>();
         }
 
-        public void setType(ComponentProperty type) {
-            this.type = type;
+        public Type getType() {
+            return type;
         }
 
         public TextType[] getSubType() {
@@ -76,21 +81,21 @@ class SecondStepStrategy {
         }
 
         public String[] getAllText() {
-            if (this.subType.isEmpty()) {
-                return new String[] {
+            if (this.subType.isEmpty()) { // se non ci sono sottotipi siamo al minimo
+                return new String[]{
                     allText
                 };
             } else {
                 Iterator<TextType> iterator = subType.iterator();
-                ArrayList al = new ArrayList();
+                ArrayList<String> al = new ArrayList();
                 while (iterator.hasNext()) {
                     TextType next = iterator.next();
-                    String[] allText = next.getAllText();
-                    al.addAll(Arrays.asList(allText));
+                    String[] text = next.getAllText();
+                    al.addAll(Arrays.asList(text));
                 }
-                return null;
+                return al.toArray(new String[0]);
             }
-        }        
+        }
     }
     /**
      * <p>Pannello al quale aggiungere il CardLayout. </p>
@@ -135,7 +140,7 @@ class SecondStepStrategy {
      * <p>Indice corrente in un array Maxtype. </p>
      */
     private int idxPostype = 0;
-    private ArrayList<ArrayList> maxTypeList;
+    private LinkedList<TextType> maxTypeList;
     /**
      * <p>Elenco dei tipi inseriti nel oggetto (typeName,Object) per i quali
      * generare delle query. Se Object è un Integer allora parliamo di tutto il
@@ -145,7 +150,7 @@ class SecondStepStrategy {
     /**
      * <p>Il testo grezzo da inserire. </p>
      */
-    private ArrayList<String> text;
+    private String text;
     /**
      * <p>Indica tutto il testo caricato è da associare al tipo. </p>
      */
@@ -181,8 +186,8 @@ class SecondStepStrategy {
      * specificare l'id del oggetto padre. Se <tt>idx ==
      * AddToServerWizard.COMPLETE_PROCEDURE</tt> allora il testo userà come
      * padre un nuovo maxType</p>
-     * 
-     * <p>I parametri relativi a <tt>prev</tt>, <tt>next</tt>, <tt>close</tt> 
+     *
+     * <p>I parametri relativi a <tt>prev</tt>, <tt>next</tt>, <tt>close</tt>
      * vengo usati sono per semplificare la visualizzazione del layout. </p>
      *
      * @param cards JPanel al quale legare tutti le successive finestre
@@ -196,7 +201,6 @@ class SecondStepStrategy {
     public SecondStepStrategy(JPanel cards, int idx, String type, ArrayList<String> text, javax.swing.JButton prev, javax.swing.JButton next, javax.swing.JButton close) {
         this.cards = cards;
         this.rootIdx = idx;
-        this.text = text;
         if ((cards == null) || (prev == null) || (next == null) || (close == null)) {
             throw new NullPointerException();
         }
@@ -208,6 +212,13 @@ class SecondStepStrategy {
         } else {
             this.rootTypeName = type;
         }
+        for (int i = 0; i < text.size(); i++) {
+            String get = text.get(i);
+            if (!get.endsWith("\n")) {
+                get += "\n";
+            }
+            this.text += text.get(i);
+        }
         typeMap = new HashMap<String, Object>();
     }
 
@@ -217,16 +228,30 @@ class SecondStepStrategy {
      */
     public void start() {
         System.gc();
+        maxTypeList = new LinkedList();
         rootType = ManuzioViewer.schema.getType(this.rootTypeName);
         if (!typeMap.containsKey(rootTypeName)) {
             throw new IllegalArgumentException("Missing type");
         }
         Object get = typeMap.get(rootTypeName);
+        TextType textType;
         if (get instanceof Integer) {
             // se è intero
+            int x = ((Integer) get).intValue();
+            if (x == SecondStepStrategy.ALLTEXT) {
+                textType = new TextType(rootType, null, null, this.text);
+                maxTypeList.add(textType);
+            }
         }
         if (get instanceof String) {
             // se stringa (regex automatica)
+            // applico le regole regex
+            Pattern pattern = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
+            Matcher matcher = pattern.matcher(this.text);
+            while (matcher.find()) {
+                textType = new TextType(rootType, null, null, matcher.group());
+                maxTypeList.add(textType);
+            }
         }
     }
 
@@ -289,11 +314,11 @@ class SecondStepStrategy {
                 break;
             case SecondStepStrategy.PARAGRAPH:
                 // divide in paragrafi
-                typeMap.put(type, "\\p{Punct}*\\p{Upper}{1}+[^.]*[.]+(\\n|\\r|\\Z)");
+                typeMap.put(type, "(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.]*[.]+(\\s+|\\Z)");
                 break;
             case SecondStepStrategy.SENTENCE:
                 // divide in frasi
-                typeMap.put(type, "\\p{Punct}*\\p{Upper}{1}+[^.]*[.]+(\\s+|\\Z)");
+                typeMap.put(type, "(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.]*[.]+(\\s+|\\Z)");
                 break;
             case SecondStepStrategy.WORD:
                 // primo livello di selezione, al secondo blocco divide le sequenze \w* da \p{Punct}*

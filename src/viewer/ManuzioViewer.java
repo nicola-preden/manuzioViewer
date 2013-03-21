@@ -74,24 +74,24 @@ public class ManuzioViewer {
      */
     public static void main(String[] args) {
         //<editor-fold defaultstate="collapsed" desc="regexTest">
-        /*Pattern pattern = Pattern.compile("\\p{Punct}*\\p{Upper}{1}+[^.]*[.]+(\\n|\\r|\\Z)", Pattern.UNICODE_CHARACTER_CLASS);
-         *
-         * Matcher matcher = pattern.matcher("1. Evocatio\n"
-         * + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "
-         * + "per la parata annuale della Vigilia di Ognissanti. I cavalli "
-         * + "sbuffavano attendendo che i cavalieri li guidassero per le "
-         * + "vie della città; i palafrenieri e i novizi avrebbero "
-         * + "seguito il corteo a piedi.\n"
-         * + "«Compieta».\n"
-         * + "Eloise Weiss annuì senza badare eccessivamente alla tangibile "
-         * + "nota d’inquietudine nella voce di Christabel Von Sayn, "
-         * + "sottile e gentile come un raggio d’argento, alla luce fioca "
-         * + "delle candele che illuminavano la stanza.");
-         *
-         * while (matcher.find()) {
-         * System.out.println(matcher.group() + "\n");
-         * }
-         * System.exit(0);*/
+        /*Pattern pattern = Pattern.compile("(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.]*[.]+(\\s+|\\Z)", Pattern.UNICODE_CHARACTER_CLASS);
+         
+          Matcher matcher = pattern.matcher("1. Evocatio\n"
+          + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "
+          + "per la parata annuale della Vigilia di Ognissanti. I cavalli "
+          + "sbuffavano attendendo che i cavalieri li guidassero per le "
+          + "vie della città; i palafrenieri e i novizi avrebbero "
+          + "seguito il corteo a piedi.\n"
+          + "«Compieta».\n"
+          + "Eloise Weiss annuì senza badare eccessivamente alla tangibile "
+          + "nota d’inquietudine nella voce di Christabel Von Sayn, "
+          + "sottile e gentile come un raggio d’argento, alla luce fioca "
+          + "delle candele che illuminavano la stanza.");
+         
+          while (matcher.find()) {
+          System.out.println(matcher.group() + "\n");
+          }
+          System.exit(0);*/
         //</editor-fold>
         try {
             if (isOSX()) {  // Se siamo su Mac
