@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -105,9 +107,48 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      */
     private class SecondStepStrategy {
 
+        /**
+         * <p>Pannello al quale aggiungere il CardLayout. </p>
+         */
         private JPanel cards;
-        private int idx;
+        /**
+         * <p>Index dell'oggetto root
+         */
+        private int rootIdx;
+        /**
+         * <p>Varibile di controllo per stabilere la fine della preparazione per 
+         * inserimento. </p>
+         */
         private volatile boolean isEnd;
+        /**
+         * <p>Nome del tipo dell'oggetto root. </p>
+         */
+        private String rootTypeName;
+        /**
+         * <p>Tipo dell'oggetto root. </p>
+         */
+        private viewer.manuzioParser.Type rootType;
+        /**
+         * <p>Indice corrente dell'array dei Maxtype. Se descritto come un
+         * <tt>SecondStepStrategy.ALLTEXT</tt> la variabile rimarrà <tt>0</tt>. 
+         * </p>
+         */
+        private int idxMaxtype = 0; 
+        /**
+         * <p>Indice corrente in un array Maxtype. </p>
+         */
+        private int idxPostype = 0;
+        private ArrayList<ArrayList> maxTypeList;
+        /**
+         * <p>Elenco dei tipi inseriti nel oggetto (typeName,Object) per i quali
+         * generare delle query. Se Object è un Integer allora parliamo di tutto
+         * il testo o selezioni, se String di una espressione regolare. <p>
+         */
+        private Map<String, Object> typeMap;
+        /**
+         * <p>Il testo grezzo da inserire. </p>
+         */
+        private ArrayList<String> text;
         /**
          * <p>Indica tutto il testo caricato è da associare al tipo. </p>
          */
@@ -140,15 +181,44 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         /**
          * <p>Costruttore, crea la classe alla quale è necessario passare tra i
          * parametri il JPanel al quale aggiungere un CardLayout. È necessario
-         * specificare l'id del oggetto padre. </p>
+         * specificare l'id del oggetto padre. Se <tt>idx ==
+         * AddToServerWizard.COMPLETE_PROCEDURE</tt> allora il testo userà come
+         * padre un nuovo maxType</p>
          *
          * @param cards JPanel al quale legare tutti le successive finestre
-         * @param idx id del padre se <tt>-1</tt> se condidera il tipo usato il maxType e 
-         * aggiunto in coda al db
+         * @param idx id del padre
+         * @param text il testo da inserire
          */
-        public SecondStepStrategy(JPanel cards, int idx) {
+        public SecondStepStrategy(JPanel cards, int idx, String type, ArrayList<String> text) {
             this.cards = cards;
-            this.idx = idx;
+            this.rootIdx = idx;
+            this.text = text;
+            if (idx == AddToServerWizard.COMPLETE_PROCEDURE) {
+                this.rootTypeName = ManuzioViewer.schema.getMaximalUnit().getTypeName();
+            } else {
+                this.rootTypeName = type;
+            }
+            typeMap = new HashMap<String, Object>();
+        }
+
+        /**
+         * <p>Prepara la struttura interna a sencoda delle precedenti chiamate
+         * ad i vari <tt>addType(...)</tt></p>
+         */
+        public void start() {
+            System.gc();
+            currentStep = secondStep;
+            rootType = ManuzioViewer.schema.getType(this.rootTypeName);
+            if (!typeMap.containsKey(rootTypeName)) {
+                throw new IllegalArgumentException("Missing type");
+            }
+            Object get = typeMap.get(rootTypeName);
+            if (get instanceof Integer) { // se è intero
+                
+            }
+            if (get instanceof String) { // se stringa (regex automatica)
+                
+            }
         }
 
         /**
@@ -163,15 +233,15 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
          * <li><tt>SecondStepStrategy.WORD</tt></li>
          * <li><tt>SecondStepStrategy.CHAR</tt></li>
          * </ul>
-         * <p>In caso di espressioni regolari personalizzate usare il medodo con 3
-         * parametri. </p>
+         * <p>In caso di espressioni regolari personalizzate usare il medodo con
+         * 3 parametri. </p>
          *
          * @param type nome del tipo di textual Object da inserire,
          * preferibilmente singolare
          * @param commontype constante da associare al tipo
          */
         public void addType(String type, int commontype) {
-            addtype(type,commontype,null);
+            addType(type, commontype, null);
         }
 
         /**
@@ -186,7 +256,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
          * <li><tt>SecondStepStrategy.WORD</tt></li>
          * <li><tt>SecondStepStrategy.CHAR</tt></li>
          * </ul>
-         * <p>Questo metodo è consigliato usarlo solo nel caso il tipo sia 
+         * <p>Questo metodo è consigliato usarlo solo nel caso il tipo sia
          * identificabile solo attraverso espressioni regolari</p>
          *
          * @param type nome del tipo di textual Object da inserire,
@@ -194,15 +264,41 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
          * @param commontype constante da associare al tipo
          * @param regex espressione regolare personalizzata
          */
-        public void addtype(String type, int commontype, String regex) {
+        public void addType(String type, int commontype, String regex) {
             if (commontype == SecondStepStrategy.REGULAR_EXP && regex == null) {
                 throw new IllegalArgumentException();
             }
-            
+            switch (commontype) {
+                case SecondStepStrategy.ALLTEXT:
+                    typeMap.put(type, new Integer(SecondStepStrategy.ALLTEXT));
+                    break;
+                case SecondStepStrategy.SELECTEDTEXT:
+                    typeMap.put(type, new Integer(SecondStepStrategy.SELECTEDTEXT));
+                    break;
+                case SecondStepStrategy.REGULAR_EXP:
+                    typeMap.put(type, regex);
+                    break;
+                case SecondStepStrategy.PARAGRAPH: // divide in paragrafi
+                    typeMap.put(type, "\\p{Punct}*\\p{Upper}{1}+[^.]*[.]+(\\n|\\r|\\Z)");
+                    break;
+                case SecondStepStrategy.SENTENCE: // divide in frasi
+                    typeMap.put(type, "\\p{Punct}*\\p{Upper}{1}+[^.]*[.]+(\\s+|\\Z)");
+                    break;
+                case SecondStepStrategy.WORD: // primo livello di selezione, al secondo blocco divide le sequenze \w* da \p{Punct}*
+                    typeMap.put(type, "\\S+"); // in variante a \\p{Punct}*\\w+\\p{Punct}*
+                    break;
+                case SecondStepStrategy.CHAR: // divide in caratteri
+                    typeMap.put(type, ".");     // uno qualsiasi
+                    break;
+                default:
+                    throw new IllegalArgumentException();
+            }
+
         }
 
         /**
-         * <p>Mostra il nuovo pannello
+         * <p>Genera e rende visibile un nuovo pannello. Se è possibile esiste
+         * ritorna <tt>TRUE</tt> altrimenti <tt>FALSE</tt>. </p>
          *
          * @return <tt>TRUE</tt> se esite
          */
@@ -210,11 +306,26 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             return false;
         }
 
+        /**
+         * <p>Genera e rende visibile, se disponibile, il pannello precedente.
+         * Se è possibile esiste ritorna <tt>TRUE</tt> altrimenti
+         * <tt>FALSE</tt>. </p>
+         *
+         * @return <tt>TRUE</tt> se esite
+         */
         public synchronized boolean previus() {
             return false;
         }
 
-        public synchronized ArrayList[] getResult() {
+        /**
+         * <p>Ritorna l'elenco di query da eseguire per il caricamento nel
+         * database. Se la procedura di caricamento dati non è ancora terminata
+         * (<tt>next()</tt> ritorna <tt>TRUE</tt>) il risultato sarà
+         * <tt>null</tt>. </p>
+         *
+         * @return un ArrayList di Stringhe
+         */
+        public synchronized ArrayList<String>[] getResult() {
             return null;
         }
     }
@@ -225,6 +336,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private static final String regexLarge = "regexLarge";  // Corferma dati
     private static final String secondStep = "secondStep";  // nome secondo gruppo di panelli (Caricamento oggetti)
     private static final String thirdStep = "thirdStep";    // nome terzo gruppo di pannelli (Caricamento attributi)
+    private SecondStepStrategy sss = null;
     /**
      * <p>Esegue l'inserimento usando tutti i type disponibili. </p>
      */
@@ -248,7 +360,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private String currentStep; // step attuale
     private String currentCard; // carta raggiunta
     private TaskRawInput taskRawInput = null;
-    private MainWindow mw;
     /**
      * <p>Il file diviso i paragrafi. </p>
      */
@@ -266,7 +377,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      * @param mw jframe padre
      * @throws IllegalArgumentException se i parametri sono incoerenti
      */
-    public AddToServerWizard(int id, String type, MainWindow mw) {
+    public AddToServerWizard(int id, String type) {
         initComponents();
         idX_to = id;
         if (idX_to == AddToServerWizard.COMPLETE_PROCEDURE) {
@@ -284,7 +395,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jProgressBar.setVisible(false);
         currentStep = firstStep;
         currentCard = file;
-        this.mw = mw;
         // inizianuzzo il pannello jP_regex
         initRegex();
         pack();
@@ -509,25 +619,39 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      *
      */
     private SecondStepStrategy prepareSecondStepCard() {
-        jB_previous.setEnabled(false);
-        CardLayout layout;
-        if (currentStep.compareTo(firstStep) == 0) { // se devo ancora inizializzare la struttura dati
-            // creazione struttura dati per l'inserimento
-            int sizeTypes = ManuzioViewer.schema.sizeTypes();
-            jB_previous.setEnabled(false); // Ora non si torna più indietro
-            jB_next.setEnabled(true);
-            jB_next.setText("Avanti");
-
-
-            // Aggiorno Grafica
-
-            currentStep = secondStep;
-            layout = (CardLayout) cards.getLayout();
-            layout.next(cards);
-            layout = (CardLayout) jP_secondStep.getLayout();
-            layout.first(jP_secondStep);
+        // creazione struttura dati per l'inserimento
+        SecondStepStrategy sss = new SecondStepStrategy(jP_secondStep, idX_to, stringX_to, filetext);
+        Iterator<AuxJP_regex> iterator = type_setting.iterator();
+        while (iterator.hasNext()) {
+            AuxJP_regex next = iterator.next();
+            JComboBox<String> jComboBox = next.getjComboBox();
+            int x = jComboBox.getSelectedIndex(); // controllo valore della scelta
+            switch (x) {
+                case 0:
+                    sss.addType(next.getType().getTypeName(), SecondStepStrategy.CHAR);
+                    break;
+                case 1:
+                    sss.addType(next.getType().getTypeName(), SecondStepStrategy.WORD);
+                    break;
+                case 2:
+                    sss.addType(next.getType().getTypeName(), SecondStepStrategy.SENTENCE);
+                    break;
+                case 3:
+                    sss.addType(next.getType().getTypeName(), SecondStepStrategy.PARAGRAPH);
+                    break;
+                case 4:
+                    sss.addType(next.getType().getTypeName(), SecondStepStrategy.ALLTEXT);
+                    break;
+                case 5:
+                    sss.addType(next.getType().getTypeName(), SecondStepStrategy.SELECTEDTEXT);
+                    break;
+                case 6:
+                    sss.addType(next.getType().getTypeName(), SecondStepStrategy.REGULAR_EXP, ((JTextField)next.jcomponent).getText());
+                    break;
+            }
         }
-        return null;
+        sss.start();
+        return sss;
     }
 
     @Override
@@ -809,17 +933,14 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 case regexLarge:
                     int x = JOptionPane.showConfirmDialog(this, "Confermi i dati inseriti?", "Conferma?", JOptionPane.YES_NO_OPTION);
                     if (x == JOptionPane.YES_OPTION) {
-                        prepareSecondStepCard();
+                        sss = prepareSecondStepCard();
                     }
                 default:
                     break;
             }
         }
         if (currentStep.compareTo(secondStep) == 0) {
-            switch (currentCard) {
-                default:
-                    break;
-            }
+            boolean next = sss.next();
         }
 
     }//GEN-LAST:event_jB_nextActionPerformed
@@ -845,9 +966,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             }
         }
         if (currentStep.compareTo(secondStep) == 0) {
-            switch (currentCard) {
-
-            }
+            boolean previus = sss.previus();
         }
     }//GEN-LAST:event_jB_previousActionPerformed
 
@@ -873,9 +992,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             }
         }
         if (currentStep.compareTo(secondStep) == 0) {
-            switch (currentCard) {
-
-            }
+            
         }
     }//GEN-LAST:event_jB_closeActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

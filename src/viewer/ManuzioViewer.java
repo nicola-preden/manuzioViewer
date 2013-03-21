@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -71,11 +73,31 @@ public class ManuzioViewer {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        //<editor-fold defaultstate="collapsed" desc="regexTest">
+        /*Pattern pattern = Pattern.compile("\\p{Punct}*\\p{Upper}{1}+[^.]*[.]+(\\n|\\r|\\Z)", Pattern.UNICODE_CHARACTER_CLASS);
+         *
+         * Matcher matcher = pattern.matcher("1. Evocatio\n"
+         * + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "
+         * + "per la parata annuale della Vigilia di Ognissanti. I cavalli "
+         * + "sbuffavano attendendo che i cavalieri li guidassero per le "
+         * + "vie della città; i palafrenieri e i novizi avrebbero "
+         * + "seguito il corteo a piedi.\n"
+         * + "«Compieta».\n"
+         * + "Eloise Weiss annuì senza badare eccessivamente alla tangibile "
+         * + "nota d’inquietudine nella voce di Christabel Von Sayn, "
+         * + "sottile e gentile come un raggio d’argento, alla luce fioca "
+         * + "delle candele che illuminavano la stanza.");
+         *
+         * while (matcher.find()) {
+         * System.out.println(matcher.group() + "\n");
+         * }
+         * System.exit(0);*/
+        //</editor-fold>
         try {
             if (isOSX()) {  // Se siamo su Mac
                 // Per risolvere il bug relativo alla prima property è stato 
                 // semplicemente cambiato il nome della classe
-                System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_NAME); 
+                System.setProperty("com.apple.mrj.application.apple.menu.about.name", APP_NAME);
                 System.setProperty("apple.awt.graphics.EnableQ2DX", "true");
                 System.setProperty("apple.laf.useScreenMenuBar", "true");
 
@@ -127,8 +149,6 @@ public class ManuzioViewer {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-
         setting = new SettingXML(urlXml);
         tm.start();
         mw = new MainWindow();
@@ -166,8 +186,8 @@ public class ManuzioViewer {
      * necessario chiamare il metodo
      * <tt>viewer.ManuzioViewer.shutdownConnectionPool</tt></p>
      *
-     * @param url Indirizzo al server secondo la * * * * * * * * * *
-     * struttura <tt>jdbc:postgresql://IP:PORT/DB_NAME</tt>
+     * @param url Indirizzo al server secondo la * * * * * * * * * * struttura
+     * <tt>jdbc:postgresql://IP:PORT/DB_NAME</tt>
      * @param user
      * @param password
      * @throws ConnectionPoolException
@@ -244,9 +264,8 @@ public class ManuzioViewer {
      * <tt>override = true</tt> and already exists a database with the given
      * name, then tries to delete and substitute it with a new database</p>
      *
-     * @param url the server path -either of the * * * * * * * * * * * * *
-     * form <tt>jdbc:subprotocol:serverPath</tt>, or only the serverPath
-     * itself
+     * @param url the server path -either of the * * * * * * * * * * * * * form
+     * <tt>jdbc:subprotocol:serverPath</tt>, or only the serverPath itself
      * @param dbName the name given to the new database
      * @param user the username to log in the server
      * @param password - the password used to log in the server using the
@@ -428,17 +447,16 @@ public class ManuzioViewer {
 
     /**
      * <p>Deletes the database with the given name
-     * <tt>dbName</tt> from the server.</p> <p>Despite to this method's
-     * name, this method could be used to delete any database, not only a
-     * Manuzio one.</p>
+     * <tt>dbName</tt> from the server.</p> <p>Despite to this method's name,
+     * this method could be used to delete any database, not only a Manuzio
+     * one.</p>
      *
-     * @param url the server path -either of the * * * * * * * * * * * * *
-     * form <tt>jdbc:subprotocol:serverPath</tt>, or only the serverPath
-     * itself
+     * @param url the server path -either of the * * * * * * * * * * * * * form
+     * <tt>jdbc:subprotocol:serverPath</tt>, or only the serverPath itself
      * @param dbName - the name of the database to delete
      * @param user the username to connect to the server
-     * @param password the password related to the <tt>user</tt> to connect
-     * to the server
+     * @param password the password related to the <tt>user</tt> to connect to
+     * the server
      * @throws SQLException if the database couldn't be deleted for any reason
      */
     public static void deleteManuzioDB(String url, String dbName, String user, String password) throws SQLException {

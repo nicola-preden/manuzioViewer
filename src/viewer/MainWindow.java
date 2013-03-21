@@ -183,11 +183,11 @@ public class MainWindow extends javax.swing.JFrame {
     void addToServer(int id, String type) {
         if (id == AddToServerWizard.COMPLETE_PROCEDURE) {
             // Avvia wizard per caricamento totale
-            AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, null, this);
+            AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, null);
             addToServerWizard.setVisible(true);
         } else {
             // Avvia wizard per append
-            AddToServerWizard addToServerWizard = new AddToServerWizard(id, type, this);
+            AddToServerWizard addToServerWizard = new AddToServerWizard(id, type);
             addToServerWizard.setVisible(true);
         }
     }
