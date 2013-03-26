@@ -74,7 +74,7 @@ public class ManuzioViewer {
      */
     public static void main(String[] args) {
         //<editor-fold defaultstate="collapsed" desc="regexTest">
-        /*Pattern pattern = Pattern.compile("(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.]*[.]+(\\s+|\\Z)", Pattern.UNICODE_CHARACTER_CLASS);
+        Pattern pattern = Pattern.compile("(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.]*(\\n|\\r|\\Z)", Pattern.UNICODE_CHARACTER_CLASS);
          
           Matcher matcher = pattern.matcher("1. Evocatio\n"
           + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "
@@ -89,9 +89,9 @@ public class ManuzioViewer {
           + "delle candele che illuminavano la stanza.");
          
           while (matcher.find()) {
-          System.out.println(matcher.group() + "\n");
+          System.out.println("Gruppo : "+matcher.group() + "\n");
           }
-          System.exit(0);*/
+          System.exit(0);
         //</editor-fold>
         try {
             if (isOSX()) {  // Se siamo su Mac

@@ -30,46 +30,46 @@ class SecondStepStrategy {
         /**
          * <p>Eventuali sottotipo dell'oggetto corrente. <p>
          */
-        private Set<TextType> subType = null;
-        /**
-         * <p>Eventuale estensione. </p>
-         */
-        private TextType superType = null;
+        private ArrayList<TextType> subType = null;
+        private Map<String, String> attribute = null;
         /**
          * <p>Padre dell'oggetto. </p>
          */
         private TextType conteiner = null;
+        private String componentName = null;
         /**
          * <p>Tutto il testo dell oggetto</p>
          */
         private String allText = null;
 
-        public TextType(Type type, TextType conteiner, TextType superType, String allText) {
+        public TextType(Type type, TextType conteiner, String componentName, String allText) {
             this.type = type;
             this.conteiner = conteiner;
-            this.superType = superType;
             this.allText = allText;
-            this.subType = new HashSet<TextType>();
+            this.subType = new ArrayList<TextType>();
+            this.attribute = new HashMap<String, String>();
+            this.componentName = componentName;
         }
 
         public Type getType() {
             return type;
         }
 
+        public String getComponentName() {
+            return componentName;
+        }
+
+        public boolean hasSubType() {
+            return subType.isEmpty();
+        }
+
         public TextType[] getSubType() {
-            return subType.toArray(new TextType[0]);
+            return subType.toArray(new TextType[subType.size()]);
         }
 
         public void addSubType(TextType subType) {
+            subType.setConteiner(this);
             this.subType.add(subType);
-        }
-
-        public TextType getSuperType() {
-            return superType;
-        }
-
-        public void setSuperType(TextType superType) {
-            this.superType = superType;
         }
 
         public TextType getConteiner() {
@@ -93,8 +93,22 @@ class SecondStepStrategy {
                     String[] text = next.getAllText();
                     al.addAll(Arrays.asList(text));
                 }
-                return al.toArray(new String[0]);
+                return al.toArray(new String[al.size()]);
             }
+        }
+
+        /**
+         *
+         * @param name
+         * @return <tt>null</tt> se non esiste
+         */
+        public String getAttribute(String name) {
+            String get = this.attribute.get(name);
+            return get;
+        }
+
+        public void setAttribute(String name, String attribute) {
+            this.attribute.put(name, attribute);
         }
     }
     /**
@@ -147,6 +161,7 @@ class SecondStepStrategy {
      * testo o selezioni, se String di una espressione regolare. <p>
      */
     private Map<String, Object> typeMap;
+    private ArrayList<JPanel> jpl;
     /**
      * <p>Il testo grezzo da inserire. </p>
      */
@@ -192,6 +207,7 @@ class SecondStepStrategy {
      *
      * @param cards JPanel al quale legare tutti le successive finestre
      * @param idx id del padre
+     * @param type Il nome del tipo root
      * @param text il testo da inserire
      * @param prev JButton che esegue <tt>previous()</tt>
      * @param next JButton che esegue <tt>next()</tt>
@@ -212,6 +228,10 @@ class SecondStepStrategy {
         } else {
             this.rootTypeName = type;
         }
+        /*
+         * Ogni stringa del vettore è un paragrafo letto dal file quindi dovrebbe
+         * finire con un \n ma per facilitare la scansione lo si riaggiunge
+         */
         for (int i = 0; i < text.size(); i++) {
             String get = text.get(i);
             if (!get.endsWith("\n")) {
@@ -240,18 +260,55 @@ class SecondStepStrategy {
             int x = ((Integer) get).intValue();
             if (x == SecondStepStrategy.ALLTEXT) {
                 textType = new TextType(rootType, null, null, this.text);
+                autoScan(textType); // cerco di minimizzare già il testo
                 maxTypeList.add(textType);
             }
         }
         if (get instanceof String) {
             // se stringa (regex automatica)
-            // applico le regole regex
+            // applico le regole regex avviando una pre inizializzazione
             Pattern pattern = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
             Matcher matcher = pattern.matcher(this.text);
             while (matcher.find()) {
                 textType = new TextType(rootType, null, null, matcher.group());
+                autoScan(textType); // cerco di minimizzare già il testo
                 maxTypeList.add(textType);
             }
+        }
+    }
+
+    private void autoScan(TextType tx) {
+        if (tx == null) {
+            return; // scansione ricorsiva terminata
+        }
+        Type type = tx.getType();
+        if (type.isMinimalUnit()) {
+            return;
+        }
+        if (!tx.hasSubType()) {
+            ComponentProperty[] components = type.getComponents();
+
+            if (components.length <= 1) {
+                if (!components[0].isOptional()) {
+                    String componentName = components[0].getComponentName();
+                    Type component = components[0].getComponent();
+                    Object get = typeMap.get(component.getTypeName());
+                    
+                    if (!component.isMinimalUnit()) { // se non è minimo
+                        if (get instanceof String) {
+                            Pattern pattern = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
+                            Matcher matcher = pattern.matcher(this.text);
+                            while (matcher.find()) {
+                                TextType textType = new TextType(component, tx, componentName, matcher.group());
+                                autoScan(textType); // chiamata ricorsiva
+                                tx.addSubType(textType);
+                            }
+                        }
+                    } else { // se minimo divido i simboli dalle parole
+                    }
+                }
+            }
+        } else { // se ha già dati elebotari
         }
     }
 
@@ -261,7 +318,6 @@ class SecondStepStrategy {
      * <ul>
      * <li><tt>SecondStepStrategy.ALLTEXT</tt></li>
      * <li><tt>SecondStepStrategy.SELECTEDTEXT</tt></li>
-     * <li><tt>SecondStepStrategy.REGULAR_EXP</tt></li>
      * <li><tt>SecondStepStrategy.PARAGRAPH</tt></li>
      * <li><tt>SecondStepStrategy.SENTENCE</tt></li>
      * <li><tt>SecondStepStrategy.WORD</tt></li>

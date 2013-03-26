@@ -296,7 +296,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             }
             idx++;
         }
-        return a.toArray(new viewer.manuzioParser.Type[0]);
+        return a.toArray(new viewer.manuzioParser.Type[a.size()]);
     }
 
     /**
@@ -414,7 +414,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             }
         }
         currentStep = secondStep;
-        sss.start();
         sss.next();
         return sss;
     }
