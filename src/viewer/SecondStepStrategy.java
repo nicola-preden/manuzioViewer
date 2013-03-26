@@ -1,13 +1,12 @@
 package viewer;
 
+import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JPanel;
@@ -115,6 +114,8 @@ class SecondStepStrategy {
      * <p>Pannello al quale aggiungere il CardLayout. </p>
      */
     private JPanel cards;
+    private JPanel current;
+    private boolean process = false;
     /**
      * <p>Pulsante di controllo per andare al JPanel precedente</p>
      */
@@ -135,7 +136,6 @@ class SecondStepStrategy {
      * <p>Varibile di controllo per stabilere la fine della preparazione per
      * inserimento. </p>
      */
-    private volatile boolean isEnd;
     /**
      * <p>Nome del tipo dell'oggetto root. </p>
      */
@@ -149,7 +149,7 @@ class SecondStepStrategy {
      * <tt>SecondStepStrategy.ALLTEXT</tt> la variabile rimarrà <tt>0</tt>.
      * </p>
      */
-    private int idxMaxtype = 0;
+    private int idxMaxtype = -1;
     /**
      * <p>Indice corrente in un array Maxtype. </p>
      */
@@ -215,11 +215,11 @@ class SecondStepStrategy {
      * @exception NullPointerException
      */
     public SecondStepStrategy(JPanel cards, int idx, String type, ArrayList<String> text, javax.swing.JButton prev, javax.swing.JButton next, javax.swing.JButton close) {
-        this.cards = cards;
-        this.rootIdx = idx;
         if ((cards == null) || (prev == null) || (next == null) || (close == null)) {
             throw new NullPointerException();
         }
+        this.cards = cards;
+        this.rootIdx = idx;
         this.prev = prev;
         this.next = next;
         this.close = close;
@@ -240,6 +240,10 @@ class SecondStepStrategy {
             this.text += text.get(i);
         }
         typeMap = new HashMap<String, Object>();
+        this.prev.setEnabled(false);
+        this.next.setText("Avanti");
+        this.close.setEnabled(false);
+        
     }
 
     /**
@@ -288,12 +292,12 @@ class SecondStepStrategy {
         if (!tx.hasSubType()) {
             ComponentProperty[] components = type.getComponents();
 
-            if (components.length <= 1) {
+            if (components.length == 1) {
                 if (!components[0].isOptional()) {
                     String componentName = components[0].getComponentName();
                     Type component = components[0].getComponent();
                     Object get = typeMap.get(component.getTypeName());
-                    
+
                     if (!component.isMinimalUnit()) { // se non è minimo
                         if (get instanceof String) {
                             Pattern pattern = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
@@ -304,11 +308,24 @@ class SecondStepStrategy {
                                 tx.addSubType(textType);
                             }
                         }
-                    } else { // se minimo divido i simboli dalle parole
+                    } else { // se minimo divido i simboli quali .,"<>dalle parole
+                        if (get instanceof String) {
+                            Pattern min = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
+                            Matcher m = min.matcher(this.text);
+                            Pattern min_simple = Pattern.compile("(\\p{Punct}+)|(\\w+)|(\\p{Punct}+)", Pattern.UNICODE_CHARACTER_CLASS);
+                            Matcher r;
+                            while (m.find()) {
+                                String t = m.group();
+                                r = min_simple.matcher(t);
+                                while (r.find()) {
+                                    TextType textType = new TextType(component, tx, componentName, r.group());
+                                    tx.addSubType(textType);
+                                }
+                            }
+                        }
                     }
                 }
             }
-        } else { // se ha già dati elebotari
         }
     }
 
@@ -370,11 +387,11 @@ class SecondStepStrategy {
                 break;
             case SecondStepStrategy.PARAGRAPH:
                 // divide in paragrafi
-                typeMap.put(type, "(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.]*[.]+(\\s+|\\Z)");
+                typeMap.put(type, "(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.].*(\\n|\\r|\\z)");
                 break;
             case SecondStepStrategy.SENTENCE:
                 // divide in frasi
-                typeMap.put(type, "(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.]*[.]+(\\s+|\\Z)");
+                typeMap.put(type, "(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^.]+([. ]|\\z)");
                 break;
             case SecondStepStrategy.WORD:
                 // primo livello di selezione, al secondo blocco divide le sequenze \w* da \p{Punct}*
@@ -396,6 +413,15 @@ class SecondStepStrategy {
      * @return <tt>TRUE</tt> se esite
      */
     public synchronized boolean next() {
+        if (this.idxMaxtype == -1) {
+            if (!this.process){ // inizializzo
+            current = new JPanel();
+            // genero primo pannello
+            CardLayout layout = (CardLayout) cards.getLayout();
+            layout.addLayoutComponent(current, "init");}
+        } else {
+            // raccolgo dati
+        }
         return false;
     }
 

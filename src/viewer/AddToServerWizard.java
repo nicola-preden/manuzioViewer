@@ -3,6 +3,7 @@ package viewer;
 import java.awt.CardLayout;
 import java.awt.Desktop;
 import java.awt.GridLayout;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -414,6 +415,9 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             }
         }
         currentStep = secondStep;
+        CardLayout layout = (CardLayout)this.cards.getLayout();
+        layout.next(cards);
+        sss.start();
         sss.next();
         return sss;
     }
@@ -695,7 +699,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     }
                     break;
                 case regexLarge:
-                    int x = JOptionPane.showConfirmDialog(this, "Confermi i dati inseriti?", "Conferma?", JOptionPane.YES_NO_OPTION);
+                    int x = JOptionPane.showConfirmDialog(this, "Confermi i dati inseriti?\nL'operazione potrebbe richiedere qualche minuto!!", "Conferma?", JOptionPane.YES_NO_OPTION);
                     if (x == JOptionPane.YES_OPTION) {
                         sss = prepareSecondStepCard();
                     }
