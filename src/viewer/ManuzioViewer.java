@@ -73,10 +73,11 @@ public class ManuzioViewer {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        /*//<editor-fold defaultstate="collapsed" desc="regexTest">
-        Pattern p = Pattern.compile("\\S+", Pattern.UNICODE_CHARACTER_CLASS);
+        //<editor-fold defaultstate="collapsed" desc="regexTest">
+        /*
+        Pattern p = Pattern.compile("(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.].*(\\n|\\r|\\z)", Pattern.UNICODE_CHARACTER_CLASS);
 
-        Pattern z = Pattern.compile("(\\p{Punct}+)|(\\w+)|(\\p{Punct}+)", Pattern.UNICODE_CHARACTER_CLASS);
+        Pattern z = Pattern.compile("(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^.]+([. ]|\\z)", Pattern.UNICODE_CHARACTER_CLASS);
 
         Matcher m = p.matcher("1. Evocatio\n"
                 + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "

@@ -1,15 +1,21 @@
 package viewer;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.GridLayout;
+import java.awt.LayoutManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.GroupLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import viewer.manuzioParser.ComponentProperty;
 import viewer.manuzioParser.Type;
 
@@ -114,7 +120,10 @@ class SecondStepStrategy {
      * <p>Pannello al quale aggiungere il CardLayout. </p>
      */
     private JPanel cards;
-    private JPanel current;
+    private JLabel tittle;
+    /**
+     * <p>Se il gruppo di due pannelli è gia stato completato. </p>
+     */
     private boolean process = false;
     /**
      * <p>Pulsante di controllo per andare al JPanel precedente</p>
@@ -145,16 +154,9 @@ class SecondStepStrategy {
      */
     private viewer.manuzioParser.Type rootType;
     /**
-     * <p>Indice corrente dell'array dei Maxtype. Se descritto come un
-     * <tt>SecondStepStrategy.ALLTEXT</tt> la variabile rimarrà <tt>0</tt>.
-     * </p>
+     * <p>Testa dell'albero contenente i dati. </p>
      */
-    private int idxMaxtype = -1;
-    /**
-     * <p>Indice corrente in un array Maxtype. </p>
-     */
-    private int idxPostype = 0;
-    private LinkedList<TextType> maxTypeList;
+    private TextType maxTypeList;
     /**
      * <p>Elenco dei tipi inseriti nel oggetto (typeName,Object) per i quali
      * generare delle query. Se Object è un Integer allora parliamo di tutto il
@@ -162,6 +164,10 @@ class SecondStepStrategy {
      */
     private Map<String, Object> typeMap;
     private ArrayList<JPanel> jpl;
+    /**
+     * <p>Indice corrente in un array di JPanel. </p>
+     */
+    private int idxPost = -1;
     /**
      * <p>Il testo grezzo da inserire. </p>
      */
@@ -200,10 +206,12 @@ class SecondStepStrategy {
      * parametri il JPanel al quale aggiungere un CardLayout. È necessario
      * specificare l'id del oggetto padre. Se <tt>idx ==
      * AddToServerWizard.COMPLETE_PROCEDURE</tt> allora il testo userà come
-     * padre un nuovo maxType</p>
+     * padre un nuovo maxType. </p>
      *
      * <p>I parametri relativi a <tt>prev</tt>, <tt>next</tt>, <tt>close</tt>
-     * vengo usati sono per semplificare la visualizzazione del layout. </p>
+     * vengo usati sono per semplificare la visualizzazione del layout. Inoltre
+     * il JPanel deve essere già contenere un <tt>java.awt.BorderLayout</tt>.
+     * </p>
      *
      * @param cards JPanel al quale legare tutti le successive finestre
      * @param idx id del padre
@@ -214,11 +222,22 @@ class SecondStepStrategy {
      * @param close JButton che chiude la finestra
      * @exception NullPointerException
      */
-    public SecondStepStrategy(JPanel cards, int idx, String type, ArrayList<String> text, javax.swing.JButton prev, javax.swing.JButton next, javax.swing.JButton close) {
+    public SecondStepStrategy(JPanel cards, int idx, String type, String text, javax.swing.JButton prev, javax.swing.JButton next, javax.swing.JButton close) {
         if ((cards == null) || (prev == null) || (next == null) || (close == null)) {
             throw new NullPointerException();
         }
-        this.cards = cards;
+        if (!(cards.getLayout() instanceof BorderLayout)) {
+            throw new IllegalArgumentException();
+        }
+        this.tittle = new JLabel();
+        this.tittle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        this.tittle.setText("<html><b>Personalizzazione Dati</b></html>");
+        this.tittle.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 0, 0)));
+        cards.add(this.tittle, java.awt.BorderLayout.PAGE_START);
+
+        this.cards = new JPanel(new CardLayout());
+        this.cards.setMaximumSize(new java.awt.Dimension(595, 346));
+        cards.add(this.cards, java.awt.BorderLayout.CENTER);
         this.rootIdx = idx;
         this.prev = prev;
         this.next = next;
@@ -228,22 +247,8 @@ class SecondStepStrategy {
         } else {
             this.rootTypeName = type;
         }
-        /*
-         * Ogni stringa del vettore è un paragrafo letto dal file quindi dovrebbe
-         * finire con un \n ma per facilitare la scansione lo si riaggiunge
-         */
-        for (int i = 0; i < text.size(); i++) {
-            String get = text.get(i);
-            if (!get.endsWith("\n")) {
-                get += "\n";
-            }
-            this.text += text.get(i);
-        }
         typeMap = new HashMap<String, Object>();
-        this.prev.setEnabled(false);
-        this.next.setText("Avanti");
-        this.close.setEnabled(false);
-        
+        this.jpl = new ArrayList<JPanel>();
     }
 
     /**
@@ -252,7 +257,10 @@ class SecondStepStrategy {
      */
     public void start() {
         System.gc();
-        maxTypeList = new LinkedList();
+        this.prev.setEnabled(false);
+        this.next.setText("Avanti");
+        this.close.setEnabled(true);
+        this.next.setEnabled(true);
         rootType = ManuzioViewer.schema.getType(this.rootTypeName);
         if (!typeMap.containsKey(rootTypeName)) {
             throw new IllegalArgumentException("Missing type");
@@ -265,19 +273,56 @@ class SecondStepStrategy {
             if (x == SecondStepStrategy.ALLTEXT) {
                 textType = new TextType(rootType, null, null, this.text);
                 autoScan(textType); // cerco di minimizzare già il testo
-                maxTypeList.add(textType);
+                this.maxTypeList = textType;
             }
-        }
-        if (get instanceof String) {
-            // se stringa (regex automatica)
-            // applico le regole regex avviando una pre inizializzazione
-            Pattern pattern = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
-            Matcher matcher = pattern.matcher(this.text);
-            while (matcher.find()) {
-                textType = new TextType(rootType, null, null, matcher.group());
-                autoScan(textType); // cerco di minimizzare già il testo
-                maxTypeList.add(textType);
+            ComponentProperty[] components = rootType.getComponents();
+            JPanel current = new JPanel();
+            this.jpl.add(current);
+            this.idxPost = 0;
+            GroupLayout layout = new GroupLayout(current);
+            current.setLayout(layout);
+            layout.setAutoCreateGaps(true);
+            layout.setAutoCreateContainerGaps(true);
+
+            for (ComponentProperty prop : components) {
+                JCheckBox c1 = new JCheckBox();
+                c1.setName(prop.getComponentName() + "_checkBox");
+                if (prop.isOptional()) {
+                    c1.setSelected(false);
+                    c1.setEnabled(true);
+                } else {
+                    c1.setSelected(true);
+                    c1.setEnabled(false);
+                }
+                c1.setText("Optionale: ");
+                c1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+                JLabel c2 = new JLabel();
+                c2.setName(prop.getComponentName() + "_label");
+                JTextField c3 = new JTextField();
+                c3.setName(prop.getComponentName() + "_textField");
+                c3.setToolTipText("Numero di oggetti da caricare");
+                c3.setText("1");
+                if (prop.isPlural()) {
+                    c3.setEnabled(true);
+                } else {
+                    c3.setEnabled(false);
+                }
+                layout.setHorizontalGroup(
+                        layout.createSequentialGroup()
+                        .addComponent(c1)
+                        .addComponent(c2)
+                        .addComponent(c3));
+                layout.setVerticalGroup(
+                        layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                        .addComponent(c1)
+                        .addComponent(c2)
+                        .addComponent(c3)));
             }
+            // genero primo pannello
+            cards.add(current, "init");
+            CardLayout lay = (CardLayout) cards.getLayout();
+            lay.first(cards);
         }
     }
 
@@ -413,14 +458,19 @@ class SecondStepStrategy {
      * @return <tt>TRUE</tt> se esite
      */
     public synchronized boolean next() {
-        if (this.idxMaxtype == -1) {
-            if (!this.process){ // inizializzo
-            current = new JPanel();
-            // genero primo pannello
-            CardLayout layout = (CardLayout) cards.getLayout();
-            layout.addLayoutComponent(current, "init");}
+        JPanel current;
+        if (true) {
+            if (!this.process) { // inizializzo rpimo pannello
+                current = new JPanel();
+                this.jpl.add(current);
+                // genero primo pannello
+                CardLayout layout = (CardLayout) cards.getLayout();
+                layout.addLayoutComponent(current, "init");
+                return false;
+            }
         } else {
-            // raccolgo dati
+            // raccolgo dati e aumento indice
+            return false;
         }
         return false;
     }

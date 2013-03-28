@@ -179,7 +179,7 @@ public class MainWindow extends javax.swing.JFrame {
     void addToServer(int id, String type) {
         if (id == AddToServerWizard.COMPLETE_PROCEDURE) {
             // Avvia wizard per caricamento totale
-            AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, null);
+            AddToServerWizard addToServerWizard = new AddToServerWizard(AddToServerWizard.COMPLETE_PROCEDURE, type);
             addToServerWizard.setVisible(true);
         } else {
             // Avvia wizard per append
@@ -573,7 +573,7 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }//GEN-LAST:event_toolBarSx_NewTypeActionPerformed
 
     private void toolBarGen_AddtoDBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolBarGen_AddtoDBActionPerformed
-        this.addToServer(AddToServerWizard.COMPLETE_PROCEDURE, null);
+        this.addToServer(AddToServerWizard.COMPLETE_PROCEDURE, ManuzioViewer.schema.getMaximalUnit().getTypeName());
     }//GEN-LAST:event_toolBarGen_AddtoDBActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;

@@ -20,7 +20,7 @@ import javax.swing.SwingWorker;
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
-public class TaskRawInput extends SwingWorker<ArrayList<String>, Void> {
+public class TaskRawInput extends SwingWorker<String, Void> {
 
     // Le classi usate per le operazioni su disco sfruttano le nuove api per Java 1.7
     private Path p;
@@ -41,20 +41,25 @@ public class TaskRawInput extends SwingWorker<ArrayList<String>, Void> {
     }
 
     @Override
-    protected ArrayList<String> doInBackground() {
-        ArrayList fun = new ArrayList();
+    protected String doInBackground() {
+        String fun = "";
         try {
             String s;
 
             size = Files.size(p); // dimensione totale del file
             current = 0;
             // uso classi java 1.7
-            
+
             BufferedReader nbr = Files.newBufferedReader(p, StandardCharsets.UTF_8);
 
             while ((s = nbr.readLine()) != null && !this.isCancelled()) {
                 current += s.getBytes(StandardCharsets.UTF_8).length;
-                fun.add(s);
+                if (s.compareTo("") != 0) {
+                    if (!s.endsWith("\n")) {
+                        s += "\n";
+                    }
+                    fun += s;
+                }
                 int perc = (int) (100 * current / size);
                 setProgress(perc);
             }

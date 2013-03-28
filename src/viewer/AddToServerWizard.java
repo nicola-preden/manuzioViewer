@@ -1,9 +1,9 @@
 package viewer;
 
 import java.awt.CardLayout;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.GridLayout;
-import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -127,7 +127,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     /**
      * <p>Il file diviso i paragrafi. </p>
      */
-    private ArrayList<String> filetext;
+    private String filetext;
     private ArrayList<AuxJP_regex> type_setting;
 
     /**
@@ -144,16 +144,13 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     public AddToServerWizard(int id, String type) {
         initComponents();
         idX_to = id;
-        if (idX_to == AddToServerWizard.COMPLETE_PROCEDURE) {
-            stringX_to = null;
+        if (type == null) {
+            // type mancante thrown exception
+            throw new IllegalArgumentException();
         } else {
-            if (type == null) {
-                // type mancante thrown exception
-                throw new IllegalArgumentException();
-            } else {
-                stringX_to = type;
-            }
+            stringX_to = type;
         }
+
 
         jB_previous.setEnabled(false);
         jProgressBar.setVisible(false);
@@ -414,11 +411,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     break;
             }
         }
-        currentStep = secondStep;
-        CardLayout layout = (CardLayout)this.cards.getLayout();
-        layout.next(cards);
-        sss.start();
-        sss.next();
         return sss;
     }
 
@@ -516,14 +508,14 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             jP_fileInnerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_fileInnerLayout.createSequentialGroup()
                 .addContainerGap()
-                .add(jFileChooser, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 583, Short.MAX_VALUE)
+                .add(jFileChooser, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 597, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jP_fileInnerLayout.setVerticalGroup(
             jP_fileInnerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_fileInnerLayout.createSequentialGroup()
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .add(jFileChooser, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 334, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .add(jFileChooser, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 494, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -549,11 +541,11 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jP_regexInner.setLayout(jP_regexInnerLayout);
         jP_regexInnerLayout.setHorizontalGroup(
             jP_regexInnerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 591, Short.MAX_VALUE)
+            .add(0, 681, Short.MAX_VALUE)
         );
         jP_regexInnerLayout.setVerticalGroup(
             jP_regexInnerLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 342, Short.MAX_VALUE)
+            .add(0, 502, Short.MAX_VALUE)
         );
 
         jScroll_regex.setViewportView(jP_regexInner);
@@ -571,6 +563,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
         jTA_confirmOutput.setEditable(false);
         jTA_confirmOutput.setColumns(20);
+        jTA_confirmOutput.setLineWrap(true);
         jTA_confirmOutput.setRows(5);
         jScrollPane1.setViewportView(jTA_confirmOutput);
 
@@ -580,7 +573,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
         cards.add(jP_firstStep, "firstStep");
 
-        jP_secondStep.setLayout(new java.awt.CardLayout());
+        jP_secondStep.setLayout(new java.awt.BorderLayout());
         cards.add(jP_secondStep, "secondStep");
 
         getContentPane().add(cards, java.awt.BorderLayout.CENTER);
@@ -615,7 +608,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jP_controlLayout.setHorizontalGroup(
             jP_controlLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_controlLayout.createSequentialGroup()
-                .addContainerGap(308, Short.MAX_VALUE)
+                .addContainerGap(322, Short.MAX_VALUE)
                 .add(jP_controlLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                     .add(jProgressBar, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_controlLayout.createSequentialGroup()
@@ -676,11 +669,11 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                         JComboBox<String> jComboBox = next.getjComboBox();
                         int x = jComboBox.getSelectedIndex();
                         if (x == 4) { // seleziona tutto il testo
-                            if (!allText) {
+                            if (!allText && this.stringX_to.compareTo(next.getType().getTypeName()) == 0) {
                                 allText = true;
                             } else {
                                 err = true;
-                                JOptionPane.showMessageDialog(this, "Attenzione ci può essere un solo tipo per inserimento che contenga l'intero file", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(this, "Attenzione in più di un tipo è attiva l'opzione \"Tutto il testo\"\nOppure è stata attivata su un tipo non compatibile", "Attenzione", JOptionPane.WARNING_MESSAGE);
                             }
                         }
                         if (x == 6) { // campi regex
@@ -692,6 +685,11 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                             }
                         }
                     }
+                    if (!allText && !err) {
+                        err = true;
+                        JOptionPane.showMessageDialog(this, "Attenzione ci deve essere almeno un tipo valido per inserimento che contenga l'intero file", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                    }
+
                     if (!err) { // passo al riepilogo
                         layout = (CardLayout) jP_firstStep.getLayout();
                         prepareFirstStepCard(regexLarge);
@@ -699,15 +697,25 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     }
                     break;
                 case regexLarge:
-                    int x = JOptionPane.showConfirmDialog(this, "Confermi i dati inseriti?\nL'operazione potrebbe richiedere qualche minuto!!", "Conferma?", JOptionPane.YES_NO_OPTION);
+                    int x = JOptionPane.showConfirmDialog(this, "Confermi i dati inseriti?", "Conferma?", JOptionPane.YES_NO_OPTION);
                     if (x == JOptionPane.YES_OPTION) {
+                        this.jB_next.setEnabled(false);
+                        this.jB_previous.setEnabled(false);
+                        this.jB_close.setEnabled(false);
+                        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                         sss = prepareSecondStepCard();
+                        sss.start();
+                        layout = (CardLayout) cards.getLayout();
+                        layout.next(cards);
+                        this.setCursor(Cursor.getDefaultCursor());
+                        currentStep = secondStep;
+                        pack();
                     }
+                    break;
                 default:
                     break;
             }
-        }
-        if (currentStep.compareTo(secondStep) == 0) {
+        } else if (currentStep.compareTo(secondStep) == 0) {
             boolean next = sss.next();
         }
 
@@ -754,14 +762,17 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     break;
                 case regexLarge:
                     this.setVisible(false);
+                    break;
                 //chiudi possibili task già avviati
                 default:
                     break;
             }
         }
         if (currentStep.compareTo(secondStep) == 0) {
+            this.setVisible(false);
         }
     }//GEN-LAST:event_jB_closeActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel cards;
     private javax.swing.JButton jB_close;
