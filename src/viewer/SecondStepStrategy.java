@@ -11,11 +11,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import viewer.manuzioParser.Attribute;
 import viewer.manuzioParser.ComponentProperty;
 import viewer.manuzioParser.Type;
 
@@ -279,10 +281,10 @@ class SecondStepStrategy {
             JPanel current = new JPanel();
             this.jpl.add(current);
             this.idxPost = 0;
-            GroupLayout layout = new GroupLayout(current);
-            current.setLayout(layout);
-            layout.setAutoCreateGaps(true);
-            layout.setAutoCreateContainerGaps(true);
+            current.setLayout(new BoxLayout(current, BoxLayout.Y_AXIS));
+            current.add(new JLabel("<HTML><p>Specificare il numero di componenti per il tipo "
+                    +rootType.getTypeName()
+                    +" ed i valori degli attrivuti </p></HTML>"));
 
             for (ComponentProperty prop : components) {
                 JCheckBox c1 = new JCheckBox();
@@ -298,6 +300,7 @@ class SecondStepStrategy {
                 c1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
                 JLabel c2 = new JLabel();
                 c2.setName(prop.getComponentName() + "_label");
+                c2.setText(prop.getComponentName() + " : " + (prop.isPlural() ? prop.getComponent().getPluralName() : prop.getComponent().getTypeName()));
                 JTextField c3 = new JTextField();
                 c3.setName(prop.getComponentName() + "_textField");
                 c3.setToolTipText("Numero di oggetti da caricare");
@@ -307,17 +310,13 @@ class SecondStepStrategy {
                 } else {
                     c3.setEnabled(false);
                 }
-                layout.setHorizontalGroup(
-                        layout.createSequentialGroup()
-                        .addComponent(c1)
-                        .addComponent(c2)
-                        .addComponent(c3));
-                layout.setVerticalGroup(
-                        layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                        .addComponent(c1)
-                        .addComponent(c2)
-                        .addComponent(c3)));
+                current.add(c1);
+                current.add(c2);
+                current.add(c3);
+            }
+            Attribute[] ownAt = rootType.getOwnAt(Type.number.BOTH);
+            for (Attribute att : ownAt) {
+                
             }
             // genero primo pannello
             cards.add(current, "init");
