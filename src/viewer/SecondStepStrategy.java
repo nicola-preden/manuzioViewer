@@ -2,8 +2,10 @@ package viewer;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.GridLayout;
-import java.awt.LayoutManager;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,8 +13,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.BoxLayout;
-import javax.swing.GroupLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -127,6 +127,7 @@ class SecondStepStrategy {
      * <p>Se il gruppo di due pannelli è gia stato completato. </p>
      */
     private boolean process = false;
+    private boolean isEnd = false;
     /**
      * <p>Pulsante di controllo per andare al JPanel precedente</p>
      */
@@ -255,7 +256,9 @@ class SecondStepStrategy {
 
     /**
      * <p>Prepara la struttura interna a sencoda delle precedenti chiamate ad i
-     * vari <tt>addType(...)</tt></p>
+     * vari <tt>addType(...)</tt>. </p>
+     *
+     * @throws IllegalArgumentException
      */
     public void start() {
         System.gc();
@@ -269,23 +272,91 @@ class SecondStepStrategy {
         }
         Object get = typeMap.get(rootTypeName);
         TextType textType;
-        if (get instanceof Integer) {
-            // se è intero
-            int x = ((Integer) get).intValue();
-            if (x == SecondStepStrategy.ALLTEXT) {
-                textType = new TextType(rootType, null, null, this.text);
-                autoScan(textType); // cerco di minimizzare già il testo
-                this.maxTypeList = textType;
-            }
-            ComponentProperty[] components = rootType.getComponents();
-            JPanel current = new JPanel();
-            this.jpl.add(current);
-            this.idxPost = 0;
-            current.setLayout(new BoxLayout(current, BoxLayout.Y_AXIS));
-            current.add(new JLabel("<HTML><p>Specificare il numero di componenti per il tipo "
-                    + rootType.getTypeName()
-                    + " ed i valori degli attrivuti </p></HTML>"));
+        if (!(get instanceof Integer)) {
+            throw new IllegalArgumentException("Missing type");
+        }
 
+        int x = ((Integer) get).intValue();
+        // controllo coerenza tipi
+        if (x == SecondStepStrategy.ALLTEXT) {
+            textType = new TextType(rootType, null, null, this.text);
+            this.maxTypeList = textType;
+        } else {
+            throw new IllegalArgumentException("Missing type");
+        }
+
+        this.isEnd = autoScan(this.maxTypeList); // cerco di minimizzare già il testo
+
+
+        if (!this.isEnd) { // è necessario gestire dei sotto tipi
+            this.printPaneSet(this.maxTypeList);
+            CardLayout lay = (CardLayout) cards.getLayout();
+            lay.first(cards);
+        } else {
+            // non ci stanno dei sotto tipi da gestire
+        }
+
+    }
+
+    /**
+     * <p>Disegna un pannello atto a visualizzare attributi e sotto-tipi
+     * correnti. </p>
+     *
+     * @param tx TextType corrente
+     */
+    private void printPaneSet(TextType tx) {
+        JPanel pane = new JPanel();
+        this.jpl.add(pane);
+        this.idxPost = 0;
+        pane.setPreferredSize(cards.getPreferredSize());
+        GridBagLayout experimentLayout = new GridBagLayout();
+        GridBagConstraints c;
+        pane.setLayout(experimentLayout);
+        JLabel l;
+
+        int i = 0;
+        if (tx.getType().hasComponents()) {
+            //<editor-fold defaultstate="collapsed" desc="Inserimento Componenti">
+            ComponentProperty[] components = tx.getType().getComponents();
+            l = new JLabel("<HTML><p><b>Specificare il numero di componenti per il tipo "
+                    + tx.getType().getTypeName() + "</b></p></HTML>");
+            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.FIRST_LINE_START;
+            c.gridx = 0;
+            c.gridwidth = 3;
+            c.gridy = 0;
+            pane.add(l, c);
+            i++;
+            // nomi colonne
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.LINE_START;
+            c.gridx = 0;
+            c.gridy = 1;
+            l = new JLabel("Optionale");
+            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            pane.add(l, c);
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.LINE_START;
+            c.gridx = 1;
+            c.gridy = 1;
+            l = new JLabel("Componente : tipo");
+            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            pane.add(l, c);
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.LINE_START;
+            c.gridx = 2;
+            c.gridy = 1;
+            l = new JLabel("Valore");
+            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            pane.add(l, c);
+
+            i++;
+            // Inserimento Componenti
             for (ComponentProperty prop : components) {
                 JCheckBox c1 = new JCheckBox();
                 c1.setName(prop.getComponentName() + "_checkBox");
@@ -296,9 +367,10 @@ class SecondStepStrategy {
                     c1.setSelected(true);
                     c1.setEnabled(false);
                 }
-                c1.setText("Optionale: ");
-                c1.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+                c1.setText(null);
+                c1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 JLabel c2 = new JLabel();
+                c2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 c2.setName(prop.getComponentName() + "_label");
                 c2.setText(prop.getComponentName() + " : " + (prop.isPlural() ? prop.getComponent().getPluralName() : prop.getComponent().getTypeName()));
                 JTextField c3 = new JTextField();
@@ -310,25 +382,92 @@ class SecondStepStrategy {
                 } else {
                     c3.setEnabled(false);
                 }
-                current.add(c1);
-                current.add(c2);
-                current.add(c3);
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.LINE_START;
+                c.gridx = 0;
+                c.gridy = i;
+                pane.add(c1, c);
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.gridx = 1;
+                c.gridy = i;
+                pane.add(c2, c);
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.gridx = 2;
+                c.gridy = i;
+                pane.add(c3, c);
+                i++;
             }
-            Attribute[] ownAt = rootType.getOwnAt(Type.number.BOTH);
-            for (Attribute att : ownAt) {
-            }
-            // genero primo pannello
-            cards.add(current, "init");
-            CardLayout lay = (CardLayout) cards.getLayout();
-            lay.first(cards);
+            //</editor-fold>
         }
+        if (tx.getType().hasAt(Type.number.SINGULAR)) {
+            //<editor-fold defaultstate="collapsed" desc="Inserimento Attributi">
+            Attribute[] ownAt = tx.getType().getAt(Type.number.SINGULAR);
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.LINE_START;
+            c.gridx = 0;
+            c.gridwidth = 3;
+            c.gridy = i;
+            l = new JLabel("<HTML><p><b>Specificare gli attributi per il tipo "
+                    + tx.getType().getTypeName() + "</b></p></HTML>");
+            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            pane.add(l, c);
+            i++;
+            // Nomi colonne
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.LINE_START;
+            c.gridx = 0;
+            c.gridy = i;
+            l = new JLabel("Attributo : Tipo");
+            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            pane.add(l, c);
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.gridx = 1;
+            c.gridy = i;
+            l = new JLabel("Valore");
+            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            pane.add(l, c);
+            i++;
+
+            for (Attribute att : ownAt) {
+                JLabel c1 = new JLabel(att.getAtName() + " : " + att.getAtType());
+                c1.setName(att.getAtName() + "_label");
+                JTextField c2 = new JTextField();
+                c2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                c2.setToolTipText("Valore dell'attributo");
+                c2.setName(att.getAtName() + "__textField");
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.LINE_START;
+                c.gridx = 0;
+                c.gridy = i;
+                pane.add(c1, c);
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.gridx = 1;
+                c.gridy = i;
+                pane.add(c2, c);
+                i++;
+            }
+            //</editor-fold>
+        }
+        // genero primo pannello
+        cards.add(pane, "init");
+    }
+
+    private void printPaneGet() {
     }
 
     /**
      * <p>Esegue una scansione automatica dei figli dell'albero. </p>
      *
      * @param tx il nodo da analizzare
-     * @return ritona true se c'e un figlio ancora da analizzare
+     * @return ritona <tt>false</tt> se c'e un figlio ancora da analizzare
      */
     private boolean autoScan(TextType tx) {
         if (tx == null) {
@@ -343,6 +482,9 @@ class SecondStepStrategy {
 
             if (components == null) {
                 return true;
+            }
+            if (type.hasAt(Type.number.SINGULAR)) {
+                return false;
             }
             if (components.length == 1) {
                 if (!components[0].isOptional()) {
@@ -473,7 +615,7 @@ class SecondStepStrategy {
      */
     public synchronized boolean next() {
         JPanel current;
-        if (true) {
+        if (!this.isEnd) {
             if (!this.process) { // inizializzo rpimo pannello
                 current = new JPanel();
                 this.jpl.add(current);
@@ -481,9 +623,10 @@ class SecondStepStrategy {
                 CardLayout layout = (CardLayout) cards.getLayout();
                 layout.addLayoutComponent(current, "init");
                 return false;
+            } else {
             }
         } else {
-            // raccolgo dati e aumento indice
+            // Preparo i dati per poi chiamare il processo che caricherù i dati
             return false;
         }
         return false;
@@ -501,14 +644,17 @@ class SecondStepStrategy {
     }
 
     /**
-     * <p>Ritorna l'elenco di query da eseguire per il caricamento nel database.
-     * Se la procedura di caricamento dati non è ancora terminata
-     * (<tt>next()</tt> ritorna <tt>TRUE</tt>) il risultato sarà
+     * <p>Lancia i thread che eseguiranno effettivamente le query. Se la
+     * procedura di caricamento dati non è ancora terminata (<tt>next()</tt>
+     * ritorna <tt>TRUE</tt>) il risultato sarà
      * <tt>null</tt>. </p>
      *
-     * @return un ArrayList di Stringhe
+     * @param windows finestra usata per la procedura di caricamento
+     * @param jpb progress bar nella quale viene visualizzato lo stato
      */
-    public synchronized ArrayList<String>[] getResult() {
-        return null;
+    public synchronized <JFrame extends PropertyChangeListener> void doLoading(JFrame windows) {
+        if (this.isEnd) {
+            // lancio il processo che si occuperò di caricare i dati
+        }
     }
 }

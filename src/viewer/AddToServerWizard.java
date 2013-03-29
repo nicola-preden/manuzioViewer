@@ -306,7 +306,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private void initRegexLarge() {
         String path = jFileChooser.getSelectedFile().getPath();
         jTA_confirmOutput.setText("");
-        jTA_confirmOutput.append("File: " + path + "\n\nType List: \n");
+        jTA_confirmOutput.append("File:"+" \"" + path + "\"\n\n"+"Type List: \n");
         Iterator<AuxJP_regex> iterator = type_setting.iterator();
         while (iterator.hasNext()) { // scorre tutti gli oggetti inseriti
             AuxJP_regex next = iterator.next();
@@ -445,6 +445,10 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 }
             }
         }
+        if (currentStep.compareTo(secondStep) == 0) {
+            if ("progress".equals(evt.getPropertyName())) {
+            }
+        }
     }
 
     /**
@@ -573,6 +577,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
         cards.add(jP_firstStep, "firstStep");
 
+        jP_secondStep.setMinimumSize(new java.awt.Dimension(595, 363));
+        jP_secondStep.setPreferredSize(new java.awt.Dimension(609, 523));
         jP_secondStep.setLayout(new java.awt.BorderLayout());
         cards.add(jP_secondStep, "secondStep");
 
@@ -772,7 +778,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             this.setVisible(false);
         }
     }//GEN-LAST:event_jB_closeActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel cards;
     private javax.swing.JButton jB_close;
