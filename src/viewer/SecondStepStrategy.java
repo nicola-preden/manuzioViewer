@@ -283,8 +283,8 @@ class SecondStepStrategy {
             this.idxPost = 0;
             current.setLayout(new BoxLayout(current, BoxLayout.Y_AXIS));
             current.add(new JLabel("<HTML><p>Specificare il numero di componenti per il tipo "
-                    +rootType.getTypeName()
-                    +" ed i valori degli attrivuti </p></HTML>"));
+                    + rootType.getTypeName()
+                    + " ed i valori degli attrivuti </p></HTML>"));
 
             for (ComponentProperty prop : components) {
                 JCheckBox c1 = new JCheckBox();
@@ -316,7 +316,6 @@ class SecondStepStrategy {
             }
             Attribute[] ownAt = rootType.getOwnAt(Type.number.BOTH);
             for (Attribute att : ownAt) {
-                
             }
             // genero primo pannello
             cards.add(current, "init");
@@ -325,50 +324,66 @@ class SecondStepStrategy {
         }
     }
 
-    private void autoScan(TextType tx) {
+    /**
+     * <p>Esegue una scansione automatica dei figli dell'albero. </p>
+     *
+     * @param tx il nodo da analizzare
+     * @return ritona true se c'e un figlio ancora da analizzare
+     */
+    private boolean autoScan(TextType tx) {
         if (tx == null) {
-            return; // scansione ricorsiva terminata
+            return true;
         }
         Type type = tx.getType();
         if (type.isMinimalUnit()) {
-            return;
-        }
-        if (!tx.hasSubType()) {
+            return true;
+        } else {
             ComponentProperty[] components = type.getComponents();
+            boolean autoScan = true;
 
+            if (components == null) {
+                return true;
+            }
             if (components.length == 1) {
                 if (!components[0].isOptional()) {
                     String componentName = components[0].getComponentName();
                     Type component = components[0].getComponent();
                     Object get = typeMap.get(component.getTypeName());
-
+                    if (!(get instanceof String)) { // se il sotto tipo richiede un input manuale
+                        return false;
+                    }
                     if (!component.isMinimalUnit()) { // se non è minimo
-                        if (get instanceof String) {
-                            Pattern pattern = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
-                            Matcher matcher = pattern.matcher(this.text);
-                            while (matcher.find()) {
-                                TextType textType = new TextType(component, tx, componentName, matcher.group());
-                                autoScan(textType); // chiamata ricorsiva
+                        Pattern pattern = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
+                        Matcher matcher = pattern.matcher(this.text);
+                        while (matcher.find()) {
+                            TextType textType = new TextType(component, tx, componentName, matcher.group());
+                            if (!autoScan(textType)) { // in casp ci stiano altri tipi non minimizzati un questo ramo
+                                autoScan = false;
+                            }
+                            // chiamata ricorsiva
+                            tx.addSubType(textType);
+                        }
+                        return autoScan;
+                    } else { // se il tipo è minimo si divide anche la punteggiatura
+                        Pattern min = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
+                        Matcher m = min.matcher(this.text);
+                        Pattern min_simple = Pattern.compile("(\\p{Punct}+)|(\\w+)|(\\p{Punct}+)", Pattern.UNICODE_CHARACTER_CLASS);
+                        Matcher r;
+                        while (m.find()) {
+                            String t = m.group();
+                            r = min_simple.matcher(t);
+                            while (r.find()) {
+                                TextType textType = new TextType(component, tx, componentName, r.group());
                                 tx.addSubType(textType);
                             }
                         }
-                    } else { // se minimo divido i simboli quali .,"<>dalle parole
-                        if (get instanceof String) {
-                            Pattern min = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
-                            Matcher m = min.matcher(this.text);
-                            Pattern min_simple = Pattern.compile("(\\p{Punct}+)|(\\w+)|(\\p{Punct}+)", Pattern.UNICODE_CHARACTER_CLASS);
-                            Matcher r;
-                            while (m.find()) {
-                                String t = m.group();
-                                r = min_simple.matcher(t);
-                                while (r.find()) {
-                                    TextType textType = new TextType(component, tx, componentName, r.group());
-                                    tx.addSubType(textType);
-                                }
-                            }
-                        }
+                        return true;
                     }
+                } else {
+                    return false;
                 }
+            } else { // se ha più componeneti
+                return false;
             }
         }
     }
