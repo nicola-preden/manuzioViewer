@@ -171,7 +171,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private void initRegex() {
         int rowN = ManuzioViewer.schema.sizeTypes(); // Numero di tipi presenti
         // Creo un layout a griglia e lo aggiungo al pannello interno
-        GridLayout gL_regIn = new GridLayout(rowN+1,1);
+        GridLayout gL_regIn = new GridLayout(rowN + 1, 1);
         jP_regexInner.setLayout(gL_regIn);
 
         // Creo il primo pannello variabile a secodo del valore di idX_to
@@ -308,7 +308,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private void initRegexLarge() {
         String path = jFileChooser.getSelectedFile().getPath();
         jTA_confirmOutput.setText("");
-        jTA_confirmOutput.append("File:"+" \"" + path + "\"\n\n"+"Type List: \n");
+        jTA_confirmOutput.append("File:" + " \"" + path + "\"\n\n" + "Type List: \n");
         Iterator<AuxJP_regex> iterator = type_setting.iterator();
         while (iterator.hasNext()) { // scorre tutti gli oggetti inseriti
             AuxJP_regex next = iterator.next();
@@ -418,8 +418,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (currentStep.compareTo(firstStep) == 0) { // Se vero stiamo caricando il file
-            if ("progress".equals(evt.getPropertyName())) {
+        if ("progress".equals(evt.getPropertyName())) { // Se vero stiamo caricando il file
+            if (currentStep.compareTo(firstStep) == 0) {
                 int progress = (Integer) evt.getNewValue();
                 jProgressBar.setValue(progress);
                 if (progress == 100) {
@@ -446,9 +446,9 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     }
                 }
             }
-        }
-        if (currentStep.compareTo(secondStep) == 0) {
-            if ("progress".equals(evt.getPropertyName())) {
+            if (currentStep.compareTo(secondStep) == 0) {
+                int progress = (Integer) evt.getNewValue();
+                jProgressBar.setValue(progress);
             }
         }
     }
@@ -726,7 +726,9 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         } else if (currentStep.compareTo(secondStep) == 0) {
             if (sss.hasNext()) {
                 sss.next();
-            } else sss.doLoading(this);
+            } else {
+                sss.doLoading(this);
+            }
         }
 
     }//GEN-LAST:event_jB_nextActionPerformed

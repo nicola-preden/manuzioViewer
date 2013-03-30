@@ -2,10 +2,10 @@ package viewer;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.FlowLayout;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.LayoutManager;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,9 +15,14 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import viewer.manuzioParser.Attribute;
 import viewer.manuzioParser.ComponentProperty;
@@ -287,6 +292,8 @@ class SecondStepStrategy {
             this.process = true; // Ci stanno dati da processare in coda
         } else {
             // non ci stanno dei sotto tipi da gestire
+            this.process = false;
+            next();
         }
 
     }
@@ -441,7 +448,7 @@ class SecondStepStrategy {
                 JTextField c2 = new JTextField();
                 c2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 c2.setToolTipText("Valore dell'attributo");
-                c2.setName(att.getAtName() + "__textField");
+                c2.setName(att.getAtName() + "_textField");
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.anchor = GridBagConstraints.LINE_START;
@@ -462,15 +469,82 @@ class SecondStepStrategy {
         cards.add(pane, tx.getType().getTypeName());
     }
 
-    private void printPaneGet(TextType pollFirst) {
-        JPanel pane = new JPanel();
-        pane.setPreferredSize(cards.getPreferredSize());
-        pane.setMaximumSize(cards.getMaximumSize());
-        pane.setMinimumSize(cards.getMinimumSize());
-        GridBagLayout experimentLayout = new GridBagLayout();
-        GridBagConstraints c;
-        pane.setLayout(experimentLayout);
-        
+    /**
+     * <p>Disegna un pannello atto a caricare sotto-tipi correnti. </p>
+     *
+     * @param elem TextType corrente
+     */
+    private void printPaneGet(TextType elem) {
+        if (elem != null) {
+            //<editor-fold defaultstate="collapsed" desc="nuovo pannello">
+            // Scroller contenente in stesto da visualizare
+            JEditorPane jEP = new JEditorPane("text/rtf", elem.allText);
+            JScrollPane scroller = new JScrollPane(jEP, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+            // Pannello contenenti i pulsanti e controlli
+            JPanel controll = new JPanel();
+            GridBagLayout experimentLayout = new GridBagLayout();
+            controll.setLayout(experimentLayout);
+            GridBagConstraints c;
+            ButtonGroup jBG = new ButtonGroup();
+            //carico jbutton[GET] componenti
+            int i = 0;
+            Component[] lpc = this.lastPanel.getComponents();
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.LINE_END;
+            c.gridx = 1;
+            c.gridy = i;
+            JButton c0 = new JButton("GET");
+            c0.addActionListener(new java.awt.event.ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    throw new UnsupportedOperationException("Not supported yet.");
+                }
+            });
+            controll.add(c0, c);
+            //carico radioButtom componenti
+            for (Component com : lpc) {
+                String g = com.getName();
+                if (g == null) {
+                    continue;
+                }
+                if (g.endsWith("_checkBox")) {
+                    JCheckBox jcb = (JCheckBox) com;
+                    boolean set = jcb.isSelected();
+                    if (!set) {
+                        continue;
+                    }
+                    c = new GridBagConstraints();
+                    c.fill = GridBagConstraints.HORIZONTAL;
+                    c.anchor = GridBagConstraints.LINE_START;
+                    c.gridx = 0;
+                    c.gridy = i;
+                    JRadioButton c1 = new JRadioButton();
+                    String name = (jcb.getName()).replace("_checkBox", "");
+                    c1.setText(name);
+                    c1.setName(name + "_radioButton");
+                    jBG.add(c1);
+                    controll.add(c1, c);
+                    i++;
+                }
+            }
+
+            // pannello generale
+            JPanel pane = new JPanel(new BorderLayout());
+            pane.setPreferredSize(cards.getPreferredSize());
+            pane.setMaximumSize(cards.getMaximumSize());
+            pane.setMinimumSize(cards.getMinimumSize());
+            pane.add(controll, BorderLayout.PAGE_START);
+            pane.add(scroller, BorderLayout.CENTER);
+            cards.add(pane);
+            //</editor-fold>
+        } else {
+            //<editor-fold defaultstate="collapsed" desc="pannello finale">
+            // elem == null creo pannelli uscita ed aggirno i pulsanti
+            //</editor-fold>
+        }
+
     }
 
     /**
@@ -628,8 +702,25 @@ class SecondStepStrategy {
             if (this.process) { // ci stanno dati da elaborare
                 // caricamento dati
                 TextType pollFirst = this.ttl.pollFirst();
+                // allego eventuali attributi
+                Component[] lpc = this.lastPanel.getComponents();
+                for (Component com : lpc) {
+                    String g = com.getName();
+                    if (g == null) {
+                        continue;
+                    }
+                    if (g.endsWith("_textField")) {
+                        JTextField jtf = (JTextField) com;
+                        String replace = (jtf.getName()).replace("_textField", "");
+                        if (pollFirst.getType().containsAt(replace, Type.number.BOTH)) {
+                            pollFirst.setAttribute(replace, jtf.getText());
+                        }
+                    }
+                }
                 // genero pannello sucessivo
                 printPaneGet(pollFirst);
+                CardLayout lay = (CardLayout) cards.getLayout();
+                lay.next(cards);
                 this.process = false;
             } else { // genero in nuovo pannello iniziale per il prossimo oggetto
                 TextType peekFirst = this.ttl.peekFirst();
@@ -643,9 +734,10 @@ class SecondStepStrategy {
             }
         }
     }
-    
+
     /**
      * <p>Specifica se è disponibile un nuovo oggetto. </p>
+     *
      * @return <tt>true</tt> se c'e un nuovo oggetto <tt>false</tt> altrimenti
      */
     public synchronized boolean hasNext() {
