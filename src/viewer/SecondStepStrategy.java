@@ -161,7 +161,7 @@ class SecondStepStrategy {
      */
     private Map<String, Object> typeMap;
     private LinkedList<TextType> ttl; // coda di texttype da analizzare
-    private ArrayList<JPanel> jpl;
+    private JPanel lastPanel;
     /**
      * <p>Il testo grezzo da inserire. </p>
      */
@@ -221,7 +221,7 @@ class SecondStepStrategy {
             throw new NullPointerException();
         }
         if (!(cards.getLayout() instanceof BorderLayout)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(cards.toString() + "Don't have a BorderLayout");
         }
         this.tittle = new JLabel();
         this.tittle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -243,7 +243,6 @@ class SecondStepStrategy {
         }
         typeMap = new HashMap<String, Object>();
         this.ttl = new LinkedList<TextType>();
-        this.jpl = new ArrayList<JPanel>();
     }
 
     /**
@@ -284,6 +283,8 @@ class SecondStepStrategy {
             this.printPaneSet(this.maxTypeList);
             ttl.add(this.maxTypeList);
             CardLayout lay = (CardLayout) cards.getLayout();
+            lay.first(cards);
+            this.process = true; // Ci stanno dati da processare in coda
         } else {
             // non ci stanno dei sotto tipi da gestire
         }
@@ -298,26 +299,37 @@ class SecondStepStrategy {
      */
     private void printPaneSet(TextType tx) {
         JPanel pane = new JPanel();
-        jpl.add(pane);
+        lastPanel = pane;
         pane.setPreferredSize(cards.getPreferredSize());
+        pane.setMaximumSize(cards.getMaximumSize());
+        pane.setMinimumSize(cards.getMinimumSize());
         GridBagLayout experimentLayout = new GridBagLayout();
         GridBagConstraints c;
         pane.setLayout(experimentLayout);
         JLabel l;
 
         int i = 0;
+        l = new JLabel("<HTML><p><b>Componente: " + (tx.getComponentName() == null ? "ROOT" : tx.getComponentName()) + " Tipo: " + tx.getType().getTypeName() + "</b></p></HTML>");
+        l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.FIRST_LINE_START;
+        c.gridx = 0;
+        c.gridwidth = 3;
+        c.gridy = i;
+        pane.add(l, c);
+        i++;
         if (tx.getType().hasComponents()) {
             //<editor-fold defaultstate="collapsed" desc="Inserimento Componenti">
             ComponentProperty[] components = tx.getType().getComponents();
-            l = new JLabel("<HTML><p><b>Specificare il numero di componenti per il tipo "
-                    + tx.getType().getTypeName() + "</b></p></HTML>");
+            l = new JLabel("<HTML><p><b>Specificare il numero di componenti</b></p></HTML>");
             l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             c = new GridBagConstraints();
             c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.FIRST_LINE_START;
+            c.anchor = GridBagConstraints.LINE_START;
             c.gridx = 0;
             c.gridwidth = 3;
-            c.gridy = 0;
+            c.gridy = i;
             pane.add(l, c);
             i++;
             // nomi colonne
@@ -325,7 +337,7 @@ class SecondStepStrategy {
             c.fill = GridBagConstraints.HORIZONTAL;
             c.anchor = GridBagConstraints.LINE_START;
             c.gridx = 0;
-            c.gridy = 1;
+            c.gridy = i;
             l = new JLabel("Optionale");
             l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             pane.add(l, c);
@@ -333,7 +345,7 @@ class SecondStepStrategy {
             c.fill = GridBagConstraints.HORIZONTAL;
             c.anchor = GridBagConstraints.CENTER;
             c.gridx = 1;
-            c.gridy = 1;
+            c.gridy = i;
             l = new JLabel("Componente : tipo");
             l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             pane.add(l, c);
@@ -341,7 +353,7 @@ class SecondStepStrategy {
             c.fill = GridBagConstraints.HORIZONTAL;
             c.anchor = GridBagConstraints.LINE_END;
             c.gridx = 2;
-            c.gridy = 1;
+            c.gridy = i;
             l = new JLabel("Valore");
             l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             pane.add(l, c);
@@ -366,13 +378,9 @@ class SecondStepStrategy {
                 c2.setText(prop.getComponentName() + " : " + (prop.isPlural() ? prop.getComponent().getPluralName() : prop.getComponent().getTypeName()));
                 JTextField c3 = new JTextField();
                 c3.setName(prop.getComponentName() + "_textField");
-                c3.setToolTipText("Numero di oggetti da caricare\nImposta AUTO se non ne conosci il numero esatto");
-                c3.setText("1");
-                if (prop.isPlural()) {
-                    c3.setEnabled(true);
-                } else {
-                    c3.setEnabled(false);
-                }
+                c3.setToolTipText("Numero di oggetti da caricare");
+                c3.setText("AUTO");
+                c3.setEnabled(false);
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.anchor = GridBagConstraints.LINE_START;
@@ -404,8 +412,7 @@ class SecondStepStrategy {
             c.gridx = 0;
             c.gridwidth = 3;
             c.gridy = i;
-            l = new JLabel("<HTML><p><b>Specificare gli attributi per il tipo "
-                    + tx.getType().getTypeName() + "</b></p></HTML>");
+            l = new JLabel("<HTML><p><b>Specificare gli attributi</b></p></HTML>");
             l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             pane.add(l, c);
             i++;
@@ -452,10 +459,18 @@ class SecondStepStrategy {
             //</editor-fold>
         }
         // genero primo pannello
-        cards.add(pane,tx.getType().getTypeName());
+        cards.add(pane, tx.getType().getTypeName());
     }
 
-    private void printPaneGet() {
+    private void printPaneGet(TextType pollFirst) {
+        JPanel pane = new JPanel();
+        pane.setPreferredSize(cards.getPreferredSize());
+        pane.setMaximumSize(cards.getMaximumSize());
+        pane.setMinimumSize(cards.getMinimumSize());
+        GridBagLayout experimentLayout = new GridBagLayout();
+        GridBagConstraints c;
+        pane.setLayout(experimentLayout);
+        
     }
 
     /**
@@ -603,34 +618,38 @@ class SecondStepStrategy {
     }
 
     /**
-     * <p>Genera e rende visibile un nuovo pannello. Se è possibile esiste
-     * ritorna <tt>TRUE</tt> altrimenti <tt>FALSE</tt>. </p>
+     * <p>Genera e rende visibile un nuovo pannello. Se è possibile ritorna
+     * <tt>TRUE</tt> altrimenti <tt>FALSE</tt>. </p>
      *
      * @return <tt>TRUE</tt> se esite
      */
-    public synchronized boolean next() {
+    public synchronized void next() {
         if (!this.isEnd) {
-            if (!this.process) { // inizializzo rpimo pannello
-                // genero primo pannello
-                return false;
-            } else {
+            if (this.process) { // ci stanno dati da elaborare
+                // caricamento dati
+                TextType pollFirst = this.ttl.pollFirst();
+                // genero pannello sucessivo
+                printPaneGet(pollFirst);
+                this.process = false;
+            } else { // genero in nuovo pannello iniziale per il prossimo oggetto
+                TextType peekFirst = this.ttl.peekFirst();
+                this.printPaneSet(peekFirst); // se peekFirst è null imposta la finiestra per la fine
+                CardLayout layout = (CardLayout) cards.getLayout();
+                layout.next(cards);
+                if (peekFirst == null) {
+                    this.isEnd = true;
+                }
+                this.process = true;
             }
-        } else {
-            // Preparo i dati per poi chiamare il processo che caricherù i dati
-            return false;
         }
-        return false;
     }
-
+    
     /**
-     * <p>Genera e rende visibile, se disponibile, il pannello precedente. Se è
-     * possibile esiste ritorna <tt>TRUE</tt> altrimenti
-     * <tt>FALSE</tt>. </p>
-     *
-     * @return <tt>TRUE</tt> se esite
+     * <p>Specifica se è disponibile un nuovo oggetto. </p>
+     * @return <tt>true</tt> se c'e un nuovo oggetto <tt>false</tt> altrimenti
      */
-    public synchronized boolean previous() {
-        return false;
+    public synchronized boolean hasNext() {
+        return !this.isEnd;
     }
 
     /**
@@ -640,7 +659,6 @@ class SecondStepStrategy {
      * <tt>null</tt>. </p>
      *
      * @param windows finestra usata per la procedura di caricamento
-     * @param jpb progress bar nella quale viene visualizzato lo stato
      */
     public synchronized <JFrame extends PropertyChangeListener> void doLoading(JFrame windows) {
         if (this.isEnd) {

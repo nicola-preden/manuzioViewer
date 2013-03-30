@@ -724,7 +724,9 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     break;
             }
         } else if (currentStep.compareTo(secondStep) == 0) {
-            boolean next = sss.next();
+            if (sss.hasNext()) {
+                sss.next();
+            } else sss.doLoading(this);
         }
 
     }//GEN-LAST:event_jB_nextActionPerformed
@@ -748,9 +750,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 default:
                     break;
             }
-        }
-        if (currentStep.compareTo(secondStep) == 0) {
-            boolean previus = sss.previous();
         }
     }//GEN-LAST:event_jB_previousActionPerformed
 
