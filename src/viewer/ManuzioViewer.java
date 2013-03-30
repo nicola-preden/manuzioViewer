@@ -75,9 +75,9 @@ public class ManuzioViewer {
     public static void main(String[] args) {
         //<editor-fold defaultstate="collapsed" desc="regexTest">
         /*
-        Pattern p = Pattern.compile("(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^\\.].*(\\n|\\r|\\z)", Pattern.UNICODE_CHARACTER_CLASS);
-
-        Pattern z = Pattern.compile("(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^.]+([. ]|\\z)", Pattern.UNICODE_CHARACTER_CLASS);
+        String w = "\\p{Graph}+";
+        Pattern p = Pattern.compile(w, Pattern.UNICODE_CHARACTER_CLASS);
+        Pattern z = Pattern.compile("(\\p{Punct})|(\\p{Alnum}+)|(\\p{Punct})", Pattern.UNICODE_CHARACTER_CLASS);
 
         Matcher m = p.matcher("1. Evocatio\n"
                 + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "
@@ -96,10 +96,12 @@ public class ManuzioViewer {
             System.out.println("Gruppo : " + t);
             r = z.matcher(t);
             while (r.find()) {
-                System.out.println("\tSub : " + r.group());
+                String k = r.group();
+                System.out.println("\tSub : " + k + " > " + k.length());
             }
         }
-        System.exit(0);*/
+        System.exit(0);
+        */
         //</editor-fold>
         try {
             if (isOSX()) {  // Se siamo su Mac

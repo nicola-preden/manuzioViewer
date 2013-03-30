@@ -3,6 +3,7 @@ package viewer;
 import java.awt.CardLayout;
 import java.awt.Cursor;
 import java.awt.Desktop;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -170,7 +171,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     private void initRegex() {
         int rowN = ManuzioViewer.schema.sizeTypes(); // Numero di tipi presenti
         // Creo un layout a griglia e lo aggiungo al pannello interno
-        GridLayout gL_regIn = new GridLayout(rowN + 1, 1);
+        GridLayout gL_regIn = new GridLayout(rowN+1,1);
         jP_regexInner.setLayout(gL_regIn);
 
         // Creo il primo pannello variabile a secodo del valore di idX_to
@@ -181,7 +182,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 + "scegliere tra le tipologie già suggerite, usare una <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html\">Espressione Regolare</a> oppure selezionare il <br />"
                 + "testo scelto attreverso un editor. Si noti che i simboli di punteggiatura quali, punti, <br />"
                 + "virgole e similari, verranno automaricamente separati dal testo ed inseriti con il tipo <br />"
-                + "minimo presente nello schema. Se è stata scelta l'aggiunta ad un textual object verranno <br />"
+                + "minimo presente nello schema(attaverso RE:\"(\\p{Punct}+)|(\\p{Alnum}+)|(\\p{Punct}+)\"). <br />"
+                + "Se è stata scelta l'aggiunta ad un textual object verranno "
                 + "presentati solo i sottotipi interessati.</p></html>";
         javax.swing.JLabel comment = new javax.swing.JLabel(commentText);
         comment.addMouseListener(new MouseListener() {

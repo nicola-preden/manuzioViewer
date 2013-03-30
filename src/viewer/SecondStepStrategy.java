@@ -5,11 +5,13 @@ import java.awt.CardLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.LayoutManager;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,7 +69,7 @@ class SecondStepStrategy {
         }
 
         public boolean hasSubType() {
-            return subType.isEmpty();
+            return !subType.isEmpty();
         }
 
         public TextType[] getSubType() {
@@ -145,17 +147,9 @@ class SecondStepStrategy {
      */
     private int rootIdx;
     /**
-     * <p>Varibile di controllo per stabilere la fine della preparazione per
-     * inserimento. </p>
-     */
-    /**
      * <p>Nome del tipo dell'oggetto root. </p>
      */
     private String rootTypeName;
-    /**
-     * <p>Tipo dell'oggetto root. </p>
-     */
-    private viewer.manuzioParser.Type rootType;
     /**
      * <p>Testa dell'albero contenente i dati. </p>
      */
@@ -166,11 +160,8 @@ class SecondStepStrategy {
      * testo o selezioni, se String di una espressione regolare. <p>
      */
     private Map<String, Object> typeMap;
+    private LinkedList<TextType> ttl; // coda di texttype da analizzare
     private ArrayList<JPanel> jpl;
-    /**
-     * <p>Indice corrente in un array di JPanel. </p>
-     */
-    private int idxPost = -1;
     /**
      * <p>Il testo grezzo da inserire. </p>
      */
@@ -251,6 +242,7 @@ class SecondStepStrategy {
             this.rootTypeName = type;
         }
         typeMap = new HashMap<String, Object>();
+        this.ttl = new LinkedList<TextType>();
         this.jpl = new ArrayList<JPanel>();
     }
 
@@ -266,7 +258,7 @@ class SecondStepStrategy {
         this.next.setText("Avanti");
         this.close.setEnabled(true);
         this.next.setEnabled(true);
-        rootType = ManuzioViewer.schema.getType(this.rootTypeName);
+        Type rootType = ManuzioViewer.schema.getType(this.rootTypeName);
         if (!typeMap.containsKey(rootTypeName)) {
             throw new IllegalArgumentException("Missing type");
         }
@@ -290,8 +282,8 @@ class SecondStepStrategy {
 
         if (!this.isEnd) { // è necessario gestire dei sotto tipi
             this.printPaneSet(this.maxTypeList);
+            ttl.add(this.maxTypeList);
             CardLayout lay = (CardLayout) cards.getLayout();
-            lay.first(cards);
         } else {
             // non ci stanno dei sotto tipi da gestire
         }
@@ -306,8 +298,7 @@ class SecondStepStrategy {
      */
     private void printPaneSet(TextType tx) {
         JPanel pane = new JPanel();
-        this.jpl.add(pane);
-        this.idxPost = 0;
+        jpl.add(pane);
         pane.setPreferredSize(cards.getPreferredSize());
         GridBagLayout experimentLayout = new GridBagLayout();
         GridBagConstraints c;
@@ -340,7 +331,7 @@ class SecondStepStrategy {
             pane.add(l, c);
             c = new GridBagConstraints();
             c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.LINE_START;
+            c.anchor = GridBagConstraints.CENTER;
             c.gridx = 1;
             c.gridy = 1;
             l = new JLabel("Componente : tipo");
@@ -348,7 +339,7 @@ class SecondStepStrategy {
             pane.add(l, c);
             c = new GridBagConstraints();
             c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.LINE_START;
+            c.anchor = GridBagConstraints.LINE_END;
             c.gridx = 2;
             c.gridy = 1;
             l = new JLabel("Valore");
@@ -375,7 +366,7 @@ class SecondStepStrategy {
                 c2.setText(prop.getComponentName() + " : " + (prop.isPlural() ? prop.getComponent().getPluralName() : prop.getComponent().getTypeName()));
                 JTextField c3 = new JTextField();
                 c3.setName(prop.getComponentName() + "_textField");
-                c3.setToolTipText("Numero di oggetti da caricare");
+                c3.setToolTipText("Numero di oggetti da caricare\nImposta AUTO se non ne conosci il numero esatto");
                 c3.setText("1");
                 if (prop.isPlural()) {
                     c3.setEnabled(true);
@@ -390,11 +381,13 @@ class SecondStepStrategy {
                 pane.add(c1, c);
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.CENTER;
                 c.gridx = 1;
                 c.gridy = i;
                 pane.add(c2, c);
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.LINE_END;
                 c.gridx = 2;
                 c.gridy = i;
                 pane.add(c3, c);
@@ -427,6 +420,7 @@ class SecondStepStrategy {
             pane.add(l, c);
             c = new GridBagConstraints();
             c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.CENTER;
             c.gridx = 1;
             c.gridy = i;
             l = new JLabel("Valore");
@@ -449,6 +443,7 @@ class SecondStepStrategy {
                 pane.add(c1, c);
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.CENTER;
                 c.gridx = 1;
                 c.gridy = i;
                 pane.add(c2, c);
@@ -457,7 +452,7 @@ class SecondStepStrategy {
             //</editor-fold>
         }
         // genero primo pannello
-        cards.add(pane, "init");
+        cards.add(pane,tx.getType().getTypeName());
     }
 
     private void printPaneGet() {
@@ -496,7 +491,7 @@ class SecondStepStrategy {
                     }
                     if (!component.isMinimalUnit()) { // se non è minimo
                         Pattern pattern = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
-                        Matcher matcher = pattern.matcher(this.text);
+                        Matcher matcher = pattern.matcher(tx.allText);
                         while (matcher.find()) {
                             TextType textType = new TextType(component, tx, componentName, matcher.group());
                             if (!autoScan(textType)) { // in casp ci stiano altri tipi non minimizzati un questo ramo
@@ -509,7 +504,7 @@ class SecondStepStrategy {
                     } else { // se il tipo è minimo si divide anche la punteggiatura
                         Pattern min = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
                         Matcher m = min.matcher(this.text);
-                        Pattern min_simple = Pattern.compile("(\\p{Punct}+)|(\\w+)|(\\p{Punct}+)", Pattern.UNICODE_CHARACTER_CLASS);
+                        Pattern min_simple = Pattern.compile("(\\p{Punct})|(\\p{Alnum}+)|(\\p{Punct})", Pattern.UNICODE_CHARACTER_CLASS);
                         Matcher r;
                         while (m.find()) {
                             String t = m.group();
@@ -596,7 +591,7 @@ class SecondStepStrategy {
                 break;
             case SecondStepStrategy.WORD:
                 // primo livello di selezione, al secondo blocco divide le sequenze \w* da \p{Punct}*
-                typeMap.put(type, "\\S+"); // in variante a \\p{Punct}*\\w+\\p{Punct}*
+                typeMap.put(type, "\\p{Graph}+"); // in variante a \\p{Punct}*\\w+\\p{Punct}*
                 break;
             case SecondStepStrategy.CHAR:
                 // divide in caratteri
@@ -614,14 +609,9 @@ class SecondStepStrategy {
      * @return <tt>TRUE</tt> se esite
      */
     public synchronized boolean next() {
-        JPanel current;
         if (!this.isEnd) {
             if (!this.process) { // inizializzo rpimo pannello
-                current = new JPanel();
-                this.jpl.add(current);
                 // genero primo pannello
-                CardLayout layout = (CardLayout) cards.getLayout();
-                layout.addLayoutComponent(current, "init");
                 return false;
             } else {
             }
