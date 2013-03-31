@@ -448,7 +448,12 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             }
             if (currentStep.compareTo(secondStep) == 0) {
                 int progress = (Integer) evt.getNewValue();
-                jProgressBar.setValue(progress);
+                if (progress == 0) {
+                    jProgressBar.setIndeterminate(true);
+                } else {
+                    jProgressBar.setIndeterminate(false);
+                    jProgressBar.setValue(progress);
+                }
             }
         }
     }
@@ -710,12 +715,10 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                         this.jB_next.setEnabled(false);
                         this.jB_previous.setEnabled(false);
                         this.jB_close.setEnabled(false);
-                        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                         sss = prepareSecondStepCard();
                         sss.start();
                         layout = (CardLayout) cards.getLayout();
                         layout.next(cards);
-                        this.setCursor(Cursor.getDefaultCursor());
                         currentStep = secondStep;
                         pack();
                     }
@@ -727,6 +730,8 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             if (sss.hasNext()) {
                 sss.next();
             } else {
+                jProgressBar.setVisible(true);
+                jProgressBar.setIndeterminate(true);
                 sss.doLoading(this);
             }
         }

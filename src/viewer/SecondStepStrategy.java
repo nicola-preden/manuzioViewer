@@ -5,36 +5,117 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.text.StyledEditorKit;
 import viewer.manuzioParser.Attribute;
 import viewer.manuzioParser.ComponentProperty;
 import viewer.manuzioParser.Type;
+import viewer.taskThread.TaskDataBaseUpdate;
 
 /**
  * <p>Classe si occupa di generare dinamicamente, intercambiare dei pannelli per
  * l'inserimento effettivo dei dati. </p>
  */
-class SecondStepStrategy {
+public class SecondStepStrategy {
 
-    class TextType {
+    private class GetActionListener implements ActionListener {
+
+        JEditorPane jep;
+        ButtonGroup jbg;
+        TextType tx;
+
+        private GetActionListener(JEditorPane jep, ButtonGroup jbg, TextType tx) {
+            this.jbg = jbg;
+            this.jep = jep;
+            this.tx = tx;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ButtonModel selection = jbg.getSelection();
+            String selectedText = jep.getSelectedText();
+            if (selectedText == null) {
+                JOptionPane.showMessageDialog(((JButton) e.getSource()).getParent(), "Selezionare un testo", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if ("".equals(selectedText)) {
+                JOptionPane.showMessageDialog(((JButton) e.getSource()).getParent(), "Selezionare un testo", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            AbstractButton jrb = null;
+            Enumeration<AbstractButton> buttons = jbg.getElements();
+            while (buttons.hasMoreElements()) {
+                AbstractButton nextElement = buttons.nextElement();
+                if (nextElement.isSelected()) {
+                    jrb = nextElement;
+                    break;
+                }
+            }
+            if (jrb == null) {
+                JOptionPane.showMessageDialog(((JButton) e.getSource()).getParent(), "Selezionare un componente", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String name = jrb.getName();
+            jbg.clearSelection();
+            ComponentProperty[] components = tx.getType().getComponents();
+            for (ComponentProperty prop : components) {
+                if (prop.getComponentName().equals(name.replace("_radioButton", ""))) {
+                    if (!prop.isPlural()) {
+                        jrb.setEnabled(false);
+                    }
+                    String typeName = prop.getComponent().getTypeName();
+                    Object get = typeMap.get(typeName);
+                    if (!(get instanceof String)) { // se il  tipo richiede un input manuale
+                        TextType elem;
+                        elem = new TextType(prop.getComponent(), tx, prop.getComponentName(), selectedText);
+                        // non serve eseguire autoScan ritornerebbe sicuramente false
+                        ttl.add(elem);
+                        tx.addSubType(elem);
+                        break;
+                    } else { // si controlla se è divisibile in tipi uguali (es. diversi Paragrafi)
+                        Pattern pattern = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
+                        Matcher matcher = pattern.matcher(selectedText);
+                        while (matcher.find()) {
+                            TextType textType = new TextType(prop.getComponent(), tx, prop.getComponentName(), matcher.group());
+                            if (!autoScan(textType)) {// in casp ci stiano altri tipi non minimizzati un questo ramo
+                                ttl.add(textType);
+                            }
+                            // chiamata ricorsiva
+                            tx.addSubType(textType);
+                        }
+                    }
+
+                }
+            }
+            jep.replaceSelection(null);
+        }
+    }
+
+    public class TextType {
 
         /**
          * <p>Descrittore del schema manuzio per stabilire le relazioni da usare
@@ -246,6 +327,7 @@ class SecondStepStrategy {
         } else {
             this.rootTypeName = type;
         }
+        this.text = text;
         typeMap = new HashMap<String, Object>();
         this.ttl = new LinkedList<TextType>();
     }
@@ -285,11 +367,9 @@ class SecondStepStrategy {
 
 
         if (!this.isEnd) { // è necessario gestire dei sotto tipi
-            this.printPaneSet(this.maxTypeList);
             ttl.add(this.maxTypeList);
-            CardLayout lay = (CardLayout) cards.getLayout();
-            lay.first(cards);
-            this.process = true; // Ci stanno dati da processare in coda
+            this.process = false; // Ci stanno dati da processare in coda
+            next();
         } else {
             // non ci stanno dei sotto tipi da gestire
             this.process = false;
@@ -304,169 +384,198 @@ class SecondStepStrategy {
      *
      * @param tx TextType corrente
      */
-    private void printPaneSet(TextType tx) {
-        JPanel pane = new JPanel();
-        lastPanel = pane;
-        pane.setPreferredSize(cards.getPreferredSize());
-        pane.setMaximumSize(cards.getMaximumSize());
-        pane.setMinimumSize(cards.getMinimumSize());
-        GridBagLayout experimentLayout = new GridBagLayout();
-        GridBagConstraints c;
-        pane.setLayout(experimentLayout);
-        JLabel l;
+    private void printPaneConfig(TextType tx) {
+        if (tx != null) {
+            //<editor-fold defaultstate="collapsed" desc="nuovo oggetto">
+            JPanel pane = new JPanel();
+            lastPanel = pane;
+            pane.setPreferredSize(cards.getPreferredSize());
+            pane.setMaximumSize(cards.getMaximumSize());
+            pane.setMinimumSize(cards.getMinimumSize());
+            GridBagLayout experimentLayout = new GridBagLayout();
+            GridBagConstraints c;
+            pane.setLayout(experimentLayout);
+            JLabel l;
 
-        int i = 0;
-        l = new JLabel("<HTML><p><b>Componente: " + (tx.getComponentName() == null ? "ROOT" : tx.getComponentName()) + " Tipo: " + tx.getType().getTypeName() + "</b></p></HTML>");
-        l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.anchor = GridBagConstraints.FIRST_LINE_START;
-        c.gridx = 0;
-        c.gridwidth = 3;
-        c.gridy = i;
-        pane.add(l, c);
-        i++;
-        if (tx.getType().hasComponents()) {
-            //<editor-fold defaultstate="collapsed" desc="Inserimento Componenti">
-            ComponentProperty[] components = tx.getType().getComponents();
-            l = new JLabel("<HTML><p><b>Specificare il numero di componenti</b></p></HTML>");
+            int i = 0;
+            l = new JLabel("<HTML><p><b>Componente: " + (tx.getComponentName() == null ? "ROOT" : tx.getComponentName()) + " Tipo: " + tx.getType().getTypeName() + "</b></p></HTML>");
             l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             c = new GridBagConstraints();
             c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.LINE_START;
+            c.anchor = GridBagConstraints.PAGE_START;
             c.gridx = 0;
             c.gridwidth = 3;
             c.gridy = i;
             pane.add(l, c);
             i++;
-            // nomi colonne
-            c = new GridBagConstraints();
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.LINE_START;
-            c.gridx = 0;
-            c.gridy = i;
-            l = new JLabel("Optionale");
-            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            pane.add(l, c);
-            c = new GridBagConstraints();
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.CENTER;
-            c.gridx = 1;
-            c.gridy = i;
-            l = new JLabel("Componente : tipo");
-            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            pane.add(l, c);
-            c = new GridBagConstraints();
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.LINE_END;
-            c.gridx = 2;
-            c.gridy = i;
-            l = new JLabel("Valore");
-            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            pane.add(l, c);
-
-            i++;
-            // Inserimento Componenti
-            for (ComponentProperty prop : components) {
-                JCheckBox c1 = new JCheckBox();
-                c1.setName(prop.getComponentName() + "_checkBox");
-                if (prop.isOptional()) {
-                    c1.setSelected(false);
-                    c1.setEnabled(true);
-                } else {
-                    c1.setSelected(true);
-                    c1.setEnabled(false);
-                }
-                c1.setText(null);
-                c1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                JLabel c2 = new JLabel();
-                c2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                c2.setName(prop.getComponentName() + "_label");
-                c2.setText(prop.getComponentName() + " : " + (prop.isPlural() ? prop.getComponent().getPluralName() : prop.getComponent().getTypeName()));
-                JTextField c3 = new JTextField();
-                c3.setName(prop.getComponentName() + "_textField");
-                c3.setToolTipText("Numero di oggetti da caricare");
-                c3.setText("AUTO");
-                c3.setEnabled(false);
+            if (tx.getType().hasComponents()) {
+                //<editor-fold defaultstate="collapsed" desc="Inserimento Componenti">
+                ComponentProperty[] components = tx.getType().getComponents();
+                l = new JLabel("<HTML><p><b>Specificare il numero di componenti</b></p></HTML>");
+                l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.LINE_START;
+                c.gridx = 0;
+                c.gridwidth = 3;
+                c.gridy = i;
+                pane.add(l, c);
+                i++;
+                // nomi colonne
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.anchor = GridBagConstraints.LINE_START;
                 c.gridx = 0;
                 c.gridy = i;
-                pane.add(c1, c);
+                l = new JLabel("Optionale");
+                l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                pane.add(l, c);
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.anchor = GridBagConstraints.CENTER;
                 c.gridx = 1;
                 c.gridy = i;
-                pane.add(c2, c);
+                l = new JLabel("Componente : tipo");
+                l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                pane.add(l, c);
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.anchor = GridBagConstraints.LINE_END;
                 c.gridx = 2;
                 c.gridy = i;
-                pane.add(c3, c);
-                i++;
-            }
-            //</editor-fold>
-        }
-        if (tx.getType().hasAt(Type.number.SINGULAR)) {
-            //<editor-fold defaultstate="collapsed" desc="Inserimento Attributi">
-            Attribute[] ownAt = tx.getType().getAt(Type.number.SINGULAR);
-            c = new GridBagConstraints();
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.LINE_START;
-            c.gridx = 0;
-            c.gridwidth = 3;
-            c.gridy = i;
-            l = new JLabel("<HTML><p><b>Specificare gli attributi</b></p></HTML>");
-            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            pane.add(l, c);
-            i++;
-            // Nomi colonne
-            c = new GridBagConstraints();
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.LINE_START;
-            c.gridx = 0;
-            c.gridy = i;
-            l = new JLabel("Attributo : Tipo");
-            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            pane.add(l, c);
-            c = new GridBagConstraints();
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.CENTER;
-            c.gridx = 1;
-            c.gridy = i;
-            l = new JLabel("Valore");
-            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            pane.add(l, c);
-            i++;
+                l = new JLabel("Valore");
+                l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                pane.add(l, c);
 
-            for (Attribute att : ownAt) {
-                JLabel c1 = new JLabel(att.getAtName() + " : " + att.getAtType());
-                c1.setName(att.getAtName() + "_label");
-                JTextField c2 = new JTextField();
-                c2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                c2.setToolTipText("Valore dell'attributo");
-                c2.setName(att.getAtName() + "_textField");
+                i++;
+                // Inserimento Componenti
+                for (ComponentProperty prop : components) {
+                    JCheckBox c1 = new JCheckBox();
+                    c1.setName(prop.getComponentName() + "_checkBox");
+                    if (prop.isOptional()) {
+                        c1.setSelected(false);
+                        c1.setEnabled(true);
+                    } else {
+                        c1.setSelected(true);
+                        c1.setEnabled(false);
+                    }
+                    c1.setText(null);
+                    c1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                    JLabel c2 = new JLabel();
+                    c2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                    c2.setName(prop.getComponentName() + "_label");
+                    c2.setText(prop.getComponentName() + " : " + (prop.isPlural() ? prop.getComponent().getPluralName() : prop.getComponent().getTypeName()));
+                    JTextField c3 = new JTextField();
+                    c3.setName(prop.getComponentName() + "_textField");
+                    c3.setToolTipText("Numero di oggetti da caricare");
+                    c3.setText("AUTO");
+                    c3.setEnabled(false);
+                    c = new GridBagConstraints();
+                    c.fill = GridBagConstraints.HORIZONTAL;
+                    c.anchor = GridBagConstraints.LINE_START;
+                    c.gridx = 0;
+                    c.gridy = i;
+                    pane.add(c1, c);
+                    c = new GridBagConstraints();
+                    c.fill = GridBagConstraints.HORIZONTAL;
+                    c.anchor = GridBagConstraints.CENTER;
+                    c.gridx = 1;
+                    c.gridy = i;
+                    pane.add(c2, c);
+                    c = new GridBagConstraints();
+                    c.fill = GridBagConstraints.HORIZONTAL;
+                    c.anchor = GridBagConstraints.LINE_END;
+                    c.gridx = 2;
+                    c.gridy = i;
+                    pane.add(c3, c);
+                    i++;
+                }
+                //</editor-fold>
+            }
+            if (tx.getType().hasAt(Type.number.SINGULAR)) {
+                //<editor-fold defaultstate="collapsed" desc="Inserimento Attributi">
+                Attribute[] ownAt = tx.getType().getAt(Type.number.SINGULAR);
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.LINE_START;
+                c.gridx = 0;
+                c.gridwidth = 3;
+                c.gridy = i;
+                l = new JLabel("<HTML><p><b>Specificare gli attributi</b></p></HTML>");
+                l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                pane.add(l, c);
+                i++;
+                // Nomi colonne
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.anchor = GridBagConstraints.LINE_START;
                 c.gridx = 0;
                 c.gridy = i;
-                pane.add(c1, c);
+                l = new JLabel("Attributo : Tipo");
+                l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                pane.add(l, c);
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.anchor = GridBagConstraints.CENTER;
                 c.gridx = 1;
                 c.gridy = i;
-                pane.add(c2, c);
+                l = new JLabel("Valore");
+                l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                pane.add(l, c);
                 i++;
+
+                for (Attribute att : ownAt) {
+                    JLabel c1 = new JLabel(att.getAtName() + " : " + att.getAtType());
+                    c1.setName(att.getAtName() + "_label");
+                    JTextField c2 = new JTextField();
+                    c2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                    c2.setToolTipText("Valore dell'attributo");
+                    c2.setName(att.getAtName() + "_textField");
+                    c = new GridBagConstraints();
+                    c.fill = GridBagConstraints.HORIZONTAL;
+                    c.anchor = GridBagConstraints.LINE_START;
+                    c.gridx = 0;
+                    c.gridy = i;
+                    pane.add(c1, c);
+                    c = new GridBagConstraints();
+                    c.fill = GridBagConstraints.HORIZONTAL;
+                    c.anchor = GridBagConstraints.CENTER;
+                    c.gridx = 1;
+                    c.gridy = i;
+                    pane.add(c2, c);
+                    i++;
+                }
+                //</editor-fold>
             }
+            // genero pannello
+            cards.add(pane, tx.getType().getTypeName());
+            //</editor-fold>
+        } else {
+            //<editor-fold defaultstate="collapsed" desc="finestra di chiusura">
+            JPanel pane = new JPanel();
+            lastPanel = pane;
+            pane.setPreferredSize(cards.getPreferredSize());
+            pane.setMaximumSize(cards.getMaximumSize());
+            pane.setMinimumSize(cards.getMinimumSize());
+            GridBagLayout experimentLayout = new GridBagLayout();
+            GridBagConstraints c;
+            pane.setLayout(experimentLayout);
+            JLabel l;
+
+            int i = 0;
+            l = new JLabel("<HTML><p><b>Creazione dati completata<br />Premi Fine  per caricare i dati nel database</b></p></HTML>");
+            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            c = new GridBagConstraints();
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.anchor = GridBagConstraints.PAGE_START;
+            c.gridx = 0;
+            c.gridy = i;
+            pane.add(l, c);
+
+            this.next.setText("Termina");
+            cards.add(pane, "end");
             //</editor-fold>
         }
-        // genero primo pannello
-        cards.add(pane, tx.getType().getTypeName());
     }
 
     /**
@@ -474,77 +583,77 @@ class SecondStepStrategy {
      *
      * @param elem TextType corrente
      */
-    private void printPaneGet(TextType elem) {
-        if (elem != null) {
-            //<editor-fold defaultstate="collapsed" desc="nuovo pannello">
-            // Scroller contenente in stesto da visualizare
-            JEditorPane jEP = new JEditorPane("text/rtf", elem.allText);
-            JScrollPane scroller = new JScrollPane(jEP, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    private void printPaneSelects(TextType elem) {
+        // Scroller contenente in stesto da visualizare
+        JEditorPane jEP = new JEditorPane();
+        jEP.setEditable(true);
+        jEP.setEditorKit(new StyledEditorKit());
+        jEP.setText(elem.allText);
 
-            // Pannello contenenti i pulsanti e controlli
-            JPanel controll = new JPanel();
-            GridBagLayout experimentLayout = new GridBagLayout();
-            controll.setLayout(experimentLayout);
-            GridBagConstraints c;
-            ButtonGroup jBG = new ButtonGroup();
-            //carico jbutton[GET] componenti
-            int i = 0;
-            Component[] lpc = this.lastPanel.getComponents();
-            c = new GridBagConstraints();
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.LINE_END;
-            c.gridx = 1;
-            c.gridy = i;
-            JButton c0 = new JButton("GET");
-            c0.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    throw new UnsupportedOperationException("Not supported yet.");
-                }
-            });
-            controll.add(c0, c);
-            //carico radioButtom componenti
-            for (Component com : lpc) {
-                String g = com.getName();
-                if (g == null) {
+        JScrollPane scroller = new JScrollPane(jEP, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        jEP.setCaretPosition(0);
+        // Pannello contenenti i pulsanti e controlli
+        JPanel controll = new JPanel();
+        GridBagLayout experimentLayout = new GridBagLayout();
+        controll.setLayout(experimentLayout);
+        GridBagConstraints c;
+        ButtonGroup jBG = new ButtonGroup();
+        //carico jbutton[GET] componenti
+        int i = 0;
+        JLabel l = new JLabel("<html><p><b>Seleziona un tipo un frammento del testo infine <br />"
+                + "premi \"Crea Oggetto\" terminata la scelta premi \"Avanti\"</b></p></html>");
+        c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.FIRST_LINE_END;
+        c.gridx = 0;
+        c.gridwidth = 2;
+        c.gridy = i;
+        i++;
+        Component[] lpc = this.lastPanel.getComponents();
+        c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.anchor = GridBagConstraints.LINE_END;
+        c.gridx = 1;
+        c.gridy = i;
+        JButton c0 = new JButton("Crea oggetto");
+        c0.addActionListener(new GetActionListener(jEP, jBG, elem));
+        controll.add(c0, c);
+        for (Component com : lpc) {
+            //<editor-fold defaultstate="collapsed" desc="RadioButton">
+            String g = com.getName();
+            if (g == null) {
+                continue;
+            }
+            if (g.endsWith("_checkBox")) {
+                JCheckBox jcb = (JCheckBox) com;
+                boolean set = jcb.isSelected();
+                if (!set) {
                     continue;
                 }
-                if (g.endsWith("_checkBox")) {
-                    JCheckBox jcb = (JCheckBox) com;
-                    boolean set = jcb.isSelected();
-                    if (!set) {
-                        continue;
-                    }
-                    c = new GridBagConstraints();
-                    c.fill = GridBagConstraints.HORIZONTAL;
-                    c.anchor = GridBagConstraints.LINE_START;
-                    c.gridx = 0;
-                    c.gridy = i;
-                    JRadioButton c1 = new JRadioButton();
-                    String name = (jcb.getName()).replace("_checkBox", "");
-                    c1.setText(name);
-                    c1.setName(name + "_radioButton");
-                    jBG.add(c1);
-                    controll.add(c1, c);
-                    i++;
-                }
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.LINE_START;
+                c.gridx = 0;
+                c.gridy = i;
+                JRadioButton c1 = new JRadioButton();
+                String name = (jcb.getName()).replace("_checkBox", "");
+                c1.setText(name);
+                c1.setName(name + "_radioButton");
+                jBG.add(c1);
+                controll.add(c1, c);
+                i++;
             }
-
-            // pannello generale
-            JPanel pane = new JPanel(new BorderLayout());
-            pane.setPreferredSize(cards.getPreferredSize());
-            pane.setMaximumSize(cards.getMaximumSize());
-            pane.setMinimumSize(cards.getMinimumSize());
-            pane.add(controll, BorderLayout.PAGE_START);
-            pane.add(scroller, BorderLayout.CENTER);
-            cards.add(pane);
-            //</editor-fold>
-        } else {
-            //<editor-fold defaultstate="collapsed" desc="pannello finale">
-            // elem == null creo pannelli uscita ed aggirno i pulsanti
             //</editor-fold>
         }
 
+        // pannello generale
+        JPanel pane = new JPanel(new BorderLayout());
+        pane.setPreferredSize(cards.getPreferredSize());
+        pane.setMaximumSize(cards.getMaximumSize());
+        pane.setMinimumSize(cards.getMinimumSize());
+        pane.add(controll, BorderLayout.PAGE_START);
+        pane.add(scroller, BorderLayout.CENTER);
+        cards.add(pane);
     }
 
     /**
@@ -592,7 +701,7 @@ class SecondStepStrategy {
                         return autoScan;
                     } else { // se il tipo è minimo si divide anche la punteggiatura
                         Pattern min = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
-                        Matcher m = min.matcher(this.text);
+                        Matcher m = min.matcher(tx.allText);
                         Pattern min_simple = Pattern.compile("(\\p{Punct})|(\\p{Alnum}+)|(\\p{Punct})", Pattern.UNICODE_CHARACTER_CLASS);
                         Matcher r;
                         while (m.find()) {
@@ -699,7 +808,7 @@ class SecondStepStrategy {
      */
     public synchronized void next() {
         if (!this.isEnd) {
-            if (this.process) { // ci stanno dati da elaborare
+            if (this.process) { // apertura pannello selezioni
                 // caricamento dati
                 TextType pollFirst = this.ttl.pollFirst();
                 // allego eventuali attributi
@@ -718,13 +827,13 @@ class SecondStepStrategy {
                     }
                 }
                 // genero pannello sucessivo
-                printPaneGet(pollFirst);
+                printPaneSelects(pollFirst);
                 CardLayout lay = (CardLayout) cards.getLayout();
                 lay.next(cards);
                 this.process = false;
-            } else { // genero in nuovo pannello iniziale per il prossimo oggetto
+            } else { // genero in nuovo pannello config per il prossimo oggetto
                 TextType peekFirst = this.ttl.peekFirst();
-                this.printPaneSet(peekFirst); // se peekFirst è null imposta la finiestra per la fine
+                printPaneConfig(peekFirst); // se peekFirst è null imposta la finiestra per la fine
                 CardLayout layout = (CardLayout) cards.getLayout();
                 layout.next(cards);
                 if (peekFirst == null) {
@@ -755,6 +864,11 @@ class SecondStepStrategy {
     public synchronized <JFrame extends PropertyChangeListener> void doLoading(JFrame windows) {
         if (this.isEnd) {
             // lancio il processo che si occuperò di caricare i dati
+            TaskDataBaseUpdate task = new TaskDataBaseUpdate(this.maxTypeList);
+            task.addPropertyChangeListener(windows);
+            
+            task.execute();
+            
         }
     }
 }
