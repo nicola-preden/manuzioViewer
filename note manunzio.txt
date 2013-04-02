@@ -1,3 +1,7 @@
+Update v3.2
+correzione funzioni:
+	create_rto_from_pos_type alcuni nomi di colonna inesatti
+
 UPDATE v3.1
 aggiunto colonna 'description' nel tipo 'schema'
 modificato colonna description nel tipo 'types' (tolto vincolo NOT NULL)

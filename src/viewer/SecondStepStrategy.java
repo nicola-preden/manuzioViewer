@@ -29,6 +29,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.StyledEditorKit;
 import viewer.manuzioParser.Attribute;
@@ -252,6 +253,7 @@ public class SecondStepStrategy {
      * <p>Il testo grezzo da inserire. </p>
      */
     private String text;
+    TaskDataBaseUpdate task;
     /**
      * <p>Indica tutto il testo caricato è da associare al tipo. </p>
      */
@@ -330,6 +332,7 @@ public class SecondStepStrategy {
         this.text = text;
         typeMap = new HashMap<String, Object>();
         this.ttl = new LinkedList<TextType>();
+        task = null;
     }
 
     /**
@@ -557,20 +560,17 @@ public class SecondStepStrategy {
             pane.setPreferredSize(cards.getPreferredSize());
             pane.setMaximumSize(cards.getMaximumSize());
             pane.setMinimumSize(cards.getMinimumSize());
-            GridBagLayout experimentLayout = new GridBagLayout();
+            BorderLayout experimentLayout = new BorderLayout();
             GridBagConstraints c;
             pane.setLayout(experimentLayout);
-            JLabel l;
+            JTextArea jta;
+            JScrollPane jsp;
 
             int i = 0;
-            l = new JLabel("<HTML><p><b>Creazione dati completata<br />Premi Fine  per caricare i dati nel database</b></p></HTML>");
-            l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            c = new GridBagConstraints();
-            c.fill = GridBagConstraints.HORIZONTAL;
-            c.anchor = GridBagConstraints.PAGE_START;
-            c.gridx = 0;
-            c.gridy = i;
-            pane.add(l, c);
+            jta = new JTextArea("Creazione dati completata<br />Premi Termina  per caricare i dati nel database\n");
+            jsp = new JScrollPane(jta,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            
+            pane.add(jsp, BorderLayout.CENTER);
 
             this.next.setText("Termina");
             cards.add(pane, "end");
@@ -861,14 +861,39 @@ public class SecondStepStrategy {
      *
      * @param windows finestra usata per la procedura di caricamento
      */
-    public synchronized <JFrame extends PropertyChangeListener> void doLoading(JFrame windows) {
+    public synchronized  void doLoading(AddToServerWizard windows) {
         if (this.isEnd) {
             // lancio il processo che si occuperò di caricare i dati
-            TaskDataBaseUpdate task = new TaskDataBaseUpdate(this.maxTypeList);
+            Component[] lpc = this.lastPanel.getComponents();
+            Component component = ((JScrollPane)lpc[0]).getViewport().getView();
+            JTextArea jta =(JTextArea) component;
+
+            task = new TaskDataBaseUpdate(ManuzioViewer.schema, windows,jta,this.maxTypeList);
             task.addPropertyChangeListener(windows);
-            
+            this.next.setEnabled(false);
+            this.close.setEnabled(false);
             task.execute();
-            
+
         }
+    }
+
+    /**
+     * <p>In caso sia già stato avviato i threads per l'effettivo caricamento li
+     * blocca. </p>
+     */
+    public synchronized void cancel() {
+        if (task != null) {
+            task.cancel(true);
+        }
+    }
+    /**
+     * <p>In caso sia già stato avviato i threads per l'effettivo caricamento
+     * ritorna lo status di quest'ultimo. </p>
+     * @return <tt>true</tt> se il task è terminato <tt>false</tt> atrimenti
+     */
+    public synchronized boolean isDone() {
+        if (task != null) {
+            return task.isDone();
+        } else return false;
     }
 }

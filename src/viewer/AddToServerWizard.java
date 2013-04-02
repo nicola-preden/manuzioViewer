@@ -1,9 +1,7 @@
 package viewer;
 
 import java.awt.CardLayout;
-import java.awt.Cursor;
 import java.awt.Desktop;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -783,6 +781,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             }
         }
         if (currentStep.compareTo(secondStep) == 0) {
+            sss.cancel();
             this.setVisible(false);
         }
     }//GEN-LAST:event_jB_closeActionPerformed

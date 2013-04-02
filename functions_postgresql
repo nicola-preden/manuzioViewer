@@ -361,7 +361,7 @@ END IF;
 --verifica esistenza tipologia dell'oggetto
 
 
-IF NOT EXISTS (SELECT * FROM type_composition WHERE type_contained = obj_type) AND 
+IF NOT EXISTS (SELECT * FROM type_composition WHERE contained_type = obj_type) AND 
 EXISTS (SELECT * FROM types WHERE type_name = obj_type AND extends IS NULL) THEN
 	plu = false;
 ELSE

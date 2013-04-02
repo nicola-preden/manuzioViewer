@@ -74,6 +74,7 @@ public class ConnectionPoolFactory {
         config.setPartitionCount(2);
         config.setTransactionRecoveryEnabled(false);
         config.setDefaultAutoCommit(true);
+        config.sanitize();
     }
 
     /**
