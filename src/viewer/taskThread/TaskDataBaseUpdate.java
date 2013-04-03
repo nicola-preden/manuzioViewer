@@ -4,14 +4,18 @@
  */
 package viewer.taskThread;
 
+import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JTextArea;
@@ -37,7 +41,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
     SecondStepStrategy.TextType maxTypeList;
     JTextArea jTA;
     Schema s;
-    int progress = -1;
+    int progress;
     int max;
 
     /**
@@ -55,21 +59,18 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
         this.jTA.setEditable(false);
         this.windows = windows;
         this.s = s;
+        progress = 0;
+        max = maxTypeList.getAllText().length;
 
     }
 
     private void updateProgress(Object x) {
         if (x == null) {
-            return;
-        }
-        if (x instanceof Integer) {
+            progress++;
             try {
-                int intValue = ((Integer) x).intValue();
-                if (intValue == progress) {
-                    return;
-                } else {
-                    progress = intValue;
-                }
+                int intValue = this.getProgress();
+                int k = 100 * progress / max;
+                if (intValue == k) return;
                 Document document = jTA.getDocument();
                 Element rootElem = document.getDefaultRootElement();
                 int numLines = rootElem.getElementCount();
@@ -77,11 +78,12 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
                 int lineStart = lineElem.getStartOffset();
                 int lineEnd = lineElem.getEndOffset();
                 document.remove(lineStart, lineEnd - lineStart);
-                this.jTA.append("In corso ... " + progress + "%\n");
+                this.jTA.append("In corso ... " + k + "%\n");
                 setProgress(intValue);
             } catch (BadLocationException ex) {
                 Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
         }
         if (x instanceof String) {
             this.jTA.append((String) x + "\n");
@@ -102,12 +104,11 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
             int end_idx = 1;
             conn = ManuzioViewer.getConnection();
             conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             setSavepoint = conn.setSavepoint();
 
             conn.commit();
             updateProgress("Inizializzazione Caricamento ... ");
-            String[] allText = this.maxTypeList.getAllText();
+            int allTextLeng = this.maxTypeList.getAllText().length;
             // calcolo lo start
             stmt = conn.createStatement();
             stmt.execute("SELECT "
@@ -120,43 +121,16 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
                 start_idx = resultSet.getInt(1);
             }
             if (start_idx != 0) {
-                end_idx = start_idx;
+                end_idx = start_idx + allTextLeng;
             } else {
                 start_idx = 1;
+                end_idx = start_idx + allTextLeng;
             }
-            ArrayList<Integer> l = new ArrayList<Integer>();
-            String qry = "{? = call create_or_return_sto(?, ?, ?, ?, ?, ?) }";
-            function = conn.prepareCall(qry);
-            String m = s.getMinimalUnit().getTypeName();
-            for (int i = 0; i < allText.length; i++) {
-                function.registerOutParameter(1, Types.OTHER);
-                function.setString(2, allText[i]);
-                function.setInt(3, allText[i].length());
-                function.setInt(4, end_idx++);
-                function.setInt(5, end_idx);
-                function.setString(6, s.getMinimalUnit().getTypeName());
-                function.setBoolean(7, false);
-                function.execute();
-                resultSet = (ResultSet) function.getObject(1);
-                while (resultSet.next()) {
-                    int aInt = resultSet.getInt(1);
-                    l.add(aInt);
-                }
-                updateProgress((Integer) (100 * i / allText.length));
-            }
-            function.close();
-            updateProgress(100);
             conn.commit();
-            updateProgress("Creazione MaximalUnit ...");
-            updateProgress(0);
-
-            qry = "{? = call create_or_return_rto(?, obj_type character varying, is_plu boolean, obj_label text) }";
-
-            updateProgress(100);
-            function.close();
-
-
-            conn.commit();
+            resultSet.close();
+            conn.close();
+            updateProgress("Caricamento dati ... ");
+            int id = load(this.maxTypeList,start_idx,end_idx);
         } catch (SQLException ex) {
             if (setSavepoint != null) {
                 try {
@@ -193,7 +167,92 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
     }
 
     private int load(SecondStepStrategy.TextType tx, int start, int end) {
-        if (tx.getType().isMinimalUnit()) {}
-        return 0;
+        Connection conn = null;
+        PreparedStatement prepareStatement = null;
+        ResultSet res = null;
+        int x = -1;
+        if (tx == null) {
+            return -1;
+        }
+        if (tx.getType().isMinimalUnit()) {
+            //<editor-fold defaultstate="collapsed" desc="minimo">
+            try {
+                String qry = "SELECT * FROM create_or_return_sto(?, ?, ?, ?, ?, ?)";
+                conn = ManuzioViewer.getConnection();
+                prepareStatement = conn.prepareStatement(qry);
+                prepareStatement.setString(1, tx.getAllText()[0]);
+                prepareStatement.setInt(2, tx.getAllText()[0].length());
+                prepareStatement.setInt(3, start);
+                prepareStatement.setInt(4, end);
+                prepareStatement.setString(5, tx.getType().getTypeName());
+                prepareStatement.setBoolean(6, false);
+                res = prepareStatement.executeQuery();
+                while (res.next()) {
+                    x = res.getInt(1);
+                }
+                updateProgress(null);
+
+            } catch (SQLException ex) {
+                Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    if (res != null) {
+                        res.close();
+                    }
+                    if (prepareStatement != null) {
+                        prepareStatement.close();
+                    }
+                    if (conn != null) {
+                        conn.close();
+                    }
+                } catch (SQLException ex) {
+                    Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            //</editor-fold>
+        } else {
+            try {
+                SecondStepStrategy.TextType[] subType = tx.getSubType();
+                Object[] arr = new Integer[subType.length];
+                int startT = start;
+                int stopT = start;
+                for (int i = 0; i < subType.length; i++) {
+                    stopT += subType[i].getAllText().length;
+                    int t = load(subType[i], startT, stopT);
+                    arr[i] = t;
+                    startT = stopT;
+                }
+                String qry = "SELECT * FROM create_or_return_rto(?, ?, ?, ?)";
+                // query caricamento
+                conn = ManuzioViewer.getConnection();
+                Array arrSql = conn.createArrayOf("integer", arr);
+                prepareStatement = conn.prepareStatement(qry);
+                prepareStatement.setArray(1, arrSql);
+                prepareStatement.setString(2, tx.getType().getTypeName());
+                prepareStatement.setBoolean(3, true);
+                prepareStatement.setString(4, "");
+                res = prepareStatement.executeQuery();
+                while (res.next()) {
+                    x = res.getInt(1);
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    if (res != null) {
+                        res.close();
+                    }
+                    if (prepareStatement != null) {
+                        prepareStatement.close();
+                    }
+                    if (conn != null) {
+                        conn.close();
+                    }
+                } catch (SQLException ex) {
+                    Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return x;
     }
 }

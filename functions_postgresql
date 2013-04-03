@@ -206,11 +206,10 @@ $BODY$DECLARE
 	first_start integer;
 	pk integer;
 BEGIN
-	--ricerca start primo component
+	--ricerca start primo component (corretto)
 	SELECT INTO first_start start
-	FROM elements AS el, text_occurence AS tex
-	WHERE el.id_tex_obj = component[1] AND 
-		el.id_text_occurence = tex.id_text_occurence;
+        FROM textual_objects
+        WHERE id_tex_obj = component[1];
 		
 	--verifica esistenza del textual object
 	SELECT INTO existing_texobj *
@@ -225,7 +224,7 @@ BEGIN
 	
 		-- inserimento dell'oggetto
 		INSERT INTO textual_objects(type_name, is_plural, start, label)
-			VALUES(obj_type, is_plu, first_start, obj_label)RETURNING id_tex_obj INTO pk;
+			VALUES(obj_type, is_plu, first_start, obj_label) RETURNING id_tex_obj INTO pk;
 				
 			SELECT INTO existing_texobj *
 			FROM textual_objects

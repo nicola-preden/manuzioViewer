@@ -1,6 +1,7 @@
 Update v3.2
 correzione funzioni:
-	create_rto_from_pos_type alcuni nomi di colonna inesatti
+create_rto_from_pos_type alcuni nomi di colonna inesatti.
+create_or_return_rto modifica prima parte dello scriptsql, in quanto dava risultati incoerenti sul riguardati le tabelle usate per cercare il textstart
 
 UPDATE v3.1
 aggiunto colonna 'description' nel tipo 'schema'

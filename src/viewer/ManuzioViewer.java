@@ -66,7 +66,7 @@ public class ManuzioViewer {
     static TaskTree taskTree = null;
     private static final String urlXml = "settings.xml";        // File di Configurazione
     private static Timer tm = new Timer();
-    private static final double VERSION_Manuzio = 3.1;
+    private static final double VERSION_Manuzio = 3.2;
     private static final String APP_NAME = "ManuzioViewer";
 
     /**
