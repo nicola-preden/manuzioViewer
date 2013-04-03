@@ -5,10 +5,8 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -196,11 +194,13 @@ public class SecondStepStrategy {
         /**
          *
          * @param name
-         * @return <tt>null</tt> se non esiste
+         * @return Stringa vuota se non esiste se non esiste
          */
         public String getAttribute(String name) {
-            String get = this.attribute.get(name);
-            return get;
+            if (attribute.containsKey(name)) {
+                return this.attribute.get(name);
+            }
+            return "";
         }
 
         public void setAttribute(String name, String attribute) {

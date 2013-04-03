@@ -26,7 +26,9 @@ import javax.swing.text.Element;
 import viewer.AddToServerWizard;
 import viewer.ManuzioViewer;
 import viewer.SecondStepStrategy;
+import viewer.manuzioParser.Attribute;
 import viewer.manuzioParser.Schema;
+import viewer.manuzioParser.Type;
 
 /**
  * <p>Questa classe si occupa di caricare il i dati ed il loro modello nel
@@ -70,7 +72,9 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
             try {
                 int intValue = this.getProgress();
                 int k = 100 * progress / max;
-                if (intValue == k) return;
+                if (intValue != k) {
+                    setProgress(k);
+                }
                 Document document = jTA.getDocument();
                 Element rootElem = document.getDefaultRootElement();
                 int numLines = rootElem.getElementCount();
@@ -78,12 +82,11 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
                 int lineStart = lineElem.getStartOffset();
                 int lineEnd = lineElem.getEndOffset();
                 document.remove(lineStart, lineEnd - lineStart);
-                this.jTA.append("In corso ... " + k + "%\n");
-                setProgress(intValue);
+                this.jTA.append("In corso ... " + progress + " su " + max + "\n");
             } catch (BadLocationException ex) {
                 Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
         }
         if (x instanceof String) {
             this.jTA.append((String) x + "\n");
@@ -130,7 +133,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
             resultSet.close();
             conn.close();
             updateProgress("Caricamento dati ... ");
-            int id = load(this.maxTypeList,start_idx,end_idx);
+            int id = load(this.maxTypeList, start_idx, end_idx);
         } catch (SQLException ex) {
             if (setSavepoint != null) {
                 try {
@@ -212,6 +215,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
             //</editor-fold>
         } else {
             try {
+                //<editor-fold defaultstate="collapsed" desc="non minimo">
                 SecondStepStrategy.TextType[] subType = tx.getSubType();
                 Object[] arr = new Integer[subType.length];
                 int startT = start;
@@ -252,6 +256,58 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
                     Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+            //</editor-fold>
+        }
+        if (tx.getType().hasAt(Type.number.BOTH)) {
+            //<editor-fold defaultstate="collapsed" desc="Attributi">
+            try {
+                Attribute[] at = tx.getType().getAt(Type.number.BOTH);
+                String qry = "SELECT "
+                        + "  attribute_types.id_att_type "
+                        + "FROM "
+                        + "  public.attribute_types "
+                        + "WHERE "
+                        + "  attribute_types.type_name = ? AND attribute_types.label = ?;";
+                String qry2 = "SELECT create_or_return_att_for_admin(?, ?, ?)";
+                int id;
+                conn = ManuzioViewer.getConnection();
+                for (Attribute ar : at) {
+                    id = -1;
+                    prepareStatement = conn.prepareStatement(qry);
+                    prepareStatement.setString(1, tx.getType().getTypeName());
+                    prepareStatement.setString(2, ar.getAtName());
+                    res = prepareStatement.executeQuery();
+                    while (res.next()) {
+                        id = res.getInt(1);
+                    }
+                    prepareStatement.close();
+                    res.close();
+                    if (id != -1) {
+                        prepareStatement = conn.prepareStatement(qry2);
+                        prepareStatement.setInt(1, id);
+                        prepareStatement.setString(2, tx.getAttribute(ar.getAtName()));
+                        prepareStatement.setInt(3, x);
+                        prepareStatement.executeQuery();
+                    }
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    if (res != null) {
+                        res.close();
+                    }
+                    if (prepareStatement != null) {
+                        prepareStatement.close();
+                    }
+                    if (conn != null) {
+                        conn.close();
+                    }
+                } catch (SQLException ex) {
+                    Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            //</editor-fold>
         }
         return x;
     }
