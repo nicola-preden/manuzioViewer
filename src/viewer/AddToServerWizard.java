@@ -282,7 +282,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 for (int i = 0; i < componentTypes.length; i++) { // per ogni nuovo type
                     test = true;
                     String s = componentTypes[i].getTypeName();
-                    for (int j = 0; j < idx && test; j++) {
+                    for (int j = 0; j < a.size() && test; j++) {
                         if (s.compareTo(a.get(j).getTypeName()) == 0) {
                             test = false;
                         }

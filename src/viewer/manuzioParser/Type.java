@@ -222,10 +222,18 @@ public class Type {
      * @return a Boolean value
      */
     public boolean hasComponents() {
-        if (this.components.isEmpty()) {
-            return false;
+        if (supertype != null) {
+            if (!this.components.isEmpty() || supertype.hasComponents()) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            return true;
+            if (this.components.isEmpty()) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 
@@ -243,31 +251,60 @@ public class Type {
      * described before
      */
     public boolean hasAt(number num) {
-        switch (num) {
-            case SINGULAR:
-                if (this.attributes.isEmpty()) {
-                    return false;
-                } else {
-                    return true;
-                }
-            case PLURAL:
-                if (this.pluralAttributes.isEmpty()) {
-                    return false;
-                } else {
-                    return true;
-                }
-            case BOTH:
-                if (!this.attributes.isEmpty()) {
-                    return true;
-                } else {
+        if (supertype != null) {
+            switch (num) {
+                case SINGULAR:
+                    if (!this.attributes.isEmpty() || supertype.hasAt(num)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case PLURAL:
+                    if (!this.pluralAttributes.isEmpty() || supertype.hasAt(num)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                case BOTH:
+                    if (!this.attributes.isEmpty() || supertype.hasAt(num)) {
+                        return true;
+                    } else {
+                        if (!this.pluralAttributes.isEmpty() || supertype.hasAt(num)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                default:
+                    throw new IllegalArgumentException("bad data input. Allowed only number.SINGULAR, number.PLURAL, number.BOTH.");
+            }
+        } else {
+            switch (num) {
+                case SINGULAR:
+                    if (this.attributes.isEmpty()) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                case PLURAL:
                     if (this.pluralAttributes.isEmpty()) {
                         return false;
                     } else {
                         return true;
                     }
-                }
-            default:
-                throw new IllegalArgumentException("bad data input. Allowed only number.SINGULAR, number.PLURAL, number.BOTH.");
+                case BOTH:
+                    if (!this.attributes.isEmpty()) {
+                        return true;
+                    } else {
+                        if (this.pluralAttributes.isEmpty()) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+                default:
+                    throw new IllegalArgumentException("bad data input. Allowed only number.SINGULAR, number.PLURAL, number.BOTH.");
+            }
         }
     }
 
