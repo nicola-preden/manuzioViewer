@@ -14,26 +14,30 @@ import java.util.Properties;
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
-public abstract class TextualLayout {
-    
+public class TextualLayout {
+
     SettingXML setting;
 
     /**
      * <p>Inizializza l'oggetto in base alla configurazione di sistema. </p>
-     * @param setting 
+     *
+     * @param setting
      */
     public TextualLayout(SettingXML setting) {
         this.setting = setting;
     }
-   
+
     /**
-     * <p>Data una connessione ed l'id dell oggetto da caricare restituisce,
-     *  in base alla configurazione, il testo formattato. </p>
+     * <p>Data una connessione ed l'id dell oggetto da caricare restituisce, in
+     * base alla configurazione, il testo formattato. </p>
+     *
      * @param conn connesione al DB
      * @param obj id dell oggetto
      * @return Stringa formattata o vuota se non trova l'oggetto
      */
-    public abstract String translateText(Connection conn, int obj);
+    public String translateText(Connection conn, int obj) {
+        return null;
+    }
 
     /**
      * <p>Data una descrizione dei vincoli di visualizzazione la aggiunge alle
@@ -45,7 +49,9 @@ public abstract class TextualLayout {
      * @param prop parametri di configurazione
      * @return <tt>true</tt> se ha successo
      */
-    public abstract boolean addStyle(String url, String nameDB, Properties prop);
+    public boolean addStyle(String url, String nameDB, Properties prop) {
+        return false;
+    }
 
     /**
      * <p>Data l'identificatvo di un database lo cancella dalla lista. I
@@ -56,5 +62,7 @@ public abstract class TextualLayout {
      * @param nameDB nome del database
      * @return <tt>true</tt> se ha successo
      */
-    public abstract boolean removeStyle(String url, String nameDB);
+    public boolean removeStyle(String url, String nameDB) {
+        return false;
+    }
 }

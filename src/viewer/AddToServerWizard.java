@@ -178,9 +178,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         String commentText = "<html><p>Ora è necesssario associare per ogni textual object, specificato nello Schema, <br />"
                 + "il relativo testo che lo compone. Per facilitare l'operazione per i tipi più semplici basterà <br />"
                 + "scegliere tra le tipologie già suggerite, usare una <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html\">Espressione Regolare</a> oppure selezionare il <br />"
-                + "testo scelto attreverso un editor. Si noti che i simboli di punteggiatura quali, punti, <br />"
-                + "virgole e similari, verranno automaricamente separati dal testo ed inseriti con il tipo <br />"
-                + "minimo presente nello schema(attaverso RE:\"(\\p{Punct}+)|(\\p{Alnum}+)|(\\p{Punct}+)\"). <br />"
+                + "testo scelto attreverso un editor. <br />"
                 + "Se è stata scelta l'aggiunta ad un textual object verranno "
                 + "presentati solo i sottotipi interessati.</p></html>";
         javax.swing.JLabel comment = new javax.swing.JLabel(commentText);

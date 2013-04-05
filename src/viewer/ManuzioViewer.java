@@ -77,7 +77,7 @@ public class ManuzioViewer {
         /*
         String w = "\\p{Graph}+";
         Pattern p = Pattern.compile(w, Pattern.UNICODE_CHARACTER_CLASS);
-        Pattern z = Pattern.compile("(\\p{Punct})|(\\p{Alnum}+)|(\\p{Punct})", Pattern.UNICODE_CHARACTER_CLASS);
+        Pattern z = Pattern.compile("(\\p{Alnum}+)|(\\p{Punct})", Pattern.UNICODE_CHARACTER_CLASS);
 
         Matcher m = p.matcher("1. Evocatio\n"
                 + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "

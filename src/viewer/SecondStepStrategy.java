@@ -600,8 +600,8 @@ public class SecondStepStrategy {
         ButtonGroup jBG = new ButtonGroup();
         //carico jbutton[GET] componenti
         int i = 0;
-        JLabel l = new JLabel("<html><p><b>Seleziona un tipo un frammento del testo infine <br />"
-                + "premi \"Crea Oggetto\" terminata la scelta premi \"Avanti\"</b></p></html>");
+        JLabel l = new JLabel("Seleziona un tipo un frammento del testo infine \n"
+                + "premi \"Crea Oggetto\" terminata la scelta premi \"Avanti\"");
         c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.FIRST_LINE_END;
@@ -702,15 +702,9 @@ public class SecondStepStrategy {
                     } else { // se il tipo è minimo si divide anche la punteggiatura
                         Pattern min = Pattern.compile((String) get, Pattern.UNICODE_CHARACTER_CLASS);
                         Matcher m = min.matcher(tx.allText);
-                        Pattern min_simple = Pattern.compile("(\\p{Punct})|(\\p{Alnum}+)|(\\p{Punct})", Pattern.UNICODE_CHARACTER_CLASS);
-                        Matcher r;
                         while (m.find()) {
-                            String t = m.group();
-                            r = min_simple.matcher(t);
-                            while (r.find()) {
-                                TextType textType = new TextType(component, tx, componentName, r.group());
+                                TextType textType = new TextType(component, tx, componentName, m.group());
                                 tx.addSubType(textType);
-                            }
                         }
                         return true;
                     }
