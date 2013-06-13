@@ -220,19 +220,9 @@ public class SettingXML {
                     ConnectionsList.appendChild(password);
                 }
             }
+            // riscrivere per salvataggio lingua, e interpretazione schemi
 
             // SCRITTURA FILE
-
-            /*TransformerFactory transformerFactory = TransformerFactory.newInstance();
-             Transformer transformer = transformerFactory.newTransformer();
-             doc.normalizeDocument();
-             DOMSource source = new DOMSource(doc);
-             StreamResult result = new StreamResult(new File(this.url));
-             //StreamResult result = new StreamResult(System.out);
-
-             transformer.transform(source, result);
-             */
-            // cosi il testo risulta umanamente leggibile
             OutputFormat format = new OutputFormat(doc);
             format.setIndenting(true);
             XMLSerializer serializer = new XMLSerializer(new FileOutputStream(new File(this.url)), format);

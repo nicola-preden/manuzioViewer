@@ -66,6 +66,9 @@ public class PreferenceWindow extends javax.swing.JFrame {
 
         jTP_Preferences = new javax.swing.JTabbedPane();
         jP_TextLayout = new JPanelTextGraphics();
+        jSP_serverList = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList();
+        jP_serverOPT = new javax.swing.JPanel();
         jP_Languages = new JPanelLanguages();
         jB_close = new javax.swing.JButton();
         jB_CloseAndSave = new javax.swing.JButton();
@@ -73,15 +76,42 @@ public class PreferenceWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Preferenze");
 
+        jList1.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        jSP_serverList.setViewportView(jList1);
+
+        org.jdesktop.layout.GroupLayout jP_serverOPTLayout = new org.jdesktop.layout.GroupLayout(jP_serverOPT);
+        jP_serverOPT.setLayout(jP_serverOPTLayout);
+        jP_serverOPTLayout.setHorizontalGroup(
+            jP_serverOPTLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 409, Short.MAX_VALUE)
+        );
+        jP_serverOPTLayout.setVerticalGroup(
+            jP_serverOPTLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 0, Short.MAX_VALUE)
+        );
+
         org.jdesktop.layout.GroupLayout jP_TextLayoutLayout = new org.jdesktop.layout.GroupLayout(jP_TextLayout);
         jP_TextLayout.setLayout(jP_TextLayoutLayout);
         jP_TextLayoutLayout.setHorizontalGroup(
             jP_TextLayoutLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 596, Short.MAX_VALUE)
+            .add(jP_TextLayoutLayout.createSequentialGroup()
+                .addContainerGap()
+                .add(jSP_serverList, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 163, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(jP_serverOPT, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jP_TextLayoutLayout.setVerticalGroup(
             jP_TextLayoutLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 304, Short.MAX_VALUE)
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, jP_TextLayoutLayout.createSequentialGroup()
+                .add(jP_TextLayoutLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(jP_serverOPT, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(jSP_serverList, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jTP_Preferences.addTab("Layout Testo", jP_TextLayout);
@@ -160,8 +190,11 @@ public class PreferenceWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jB_CloseAndSave;
     private javax.swing.JButton jB_close;
+    private javax.swing.JList jList1;
     private javax.swing.JPanel jP_Languages;
     private javax.swing.JPanel jP_TextLayout;
+    private javax.swing.JPanel jP_serverOPT;
+    private javax.swing.JScrollPane jSP_serverList;
     private javax.swing.JTabbedPane jTP_Preferences;
     // End of variables declaration//GEN-END:variables
 }
