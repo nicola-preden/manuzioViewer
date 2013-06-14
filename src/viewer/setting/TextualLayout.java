@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import javax.swing.text.JTextComponent;
 
 /**
  * <p>Classe astratta che descrive i metodi per aggiungere generare del testo a
@@ -16,60 +17,30 @@ import java.util.Properties;
  * @author Nicola Preden, matricola 818578, Facolt�� di informatica Ca' Foscari
  * in Venice
  */
-public abstract class TextualLayout {
+public abstract class TextualLayout<T extends JTextComponent> extends Thread {
 
-    Map<String,Integer> setting;
+    public static final int NO_OPERATION = 0;
     public static final int SPACE = 1;
     public static final int TABBED_SPACE = 2;
     public static final int RETURN_CARRIGE = 3;
     public static final int DEFAULT = SPACE;
-    private static final String DEFAULT_STRING = "default";
+    private final int id_object;
+    private final T output;
 
     /**
      * <p>Crea un <tt></tt> generico che genera un output privo di
      * configurazioni di layout. </p>
+     * @param id_object id dell' oggetto da visualizare dal database
+     * @param id_object oggetto nel quale verrà visualizzato l'output
      */
-    private TextualLayout() {
-        setting = new HashMap<String,Integer>();
-        setting.put(DEFAULT_STRING, DEFAULT);
+    private TextualLayout(int id_object, T output) {
+        this.id_object = id_object;
+        this.output = output;
     }
-
-    /**
-     * <p>Inizializza l'oggetto in base alla configurazione di sistema. </p>
-     *
-     * @param setting
-     */
-    private TextualLayout(Properties ... props) {
-        for (Properties prop : props) {
-           
-        }
-    }
-
-    /**
-     * <p>Crea un nuovo oggetto. </p>
-     * @param prop se <tt>null</tt> ritorna il costruttore di default
-     * @return 
-     */
-    public TextualLayout createTextualLayout(Properties prop) {
-        return new TextualLayout() {
-
-            @Override
-            public String translateText(Connection conn, int obj) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public boolean changeStyle(String url, String nameDB, Properties prop) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public boolean removeStyle(String url, String nameDB) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
-    }
-
+    
+    @Override
+    public abstract void run();
+    
     /**
      * <p>Data una connessione ed l'id dell oggetto da caricare restituisce, in
      * base alla configurazione, il testo formattato. </p>
@@ -79,27 +50,4 @@ public abstract class TextualLayout {
      * @return Stringa formattata o vuota se non trova l'oggetto
      */
     public abstract String translateText(Connection conn, int obj);
-
-    /**
-     * <p>Data una descrizione dei vincoli di visualizzazione la aggiunge alle
-     * impostazioni. I parametri per identificare il sever devono essere
-     * coerenti con quelli delle connessioni. </p>
-     *
-     * @param url indirizzio del database
-     * @param nameDB nome del database
-     * @param prop parametri di configurazione
-     * @return <tt>true</tt> se ha successo
-     */
-    public abstract boolean changeStyle(String url, String nameDB, Properties prop);
-
-    /**
-     * <p>Data l'identificatvo di un database lo cancella dalla lista. I
-     * parametri per identificare il sever devono essere coerenti con quelli
-     * delle connessioni. NON ANCORA IMPLEMENTATA</p>
-     *
-     * @param url indirizzio del database
-     * @param nameDB nome del database
-     * @return <tt>true</tt> se ha successo
-     */
-    public abstract boolean removeStyle(String url, String nameDB);
 }

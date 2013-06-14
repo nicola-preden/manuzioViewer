@@ -37,6 +37,7 @@ public class SettingXML {
      * <p>markup xml lingua selezionata. </p>
      */
     public static final String LANGUAGE_SELECT = "Language";
+    public static final String SCHEMA_LIST = "SchemaList";
     private ArrayList<NodeSetting> setting;
     private String url;
 
@@ -66,7 +67,7 @@ public class SettingXML {
         }
 
         find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
-        if (find != -1) {
+        if (find >= 0) {
             setting.get(find).addProp(prop);
         } else {
             setting.add(new NodeSetting(desc, prop));
@@ -89,7 +90,7 @@ public class SettingXML {
         }
 
         find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
-        if (find != -1) {
+        if (find >= 0) {
             setting.get(find).addAtFistOccProp(prop);
         } else {
             setting.add(new NodeSetting(desc, prop));
@@ -122,7 +123,7 @@ public class SettingXML {
     }
 
     /**
-     * <p>Ritona un <tt>viewer.setting.NodeSettingInterface</tt> 
+     * <p>Ritona un <tt>viewer.setting.NodeSettingInterface</tt>
      * se trova l'oggetto altrimenti <tt>NULL</tt>. </p>
      *
      * @param desc
@@ -130,7 +131,7 @@ public class SettingXML {
      */
     public synchronized NodeSettingInterface getSetting(String desc) {
         int find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
-        if (find != -1) {
+        if (find >= 0) {
             return setting.get(find);
         } else {
             return null;
@@ -169,7 +170,24 @@ public class SettingXML {
                     p.setProperty("url", e.getElementsByTagName("url").item(0).getTextContent());
                     p.setProperty("user", e.getElementsByTagName("user").item(0).getTextContent());
                     p.setProperty("password", e.getElementsByTagName("password").item(0).getTextContent());
-                    this.addSetting("ConnectionsList", p);
+                    this.addSetting(SettingXML.CONNECTION_LIST, p);
+                }
+
+            }
+            nList = doc.getElementsByTagName(SettingXML.SCHEMA_LIST);
+
+            for (int i = 0; i < nList.getLength(); i++) {
+                Node n = nList.item(i);
+                if (n.getNodeType() == Node.ELEMENT_NODE) {
+                    Element e = (Element) n;
+                    NodeList childNodes = e.getChildNodes();
+                    Properties p = new Properties();
+
+                    for (int j = 0; j < childNodes.getLength();j++) {
+                        Element item = (Element) childNodes.item(j);
+                        p.setProperty(item.getTagName(), item.getNodeValue());
+                    }
+                    this.addSetting(SettingXML.SCHEMA_LIST, p);
                 }
 
             }
@@ -185,14 +203,12 @@ public class SettingXML {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
-
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement("Setting");
             //rootElement.setAttribute("test", "1");
             doc.appendChild(rootElement);
 
-
+            // Lista connessioni
             NodeSetting ns_c = (NodeSetting) this.getSetting(SettingXML.CONNECTION_LIST);
             if (ns_c != null) {
                 ListIterator<Properties> readProp = ns_c.readProp();
@@ -220,7 +236,28 @@ public class SettingXML {
                     ConnectionsList.appendChild(password);
                 }
             }
-            // riscrivere per salvataggio lingua, e interpretazione schemi
+            // Elenco layout
+            NodeSetting ns_s = (NodeSetting) this.getSetting(SettingXML.SCHEMA_LIST);
+            if (ns_s != null) {
+                ListIterator<Properties> readProp = ns_s.readProp();
+                while (readProp.hasNext()) {
+                    Properties next;
+                    Element SchemaList;
+
+                    next = readProp.next();
+                    ArrayList ar = Collections.list(next.propertyNames());
+                    
+                    SchemaList = doc.createElement(SettingXML.SCHEMA_LIST);
+                    rootElement.appendChild(SchemaList);
+
+                    for (int i = 0; i < ar.size(); i++) {
+                        Element type = doc.createElement(ar.get(i).toString());
+                        type.appendChild(doc.createTextNode(next.getProperty(ar.get(i).toString())));
+                        SchemaList.appendChild(type);
+                    }
+                }
+            }
+            // riscrivere per salvataggio lingua
 
             // SCRITTURA FILE
             OutputFormat format = new OutputFormat(doc);
