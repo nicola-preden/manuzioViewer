@@ -5,8 +5,6 @@
 package viewer.setting;
 
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -16,7 +14,7 @@ import java.util.Properties;
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
-public abstract class TextualLayout {
+public class TextualLayout {
 
     Map<String,Integer> setting;
     public static final int SPACE = 1;
@@ -40,35 +38,8 @@ public abstract class TextualLayout {
      *
      * @param setting
      */
-    private TextualLayout(Properties ... props) {
-        for (Properties prop : props) {
-           
-        }
-    }
-
-    /**
-     * <p>Crea un nuovo oggetto. </p>
-     * @param prop se <tt>null</tt> ritorna il costruttore di default
-     * @return 
-     */
-    public TextualLayout createTextualLayout(Properties prop) {
-        return new TextualLayout() {
-
-            @Override
-            public String translateText(Connection conn, int obj) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public boolean changeStyle(String url, String nameDB, Properties prop) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public boolean removeStyle(String url, String nameDB) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
+    public TextualLayout(SettingXML setting) {
+        this.setting = setting;
     }
 
     /**
@@ -79,7 +50,9 @@ public abstract class TextualLayout {
      * @param obj id dell oggetto
      * @return Stringa formattata o vuota se non trova l'oggetto
      */
-    public abstract String translateText(Connection conn, int obj);
+    public String translateText(Connection conn, int obj) {
+        return null;
+    }
 
     /**
      * <p>Data una descrizione dei vincoli di visualizzazione la aggiunge alle
@@ -91,16 +64,20 @@ public abstract class TextualLayout {
      * @param prop parametri di configurazione
      * @return <tt>true</tt> se ha successo
      */
-    public abstract boolean changeStyle(String url, String nameDB, Properties prop);
+    public boolean addStyle(String url, String nameDB, Properties prop) {
+        return false;
+    }
 
     /**
      * <p>Data l'identificatvo di un database lo cancella dalla lista. I
      * parametri per identificare il sever devono essere coerenti con quelli
-     * delle connessioni. NON ANCORA IMPLEMENTATA</p>
+     * delle connessioni. </p>
      *
      * @param url indirizzio del database
      * @param nameDB nome del database
      * @return <tt>true</tt> se ha successo
      */
-    public abstract boolean removeStyle(String url, String nameDB);
+    public boolean removeStyle(String url, String nameDB) {
+        return false;
+    }
 }
