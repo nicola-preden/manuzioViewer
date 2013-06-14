@@ -5,6 +5,8 @@
 package viewer.setting;
 
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
