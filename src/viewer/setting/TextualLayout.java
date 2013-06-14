@@ -5,16 +5,18 @@
 package viewer.setting;
 
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
  * <p>Classe astratta che descrive i metodi per aggiungere generare del testo a
  * seconda dei stili pre caricati</p>
  *
- * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
+ * @author Nicola Preden, matricola 818578, Facolt�� di informatica Ca' Foscari
  * in Venice
  */
-public class TextualLayout {
+public abstract class TextualLayout {
 
     Map<String,Integer> setting;
     public static final int SPACE = 1;
@@ -30,7 +32,6 @@ public class TextualLayout {
     private TextualLayout() {
         setting = new HashMap<String,Integer>();
         setting.put(DEFAULT_STRING, DEFAULT);
-        
     }
 
     /**
@@ -38,8 +39,35 @@ public class TextualLayout {
      *
      * @param setting
      */
-    public TextualLayout(SettingXML setting) {
-        this.setting = setting;
+    private TextualLayout(Properties ... props) {
+        for (Properties prop : props) {
+           
+        }
+    }
+
+    /**
+     * <p>Crea un nuovo oggetto. </p>
+     * @param prop se <tt>null</tt> ritorna il costruttore di default
+     * @return 
+     */
+    public TextualLayout createTextualLayout(Properties prop) {
+        return new TextualLayout() {
+
+            @Override
+            public String translateText(Connection conn, int obj) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public boolean changeStyle(String url, String nameDB, Properties prop) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public boolean removeStyle(String url, String nameDB) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        };
     }
 
     /**
@@ -50,9 +78,7 @@ public class TextualLayout {
      * @param obj id dell oggetto
      * @return Stringa formattata o vuota se non trova l'oggetto
      */
-    public String translateText(Connection conn, int obj) {
-        return null;
-    }
+    public abstract String translateText(Connection conn, int obj);
 
     /**
      * <p>Data una descrizione dei vincoli di visualizzazione la aggiunge alle
@@ -64,20 +90,16 @@ public class TextualLayout {
      * @param prop parametri di configurazione
      * @return <tt>true</tt> se ha successo
      */
-    public boolean addStyle(String url, String nameDB, Properties prop) {
-        return false;
-    }
+    public abstract boolean changeStyle(String url, String nameDB, Properties prop);
 
     /**
      * <p>Data l'identificatvo di un database lo cancella dalla lista. I
      * parametri per identificare il sever devono essere coerenti con quelli
-     * delle connessioni. </p>
+     * delle connessioni. NON ANCORA IMPLEMENTATA</p>
      *
      * @param url indirizzio del database
      * @param nameDB nome del database
      * @return <tt>true</tt> se ha successo
      */
-    public boolean removeStyle(String url, String nameDB) {
-        return false;
-    }
+    public abstract boolean removeStyle(String url, String nameDB);
 }

@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -25,7 +24,7 @@ import org.xml.sax.SAXException;
  * <p>Questa classe rende trasparente qualsiasi operazione sul file di
  * configurazione che contiene l'elenco dei server ed altro </p>
  *
- * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
+ * @author Nicola Preden, matricola 818578, Facolt�� di informatica Ca' Foscari
  * in Venice
  */
 public class SettingXML {
@@ -38,7 +37,6 @@ public class SettingXML {
      * <p>markup xml lingua selezionata. </p>
      */
     public static final String LANGUAGE_SELECT = "Language";
-    public static final String SCHEMA_OBJ = "SchemaList";
     private ArrayList<NodeSetting> setting;
     private String url;
 
@@ -55,31 +53,44 @@ public class SettingXML {
     }
 
     /**
-     * <p>Aggiunge un nuovo valore di configurazione in coda agli altri già
+     * <p>Aggiunge un nuovo valore di configurazione in coda agli altri gi��
      * presenti</p>
      *
      * @param desc descrittore
      * @param prop parametri di configurazione
      */
-    public synchronized boolean addSetting(String desc, Properties... prop) {
+    public synchronized boolean addSetting(String desc, Properties prop) {
         int find;
         if (desc == null || desc.isEmpty() || prop == null) {
             return false;
         }
 
         find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
-        int i = 0;
-        while (i < setting.size()) {
-            NodeSetting get = setting.get(i);
-            if (get.getDesc().compareTo(desc) != 0) {
-                i++;
-            } else {
-                setting.remove(i);
-            }
-
-        }
         if (find != -1) {
             setting.get(find).addProp(prop);
+        } else {
+            setting.add(new NodeSetting(desc, prop));
+            Collections.sort(setting, new NodeSettingComparator());
+        }
+        return true;
+    }
+
+    /**
+     * <p>Aggiunge un nuovo valore di configurazione in testa agli altri gi��
+     * presenti</p>
+     *
+     * @param desc descrittore
+     * @param prop parametri di configurazione
+     */
+    public synchronized boolean addSettingAtTop(String desc, Properties prop) {
+        int find;
+        if (desc == null || desc.isEmpty() || prop == null) {
+            return false;
+        }
+
+        find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
+        if (find != -1) {
+            setting.get(find).addAtFistOccProp(prop);
         } else {
             setting.add(new NodeSetting(desc, prop));
             Collections.sort(setting, new NodeSettingComparator());
@@ -91,62 +102,40 @@ public class SettingXML {
      * <p>Rimuove un singola configurazione o tutto un blocco</p>
      *
      * @param desc descrittore
-     * @param prop se <tt>NULL</tt> rimuove tutti il bloccchi con sescrittore
-     * desc
+     * @param prop se <tt>NULL</tt> rimuove tutto il blocco
      */
-    public synchronized boolean removeSetting(String desc, Properties... prop) {
-        Boolean test = false;
+    public synchronized boolean removeSetting(String desc, Properties prop) {
         if (desc == null || desc.isEmpty()) {
             return false;
         }
-
+        int find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
         if (prop == null) {
-            int i = 0;
-            while (i < setting.size()) {
-                NodeSetting get = setting.get(i);
-                if (get.getDesc().compareTo(desc) != 0) {
-                    i++;
-                } else {
-                    setting.remove(i);
-                    test = true;
-                }
-
-            }
+            setting.remove(find);
         } else {
-            int i = 0;
-            while (i < setting.size()) {
-                NodeSetting get = setting.get(i);
-                if (get.getDesc().compareTo(desc) != 0) {
-                    i++;
-                } else {
-                    get.removeProp(prop);
-                    test = true;
-                    if (get.size() < 1) {
-                        setting.remove(i);
-                    }
-                }
+            NodeSetting get = setting.get(find);
+            get.removeProp(prop);
+            if (get.isEmpty()) {
+                setting.remove(find);
             }
         }
-        return test;
+        return false;
     }
 
     /**
-     * <p>Ritona un <tt>viewer.setting.NodeSettingInterface</tt>
+     * <p>Ritona un <tt>viewer.setting.NodeSettingInterface</tt> 
      * se trova l'oggetto altrimenti <tt>NULL</tt>. </p>
      *
      * @param desc
      * @return
      */
-    public synchronized NodeSettingInterface[] getSetting(String desc) {
-        Iterator<NodeSetting> iterator = setting.iterator();
-        ArrayList<NodeSettingInterface> al = new ArrayList<NodeSettingInterface>();
-        while (iterator.hasNext()) {
-            NodeSetting next = iterator.next();
-            if (next.getDesc().compareTo(desc) == 0) {
-                al.add(next);
-            }
+    public synchronized NodeSettingInterface getSetting(String desc) {
+        int find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
+        if (find != -1) {
+            return setting.get(find);
+        } else {
+            return null;
         }
-        return al.toArray(new NodeSettingInterface[al.size()]);
+
     }
 
     /**
