@@ -123,7 +123,7 @@ public class MainWindow extends javax.swing.JFrame {
                 String url = next.getProperty("url");
 
                 JMenuItem x = new javax.swing.JMenuItem();
-                x.setText(url.split("/")[0]);
+                x.setText(url);
                 x.addActionListener(new MenuConnectActionListener(next));
                 jM_Connects.add(x);
 

@@ -32,6 +32,7 @@ public abstract class TextualLayout {
     private TextualLayout() {
         setting = new HashMap<String,Integer>();
         setting.put(DEFAULT_STRING, DEFAULT);
+        
     }
 
     /**
