@@ -62,17 +62,19 @@ public class SettingXML {
      * @param prop parametri di configurazione
      */
     public synchronized boolean addSetting(String desc, Properties... prop) {
+        int find;
         if (desc == null || desc.isEmpty() || prop == null) {
             return false;
         }
+
+        find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
         int i = 0;
         while (i < setting.size()) {
             NodeSetting get = setting.get(i);
             if (get.getDesc().compareTo(desc) != 0) {
                 i++;
             } else {
-                // Controllo se un elemento con le prop specifiche esiste davero
-                
+                setting.remove(i);
             }
 
         }
