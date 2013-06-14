@@ -59,6 +59,14 @@ public interface NodeSettingInterface extends Comparable<NodeSettingInterface> {
      * @return <p>Iteratore alla lista</p>
      */
     ListIterator<Properties> readProp();
+    
+    /**
+     * <p>Controlla se le Properties passate come imput sono presenti nell'oggetto. 
+     * solo se tutte le Properties passate sono presenti ritorna <tt>TRUE</tt></p>
+     * @param prop
+     * @return <tt>TRUE</tt> solo se tutte le condizioni sono vere
+     */
+    Boolean hasProp(Properties... prop);
 
     /**
      * <p>Ritorna</p>
