@@ -79,14 +79,18 @@ public class PreferenceWindow extends javax.swing.JFrame {
                 Properties next = readProp.next();
                 String url = next.getProperty("url");
                 int binarySearch = Collections.binarySearch(al, url);
-                if (binarySearch >= 0) {
-                    
+                if (binarySearch < 0) {
+                    al.add(url);
+                    Properties p = new Properties();
+                    p.setProperty("url", url);
+                    viewer.ManuzioViewer.setting.addSetting(SettingXML.SCHEMA_LIST, p);
                 }
             }
         }
         //</editor-fold>
         jL_server.setValueIsAdjusting(true);
         // inserimento valori
+        jL_server.setListData(al.toArray(new String[al.size()]));
         jL_server.setValueIsAdjusting(false);
     }
 

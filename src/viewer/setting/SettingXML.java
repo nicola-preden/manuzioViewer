@@ -7,8 +7,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -158,8 +160,9 @@ public class SettingXML {
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(file);
             doc.getDocumentElement().normalize();
+            NodeList nList;
 
-            NodeList nList = doc.getElementsByTagName(SettingXML.CONNECTION_LIST);
+            nList = doc.getElementsByTagName(SettingXML.CONNECTION_LIST);
 
             for (int i = 0; i < nList.getLength(); i++) {
                 Node n = nList.item(i);
@@ -183,9 +186,11 @@ public class SettingXML {
                     NodeList childNodes = e.getChildNodes();
                     Properties p = new Properties();
 
-                    for (int j = 0; j < childNodes.getLength();j++) {
-                        Element item = (Element) childNodes.item(j);
-                        p.setProperty(item.getTagName(), item.getNodeValue());
+                    for (int j = 0; j < childNodes.getLength(); j++) {
+                        if (childNodes.item(j).getNodeType() == Node.ELEMENT_NODE) {
+                            Element item = (Element) childNodes.item(j);
+                            p.setProperty(item.getTagName(), item.getTextContent());
+                        }
                     }
                     this.addSetting(SettingXML.SCHEMA_LIST, p);
                 }
@@ -245,14 +250,16 @@ public class SettingXML {
                     Element SchemaList;
 
                     next = readProp.next();
-                    ArrayList ar = Collections.list(next.propertyNames());
-                    
+                    Set<String> spn = next.stringPropertyNames();
+                    Iterator<String> iterSnp = spn.iterator();
+
                     SchemaList = doc.createElement(SettingXML.SCHEMA_LIST);
                     rootElement.appendChild(SchemaList);
 
-                    for (int i = 0; i < ar.size(); i++) {
-                        Element type = doc.createElement(ar.get(i).toString());
-                        type.appendChild(doc.createTextNode(next.getProperty(ar.get(i).toString())));
+                    while (iterSnp.hasNext()) {
+                        String s = iterSnp.next();
+                        Element type = doc.createElement(s);
+                        type.appendChild(doc.createTextNode(next.getProperty(s)));
                         SchemaList.appendChild(type);
                     }
                 }

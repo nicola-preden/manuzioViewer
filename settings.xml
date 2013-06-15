@@ -10,4 +10,10 @@
         <user>manu</user>
         <password>1234</password>
     </ConnectionsList>
+    <SchemaList>
+        <url>127.0.0.1:5432/manuzio</url>
+    </SchemaList>
+    <SchemaList>
+        <url>localhost:5432/manuzio</url>
+    </SchemaList>
 </Setting>
