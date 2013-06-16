@@ -2,6 +2,7 @@ package viewer;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.ListIterator;
 import java.util.Properties;
 import javax.swing.JPanel;

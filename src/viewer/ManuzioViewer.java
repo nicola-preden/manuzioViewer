@@ -20,7 +20,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -168,11 +170,15 @@ public class ManuzioViewer {
     }
 
     /**
-     * <p>
-     * @return 
+     * <p>Controllo se i nomi dei tipi passati in input è coerente con la
+     * connessione attuale. </p>
+     *
+     * @param typeNames
+     * @return <tt>true</tt> se i dati in input sono coerenti con il server al
+     * quale si è connessi <tt>false</tt> atrimenti
      */
-    public static int schemaConsistencyCheck() {
-        return 0;
+    public static Boolean typeConsistencyCheck(Enumeration<String> typeNames) throws IllegalArgumentException {
+        return false;
     }
 
     /**
