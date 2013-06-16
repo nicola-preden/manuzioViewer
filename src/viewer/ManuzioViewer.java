@@ -75,33 +75,33 @@ public class ManuzioViewer {
     public static void main(String[] args) {
         //<editor-fold defaultstate="collapsed" desc="regexTest">
         /*
-        String w = "\\p{Graph}+";
-        Pattern p = Pattern.compile(w, Pattern.UNICODE_CHARACTER_CLASS);
-        Pattern z = Pattern.compile("(\\p{Alnum}+)|(\\p{Punct})", Pattern.UNICODE_CHARACTER_CLASS);
+         String w = "\\p{Graph}+";
+         Pattern p = Pattern.compile(w, Pattern.UNICODE_CHARACTER_CLASS);
+         Pattern z = Pattern.compile("(\\p{Alnum}+)|(\\p{Punct})", Pattern.UNICODE_CHARACTER_CLASS);
 
-        Matcher m = p.matcher("1. Evocatio\n"
-                + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "
-                + "per la parata annuale della Vigilia di Ognissanti. I cavalli "
-                + "sbuffavano attendendo che i cavalieri li guidassero per le "
-                + "vie della città; i palafrenieri e i novizi avrebbero "
-                + "seguito il corteo a piedi.\n"
-                + "«Compieta».\n"
-                + "Eloise Weiss. Annuì senza badare eccessivamente alla tangibile "
-                + "nota d’inquietudine nella voce di Christabel Von Sayn, "
-                + "sottile e gentile come un raggio d’argento, alla luce fioca "
-                + "delle candele che illuminavano la stanza.\n");
-        Matcher r;
-        while (m.find()) {
-            String t = m.group();
-            System.out.println("Gruppo : " + t);
-            r = z.matcher(t);
-            while (r.find()) {
-                String k = r.group();
-                System.out.println("\tSub : " + k + " > " + k.length());
-            }
-        }
-        System.exit(0);
-        */
+         Matcher m = p.matcher("1. Evocatio\n"
+         + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "
+         + "per la parata annuale della Vigilia di Ognissanti. I cavalli "
+         + "sbuffavano attendendo che i cavalieri li guidassero per le "
+         + "vie della città; i palafrenieri e i novizi avrebbero "
+         + "seguito il corteo a piedi.\n"
+         + "«Compieta».\n"
+         + "Eloise Weiss. Annuì senza badare eccessivamente alla tangibile "
+         + "nota d’inquietudine nella voce di Christabel Von Sayn, "
+         + "sottile e gentile come un raggio d’argento, alla luce fioca "
+         + "delle candele che illuminavano la stanza.\n");
+         Matcher r;
+         while (m.find()) {
+         String t = m.group();
+         System.out.println("Gruppo : " + t);
+         r = z.matcher(t);
+         while (r.find()) {
+         String k = r.group();
+         System.out.println("\tSub : " + k + " > " + k.length());
+         }
+         }
+         System.exit(0);
+         */
         //</editor-fold>
         try {
             if (isOSX()) {  // Se siamo su Mac
@@ -167,6 +167,19 @@ public class ManuzioViewer {
 
     }
 
+    /**
+     * <p>
+     * @return 
+     */
+    public static int schemaConsistencyCheck() {
+        return 0;
+    }
+
+    /**
+     * <p>Controlla se l'OS è mac. </p>
+     *
+     * @return <tt>true</tt> se è OS X
+     */
     static boolean isOSX() {
         String osName = System.getProperty("os.name");
         return osName.contains("OS X");

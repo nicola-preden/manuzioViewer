@@ -33,6 +33,7 @@ public abstract class TextualLayout<T extends JTextComponent> extends Thread {
     private TextualLayout(int id_object, T output) {
         this.id_object = id_object;
         this.output = output;
+        
     }
     
     @Override

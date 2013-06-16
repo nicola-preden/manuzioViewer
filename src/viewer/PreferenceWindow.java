@@ -93,7 +93,7 @@ public class PreferenceWindow extends javax.swing.JFrame {
         jL_server.setListData(al.toArray(new String[al.size()]));
         jL_server.setValueIsAdjusting(false);
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
