@@ -20,14 +20,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -60,13 +56,13 @@ public class ManuzioViewer {
         }
     }
     private static volatile boolean isConnect = false;
-    private static BoneCP connPool = null;                              // Pool Connessione al DB
-    static MainWindow mw = null;                                // Finestra Principale
-    static ConnectWindow cw = null;                             // Finestra di login
-    static SettingXML setting = null;                           // Struttura configurazione
+    private static BoneCP connPool = null;                       // Pool Connessione al DB
+    static MainWindow mw = null;                                 // Finestra Principale
+    static ConnectWindow cw = null;                              // Finestra di login
+    static SettingXML setting = null;                            // Struttura configurazione
     static Schema schema = null;
     static TaskTree taskTree = null;
-    private static final String urlXml = "settings.xml";        // File di Configurazione
+    private static final String urlXml = "settings.xml";         // File di Configurazione
     private static Timer tm = new Timer();
     private static final double VERSION_Manuzio = 3.2;
     private static final String APP_NAME = "ManuzioViewer";
@@ -170,18 +166,6 @@ public class ManuzioViewer {
     }
 
     /**
-     * <p>Controllo se i nomi dei tipi passati in input è coerente con la
-     * connessione attuale. </p>
-     *
-     * @param typeNames
-     * @return <tt>true</tt> se i dati in input sono coerenti con il server al
-     * quale si è connessi <tt>false</tt> atrimenti
-     */
-    public static Boolean typeConsistencyCheck(Enumeration<String> typeNames) throws IllegalArgumentException {
-        return false;
-    }
-
-    /**
      * <p>Controlla se l'OS è mac. </p>
      *
      * @return <tt>true</tt> se è OS X
@@ -206,7 +190,7 @@ public class ManuzioViewer {
      *
      * @return <tt>TRUE</tt> se connesso altrimenti <tt>FALSE</tt>
      */
-    static synchronized boolean connectionIsSet() {
+    public static synchronized boolean connectionIsSet() {
         return isConnect;
     }
 
@@ -230,12 +214,27 @@ public class ManuzioViewer {
     }
 
     /**
+     * <p>Ritorna l'indirizzzo del Database al quale siamo connessi o
+     * <tt>NULL</tt>. </p>
+     *
+     * @return
+     */
+    public static synchronized String getJdbcUrl() {
+        String k = null;
+        if (isConnect) {
+            k = connPool.getConfig().getJdbcUrl();
+            k = k.split("//")[1];
+        }
+        return k;
+    }
+
+    /**
      * <p>Ritorna una connessione dal connection pool se disponibile</p>
      *
      * @return
      * @throws SQLException
      */
-    static public synchronized Connection getConnection() throws SQLException {
+    public static synchronized Connection getConnection() throws SQLException {
         if (isConnect) {
             return connPool.getConnection();
         }

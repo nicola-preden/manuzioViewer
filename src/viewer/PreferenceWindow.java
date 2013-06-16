@@ -68,7 +68,7 @@ public class PreferenceWindow extends javax.swing.JFrame {
             ListIterator<Properties> readProp = SchemaList.readProp();
             while(readProp.hasNext()) {
                 Properties next = readProp.next();
-                al.add(next.getProperty("url"));
+                al.add(next.getProperty("schema-url"));
             }
             Collections.sort(al);
         }
@@ -83,7 +83,7 @@ public class PreferenceWindow extends javax.swing.JFrame {
                 if (binarySearch < 0) {
                     al.add(url);
                     Properties p = new Properties();
-                    p.setProperty("url", url);
+                    p.setProperty("schema-url", url);
                     viewer.ManuzioViewer.setting.addSetting(SettingXML.SCHEMA_LIST, p);
                 }
             }

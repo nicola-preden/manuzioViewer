@@ -1,7 +1,7 @@
 Update v3.2
 correzione funzioni:
 create_rto_from_pos_type alcuni nomi di colonna inesatti.
-create_or_return_rto modifica prima parte dello scriptsql, in quanto dava risultati incoerenti sul riguardati le tabelle usate per cercare il textstart
+create_or_return_rto modifica prima parte dello scriptsql, in quanto dava risultati incoerenti riguardati le tabelle usate per cercare il textstart
 
 UPDATE v3.1
 aggiunto colonna 'description' nel tipo 'schema'
@@ -11,13 +11,13 @@ aggiunto funzione 'create_or_update_schema' per caricare in automatico lo schema
 
 v3.0
 Non ho testato tutte le funzioni, per mancanza di tempo e di comprensione (non sono sicuro di come dovrebbero funzionare).
-PerÚ ho testato con successo le funzioni che riguardavano direttamente le tab modificate (methods, attribute, types, type_composition)
-aggiunto vincolo di unicit‡ nel campo 'nickname' della tabella 'users'.
+Per√≤ ho testato con successo le funzioni che riguardavano direttamente le tab modificate (methods, attribute, types, type_composition)
+aggiunto vincolo di unicit√† nel campo 'nickname' della tabella 'users'.
 aggiunta function 'insert_method'
 
 function create_composition
 -modificati i parametri di input
--rimosso controllo di relazione gi‡ esistente (container/contained)
+-rimosso controllo di relazione gi√† esistente (container/contained)
 -aggiunto controllo duplicati su chiave primaria (container, component_name)
 -aggiunto controllo component_name <> ''
 -modificato l'inesrimento dei dati in accordo col nuovo db
@@ -37,19 +37,19 @@ create_or_return_obj
 -modificati i parametri di input
 -fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
 -IMPORTANTE: in precedenza era possibile che il tipo di riferimento nella tab. textual_object fosse plurale. Ora bisognerebbe controllare la colonna isPlural.
-	Serve? -> per me conta; nella function ho dato la possibilit‡ di specificare il genere.
+	Serve? -> per me conta; nella function ho dato la possibilit√† di specificare il genere.
 	
 create_or_return_rto
 -modificati i parametri di input
 -fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
 -IMPORTANTE: in precedenza era possibile che il tipo di riferimento nella tab. textual_object fosse plurale. Ora bisognerebbe controllare la colonna isPlural.
-	Serve? -> per me conta; nella function ho dato la possibilit‡ di specificare il genere.
+	Serve? -> per me conta; nella function ho dato la possibilit√† di specificare il genere.
 	
 create_or_return_sto
 -modificati i parametri di input
 -fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
 -IMPORTANTE: in precedenza era possibile che il tipo di riferimento nella tab. textual_object fosse plurale. Ora bisognerebbe controllare la colonna isPlural.
-	Serve? -> per me conta; nella function ho dato la possibilit‡ di specificare il genere.
+	Serve? -> per me conta; nella function ho dato la possibilit√† di specificare il genere.
 	
 create_or_return_text
 Non toccata.
@@ -57,9 +57,9 @@ Non toccata.
 create_rto_from_pos_type
 -modificati i parametri di input
 -fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
--MOLTO IMPORTANTE: isPlural aggiunto come input. Ho interpretato la seconda met‡ della funzione (testualmente "vericare l'esistenza di un tipo
-plurale.") come: se il tipo Ë la max_unit allora isPlural Ë settato a false; altrimenti true.
-Non sono perÚ convinto di questa interpretazione, per cui vorrei discuterne con Lei.
+-MOLTO IMPORTANTE: isPlural aggiunto come input. Ho interpretato la seconda met√† della funzione (testualmente "vericare l'esistenza di un tipo
+plurale.") come: se il tipo ÔøΩ la max_unit allora isPlural ÔøΩ settato a false; altrimenti true.
+Non sono per√≤ convinto di questa interpretazione, per cui vorrei discuterne con Lei.
 
 get_all_attribute_for_obj
 Non toccata
@@ -97,4 +97,4 @@ select_obj_from_pos_type
 -modificati i parametri di input
 -fatte piccole modifiche (nomi delle colonne e tipi modificati col nuovo db)
 -IMPORTANTE: in precedenza era possibile che il tipo di riferimento nella tab. textual_object fosse plurale. Ora bisognerebbe controllare la colonna isPlural.
-	Serve? -> per me conta; nella function ho dato la possibilit‡ di specificare il genere.
+	Serve? -> per me conta; nella function ho dato la possibilit√† di specificare il genere.

@@ -11,9 +11,9 @@
         <password>1234</password>
     </ConnectionsList>
     <SchemaList>
-        <url>127.0.0.1:5432/manuzio</url>
+        <schema-url>127.0.0.1:5432/manuzio</schema-url>
     </SchemaList>
     <SchemaList>
-        <url>localhost:5432/manuzio</url>
+        <schema-url>localhost:5432/manuzio</schema-url>
     </SchemaList>
 </Setting>
