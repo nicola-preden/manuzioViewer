@@ -6,8 +6,10 @@ package viewer.taskThread;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +18,7 @@ import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
+import viewer.ManuzioViewer;
 import viewer.manuzioParser.Schema;
 import viewer.manuzioParser.Type;
 
@@ -28,65 +31,6 @@ import viewer.manuzioParser.Type;
  */
 public class TextualLayout<T extends JEditorPane> extends SwingWorker<Void, Void> {
 
-    /**
-     * <p>Classe ausiliaria contenete il testo letto dal database. </p>
-     */
-    private class DataObject {
-
-        int key;
-        int operation;
-        DataObject[] keys;
-        String text;
-
-        public DataObject(int key, int operation, String text) {
-            this.key = key;
-            this.operation = operation;
-            this.text = text;
-            if (text == null) {
-                this.text = "";
-            }
-        }
-
-        void setKeys(DataObject[] keys) {
-            this.keys = keys;
-        }
-
-        int getKey() {
-            return key;
-        }
-
-        DataObject[] getKeys() {
-            return keys;
-        }
-
-        @Override
-        public String toString() {
-            String k = "";
-            // Crea il testo ricorsivamente in postordine
-            if (keys != null) {
-                for (int i = 0; i < keys.length; i++) {
-                    k = k + keys[i].toString();
-                }
-            }
-            switch (key) {
-                case NO_OPERATION:
-                    k += this.text;
-                    break;
-                case SPACE:
-                    k += this.text + " ";
-                    break;
-                case TABBED_SPACE:
-                    k += this.text + "\t";
-                    break;
-                case RETURN_CARRIGE:
-                    k += this.text + "\n";
-                    break;
-                default:
-                    break;
-            }
-            return k;
-        }
-    }
     public static final int NO_OPERATION = 0;
     public static final int SPACE = 1;
     public static final int TABBED_SPACE = 2;
@@ -96,8 +40,9 @@ public class TextualLayout<T extends JEditorPane> extends SwingWorker<Void, Void
     private T output;
     private Schema s;
     private Properties prop;
-    private int progress;
-    private int max;
+    private volatile int progress;
+    private volatile int max;
+    private Boolean consistency;
 
     /**
      * <p>Costruttore</p>
@@ -107,16 +52,41 @@ public class TextualLayout<T extends JEditorPane> extends SwingWorker<Void, Void
      * @param s
      * @param prop
      */
-    protected TextualLayout(int id_object, T output, Schema s, Properties prop) {
+    private TextualLayout(int id_object, T output, Schema s, Properties prop) {
+        if (id_object <= 0) {
+            throw new IllegalArgumentException("MIssing Data : schema-url" + prop.toString());
+        }
         this.id_object = id_object;
         this.output = output;
         this.s = s;
         this.prop = prop;
         this.progress = 0;
         this.max = 0;
+        if (typeConsistencyCheck(this.prop, this.s)) {
+            consistency = true;
+        } else {
+            consistency = false;
+        }
     }
 
-    protected void updateProgress(Object x) {
+    public static <T extends JEditorPane> TextualLayout<T> createTextualLayout(int id_object, T output, Schema s, Properties prop) {
+        return new TextualLayout<T>(id_object, output, s, prop);
+    }
+
+    synchronized private void setMax(int max) {
+        this.max = max;
+    }
+
+    synchronized private void addMax(int add) {
+        this.max += add;
+    }
+
+    /**
+     *
+     * @param x stringa da scrivere o null per progressione
+     * @param b ultimo testo
+     */
+    synchronized private void updateProgress(Object x, Boolean b) {
         try {
             if (x == null) {
                 progress++;
@@ -132,12 +102,15 @@ public class TextualLayout<T extends JEditorPane> extends SwingWorker<Void, Void
                 int lineStart = lineElem.getStartOffset();
                 int lineEnd = lineElem.getEndOffset();
                 document.remove(lineStart, lineEnd - lineStart);
-                document.insertString(document.getLength(), "In corso ... " + progress + " su " + max + "\n", null);
+                document.insertString(document.getLength(), "In corso ... " + progress + " / " + max + "\n", null);
             }
             if (x instanceof String) {
+                progress = 0;
                 Document document = output.getDocument();
                 document.insertString(document.getLength(), (String) x + "\n", null);
-                document.insertString(document.getLength(), "In corso ... \n", null);
+                if (!b) {
+                    document.insertString(document.getLength(), "In corso ... \n", null);
+                }
                 setProgress(0);
             }
         } catch (BadLocationException ex) {
@@ -147,13 +120,90 @@ public class TextualLayout<T extends JEditorPane> extends SwingWorker<Void, Void
 
     @Override
     protected Void doInBackground() {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet resultSet = null;
-        CallableStatement function = null;
-        
-        return null;
+        setMax(1);
+        Connection conn;
+        PreparedStatement stmt;
+        ResultSet resultSet;
+        CallableStatement function;
+        try {
+            output.setText(null);
+            updateProgress("Controllo coerenza layout ...", false);
+            if (consistency) {
+                updateProgress(null, false);
+            } else {
+                Type[] typeSet = s.getTypeSet();
+                setMax(typeSet.length);
+                this.prop = new Properties();
+                for (int i = 0; i < typeSet.length; i++) {
+                    this.prop.setProperty(typeSet[i].getTypeName(), TextualLayout.SPACE + "");
+                    updateProgress(null, false);
+                }
+            }
+            updateProgress("Interrogazione Database ...", false);
+            conn = ManuzioViewer.getConnection();
+            stmt = conn.prepareStatement("SELECT "
+                    + "textual_objects.id_tex_obj, "
+                    + "textual_objects.type_name "
+                    + "FROM "
+                    + "  public.textual_objects "
+                    + "WHERE "
+                    + "  textual_objects.id_tex_obj = ?;");
+            stmt.setInt(1, this.id_object);
+            resultSet = stmt.executeQuery();
+            String q;
+            if (!resultSet.next()) {
+                updateProgress("Errore Caricamento dati inesistenti", true);
+                return null;
+            } else {
+                q = resultSet.getString(2);
+            }
+            ManuzioViewer.close(resultSet);
+            ManuzioViewer.close(stmt);
+            ManuzioViewer.close(conn);
+            // Caricamento ricorsivo dei dati
+            setMax(1); // c'e almeno un oggetto
+            String translateText = translateText(this.id_object);
 
+            // Caricamento degli attributi
+            updateProgress("Caricamento Attributi ...", true);
+            String k = "-------------\n";
+            conn = ManuzioViewer.getConnection();
+            k += "ID : " + this.id_object + " TYPE: " + q + "\n\n";
+            q = "SELECT "
+                    + "  attribute_values.id_att_value, "
+                    + "  attribute_types.label, "
+                    + "  attribute_values.content AS value "
+                    + "FROM "
+                    + "  public.attribute_types, "
+                    + "  public.attribute_values "
+                    + "WHERE "
+                    + "  attribute_types.id_att_type = attribute_values.id_att_type AND"
+                    + "  attribute_values.id_tex_obj = ? "
+                    + "ORDER BY "
+                    + "  attribute_types.label ASC;";
+            stmt = conn.prepareStatement(q);
+            stmt.setInt(1, this.id_object);
+            resultSet = stmt.executeQuery();
+            String z = "";
+            while (resultSet.next()) {
+                z += "ID_ATTRIBUTE :  " + resultSet.getInt("id_att_value") + "\tLABEL : " + resultSet.getString("label") + " VALUE : " + resultSet.getString("value") + "\n";
+            }
+            k += z.length() == 0 ? "" : "Attributi Textual Object: \n"+ z;
+            k += (consistency) ? "-------------\n" : "Layout non configurato, scegliere Preferenze --> Layout \n" + "-------------\n";
+            ManuzioViewer.close(resultSet);
+            ManuzioViewer.close(stmt);
+            ManuzioViewer.close(conn);
+            k += "\n\n" + translateText;
+            updateProgress("Visualizzazione", true);
+
+            // Visualizzazione dati
+            Document document = output.getDocument();
+            document.insertString(document.getLength(), "\n\n" + k, null);
+
+        } catch (SQLException | BadLocationException ex) {
+            Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
     @Override
@@ -161,15 +211,183 @@ public class TextualLayout<T extends JEditorPane> extends SwingWorker<Void, Void
     }
 
     /**
-     * <p>Data una connessione ed l'id dell oggetto da caricare restituisce, in
-     * base alla configurazione, il testo formattato. </p>
+     * <p>Dato l'id dell oggetto da caricare restituisce, in base alla
+     * configurazione, la struttara dell' oggetto contenente il testo attraverso
+     * una serie di chiamate ricorsive. </p>
      *
-     * @param obj id dell oggetto
+     * @param obj id dell' oggetto da caricare
      * @return Stringa formattata o vuota se non trova l'oggetto
      */
     protected String translateText(int obj) {
-        return null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        String q = "";
+        String k = "";
+        ArrayList<Integer> ar = new ArrayList<Integer>();
+        // Controllo eventuali sottotipi
+        try {
+            conn = ManuzioViewer.getConnection();
+            q += "SELECT "
+                    + "  objects_composition.id_contained "
+                    + "FROM \n"
+                    + "  public.objects_composition "
+                    + "WHERE "
+                    + "  objects_composition.id_container = ? "
+                    + "ORDER BY "
+                    + "  objects_composition.pos ASC;";
+            stmt = conn.prepareStatement(q);
+            stmt.setInt(1, obj);
+            resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                ar.add(resultSet.getInt(1));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    ManuzioViewer.close(resultSet);
+                } catch (SQLException ex) {
+                    Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (stmt != null) {
+                try {
+                    ManuzioViewer.close(stmt);
+                } catch (SQLException ex) {
+                    Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    ManuzioViewer.close(conn);
+                } catch (SQLException ex) {
+                    Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        conn = null;
+        stmt = null;
+        resultSet = null;
+        // Chiamate ricorsive su cutti i sotto-tipo
+        addMax(ar.size());
+        if (!ar.isEmpty()) {
+            for (int i = 0; i < ar.size(); i++) {
+                k += translateText(ar.get(i));
+            }
+        }
+        // Aggiunta proprio testo
+        try {
+            q = "SELECT "
+                    + "  texts.cached_text "
+                    + "FROM "
+                    + "  public.elements, "
+                    + "  public.text_occurence, "
+                    + "  public.texts "
+                    + "WHERE  "
+                    + "  elements.id_text_occurence = text_occurence.id_text_occurence AND "
+                    + "  text_occurence.id_text = texts.id_text AND "
+                    + "  elements.id_tex_obj = ?;";
+            conn = ManuzioViewer.getConnection();
+            stmt = conn.prepareStatement(q);
+            stmt.setInt(1, obj);
+            resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                k += resultSet.getString(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    ManuzioViewer.close(resultSet);
+                } catch (SQLException ex) {
+                    Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (stmt != null) {
+                try {
+                    ManuzioViewer.close(stmt);
+                } catch (SQLException ex) {
+                    Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    ManuzioViewer.close(conn);
+                } catch (SQLException ex) {
+                    Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
 
+        // Stesura Layout
+        conn = null;
+        stmt = null;
+        resultSet = null;
+        try {
+            conn = ManuzioViewer.getConnection();
+            q = "SELECT "
+                    + "  textual_objects.type_name "
+                    + "FROM "
+                    + "  public.textual_objects "
+                    + "WHERE "
+                    + "  textual_objects.id_tex_obj = ?;";
+            stmt = conn.prepareStatement(q);
+            stmt.setInt(1, obj);
+            resultSet = stmt.executeQuery();
+            String type = "";
+            while (resultSet.next()) {
+                type = resultSet.getString(1);
+            }
+            try {
+                int temp = Integer.parseInt(prop.getProperty(type));
+                switch (temp) {
+                    case SPACE:
+                        k += " ";
+                        break;
+                    case TABBED_SPACE:
+                        k += "\t";
+                        break;
+                    case RETURN_CARRIGE:
+                        k += "\n";
+                        break;
+                    case NO_OPERATION:
+                    default:
+                        break;
+                }
+            } catch (NumberFormatException ex) {
+                Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    ManuzioViewer.close(resultSet);
+                } catch (SQLException ex) {
+                    Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (stmt != null) {
+                try {
+                    ManuzioViewer.close(stmt);
+                } catch (SQLException ex) {
+                    Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    ManuzioViewer.close(conn);
+                } catch (SQLException ex) {
+                    Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
+        updateProgress(null, false);
+        return k;
     }
 
     /**
@@ -182,11 +400,14 @@ public class TextualLayout<T extends JEditorPane> extends SwingWorker<Void, Void
      * quale si è connessi <tt>false</tt> atrimenti
      */
     public static Boolean typeConsistencyCheck(Properties prop, Schema sc) throws IllegalArgumentException {
+        if (prop == null || sc == null) {
+            return false;
+        }
         if (!prop.containsKey("schema-url")) {
             throw new IllegalArgumentException("MIssing Data : schema-url" + prop.toString());
         }
         String url = prop.getProperty("schema-url");
-        String current_url = viewer.ManuzioViewer.getJdbcUrl();
+        String current_url = ManuzioViewer.getJdbcUrl();
         if (url.compareTo(current_url) != 0) {
             return false;
         } else {

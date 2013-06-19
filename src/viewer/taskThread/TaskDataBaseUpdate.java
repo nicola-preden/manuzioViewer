@@ -39,8 +39,8 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
     SecondStepStrategy.TextType maxTypeList;
     JTextArea jTA;
     Schema s;
-    int progress;
-    int max;
+    volatile int progress;
+    volatile int max;
 
     /**
      * <p>Crea un nuovo oggetto. </p>
@@ -62,7 +62,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
 
     }
 
-    private void updateProgress(Object x) {
+    synchronized private void updateProgress(Object x) {
         if (x == null) {
             progress++;
             try {

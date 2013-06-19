@@ -1,31 +1,33 @@
 package viewer.taskThread;
 
-import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Enumeration;
+import java.util.ListIterator;
+import java.util.Properties;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JEditorPane;
 import javax.swing.JSlider;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 import viewer.ManuzioViewer;
 import viewer.manuzioParser.Schema;
+import viewer.setting.NodeSettingInterface;
+import viewer.setting.SettingXML;
 
 /**
- * <p> Si occupa di aggiornare e gestire un <tt>javax.swing.JTree</tt> 
- * ed eseguire l'output in un <tt>T extends JTextComponent</tt> delle query 
+ * <p> Si occupa di aggiornare e gestire un <tt>javax.swing.JTree</tt>
+ * ed eseguire l'output in un <tt>T extends JTextComponent</tt> delle query
  * automatiche eseguite attraverso gli eventi associati. </p>
  * <p>Il Thread termina automaticamente in caso che la Connessione al DB
  * termini.</p>
@@ -35,7 +37,7 @@ import viewer.manuzioParser.Schema;
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
-public class TaskTree<T extends JTextComponent> extends Thread implements TreeSelectionListener {
+public class TaskTree<T extends JEditorPane> extends Thread implements TreeSelectionListener {
 
     /**
      * Richiede il refresh
@@ -77,11 +79,12 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
      * indica l'altezza dell'albero
      */
     private int level = 0;
+    private final SettingXML setting;
 
     /**
      * <p>Crea un oggetto contenenti i dati per identificare univocamente un
-     * text object nel database. Il quale ha un metodo <tt>toString()</tt> 
-     * oppurtunamente modificato per poter essere usato nel <tt>JTree</tt> 
+     * text object nel database. Il quale ha un metodo <tt>toString()</tt>
+     * oppurtunamente modificato per poter essere usato nel <tt>JTree</tt>
      * come etichetta dei nodi.</p>
      */
     protected class TreeNodeObject {
@@ -125,11 +128,12 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
      * @param slider lo slider che gestisce il livello di dettaglio visibile del
      * jtree
      */
-    public TaskTree(JTree tree, T output, Schema schema, JSlider slider) {
+    public TaskTree(JTree tree, T output, Schema schema, JSlider slider, SettingXML setting) {
         this.tree = tree;
         this.output = output;
         this.schema = schema;
         this.slider = slider;
+        this.setting = setting;
         //  this.slider;
         this.root = null;
 
@@ -230,65 +234,30 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
                     if (poll.getId() == TaskTree.REFRESH) {
                         continue;
                     }
-                    try {
-                        // aggiorno contenuto finestra di output
-                        conn = ManuzioViewer.getConnection();
-
-                        // lettura attributi
-                        String text = "id= " + poll.getId() + " type= " + poll.getType() + "\n"
-                                + "Attributi Textual Object: \n";
-                        q = "SELECT "
-                                + "  attribute_values.id_att_value, "
-                                + "  attribute_types.label, "
-                                + "  attribute_values.content AS value, "
-                                + "  attribute_types.editable "
-                                + "FROM "
-                                + "  public.attribute_types, "
-                                + "  public.attribute_values "
-                                + "WHERE "
-                                + "  attribute_types.id_att_type = attribute_values.id_att_type AND"
-                                + "  attribute_values.id_tex_obj = ?;";
-                        query = conn.prepareStatement(q);
-                        query.setInt(1, poll.getId());
-                        res = query.executeQuery();
-                        while (res.next()) {
-                            text += "id_value= " + res.getInt("id_att_value") + " editable= " + res.getBoolean("editable")
-                                    + "\tlabel= " + res.getString("label") + " value=" + res.getString("value") + "\n";
+                    NodeSettingInterface set = setting.getSetting("SchemaList");
+                    String jdbcUrl = ManuzioViewer.getJdbcUrl();
+                    Properties t = null;
+                    if (set != null) {
+                        ListIterator<Properties> readProp = set.readProp();
+                        while (readProp.hasNext()) {
+                            Properties next = readProp.next();
+                            String property = next.getProperty("schema-url");
+                            if (property.compareTo(jdbcUrl) == 0) {
+                                t = next;
+                                break;
+                            }
                         }
-                        text += "Fine Attributi\n INIZIO TESTO \n";
-                        ManuzioViewer.close(res);
-                        ManuzioViewer.close(query);
-                        // lettura text object
-
-                        Object[] arr = {poll.getId()};
-                        q = "{ ? = call get_text_from_id(?) }";
-                        Array t = conn.createArrayOf("integer", arr);
-                        function = conn.prepareCall(q);
-                        function.registerOutParameter(1, Types.ARRAY);
-                        function.setArray(2, t);
-                        function.execute();
-                        Array array = function.getArray(1);
-                        // ottendo un resultSet dove la prima colonna è in indice mentre la secondo il valore
-                        res = array.getResultSet();
-
-                        while (res.next()) {
-                            text += res.getString(2);
+                        if (t == null) {
+                            t = new Properties();
+                            t.setProperty("schema-url", ManuzioViewer.getJdbcUrl());
+                            setting.addSetting("SchemaList", t);
                         }
-
-                        // Aggiorno contenuto finestra
-                        output.setText(null);
-                        output.setText(text);
-                    } catch (SQLException ex) {
-                        Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
-                    } finally {
-                        try {
-                            ManuzioViewer.close(conn);
-                            ManuzioViewer.close(function);
-                            ManuzioViewer.close(res);
-                        } catch (SQLException ex) {
-                            Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                    } else {
+                        t = new Properties();
+                        t.setProperty("schema-url", ManuzioViewer.getJdbcUrl());
+                        setting.addSetting("SchemaList", t);
                     }
+                    TextualLayout.createTextualLayout(poll.getId(), output, schema, t).execute();
                 }
             } catch (InterruptedException ex) {
                 Logger.getLogger(TaskTree.class.getName()).log(Level.SEVERE, null, ex);
@@ -305,8 +274,8 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
     }
 
     /**
-     * <p>Popola l'albero inserendo i vari <tt>textual object</tt> come 
-     * figli della radiece dell albero, rispettando la loro struttura. </p>
+     * <p>Popola l'albero inserendo i vari <tt>textual object</tt> come figli
+     * della radiece dell albero, rispettando la loro struttura. </p>
      *
      */
     private void loadChild() {
@@ -365,9 +334,9 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
     }
 
     /**
-     * <p>Inserisce tutti i figli di <tt>head</tt> fino a raggiungere le 
-     * foglie ricorsivamente. </p> <p>Il metodo si ferma se si ha raggiunto il 
-     * minimo dello schema oppure se <tt>head</tt> non ha figli</p>
+     * <p>Inserisce tutti i figli di <tt>head</tt> fino a raggiungere le foglie
+     * ricorsivamente. </p> <p>Il metodo si ferma se si ha raggiunto il minimo
+     * dello schema oppure se <tt>head</tt> non ha figli</p>
      *
      * @param head un nodo dell'albero
      */
@@ -439,9 +408,9 @@ public class TaskTree<T extends JTextComponent> extends Thread implements TreeSe
     }
 
     /**
-     * <p>Ferma il Thread, deassocia tutti gli eventi aggiunti e azzera il 
-     * contenuto dell'albero <tt>javax.swing.JTree</tt> e chiude la 
-     * connessione al DB. </p>
+     * <p>Ferma il Thread, deassocia tutti gli eventi aggiunti e azzera il
+     * contenuto dell'albero <tt>javax.swing.JTree</tt> e chiude la connessione
+     * al DB. </p>
      */
     public synchronized void stopThread() {
         if (!endValue()) {

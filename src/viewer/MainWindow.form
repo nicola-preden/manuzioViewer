@@ -455,6 +455,9 @@
             <Component class="javax.swing.JEditorPane" name="jE_output">
               <Properties>
                 <Property name="editable" type="boolean" value="false"/>
+                <Property name="editorKit" type="javax.swing.text.EditorKit" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="new StyledEditorKit()" type="code"/>
+                </Property>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
             </Component>

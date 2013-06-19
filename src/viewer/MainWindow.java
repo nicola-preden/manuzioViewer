@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.text.StyledEditorKit;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import viewer.manuzioParser.Schema;
@@ -137,7 +138,7 @@ public class MainWindow extends javax.swing.JFrame {
     void startTreeThread() {
         if (ManuzioViewer.connectionIsSet()) {
             TaskTree tree;
-            tree = new TaskTree(jT_SchemaServer, jE_output, ManuzioViewer.schema, jS_Level);
+            tree = new TaskTree(jT_SchemaServer, jE_output, ManuzioViewer.schema, jS_Level, ManuzioViewer.setting);
             tree.startThread();
             ManuzioViewer.setTaskTree(tree);
         }
@@ -368,6 +369,7 @@ public class MainWindow extends javax.swing.JFrame {
         jScrollPane2.setPreferredSize(new java.awt.Dimension(400, 300));
 
         jE_output.setEditable(false);
+        jE_output.setEditorKit(new StyledEditorKit());
         jE_output.setEnabled(false);
         jScrollPane2.setViewportView(jE_output);
 

@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -57,9 +59,9 @@ public class ManuzioViewer {
     }
     private static volatile boolean isConnect = false;
     private static BoneCP connPool = null;                       // Pool Connessione al DB
+    static SettingXML setting = null;                            // Struttura configurazione
     static MainWindow mw = null;                                 // Finestra Principale
     static ConnectWindow cw = null;                              // Finestra di login
-    static SettingXML setting = null;                            // Struttura configurazione
     static Schema schema = null;
     static TaskTree taskTree = null;
     private static final String urlXml = "settings.xml";         // File di Configurazione
@@ -74,8 +76,9 @@ public class ManuzioViewer {
         //<editor-fold defaultstate="collapsed" desc="regexTest">
         /*
          String w = "\\p{Graph}+";
-         Pattern p = Pattern.compile(w, Pattern.UNICODE_CHARACTER_CLASS);
-         Pattern z = Pattern.compile("(\\p{Alnum}+)|(\\p{Punct})", Pattern.UNICODE_CHARACTER_CLASS);
+         String y = "(\\p{Alnum}+)|(\\p{Punct})";
+         Pattern p = Pattern.compile("(\\p{Digit}{1,}+\\.\\s){0,1}+\\p{Punct}*\\p{Upper}{1}+[^.]+([. ]|\\z)", Pattern.UNICODE_CHARACTER_CLASS);
+         Pattern z = Pattern.compile(w, Pattern.UNICODE_CHARACTER_CLASS);
 
          Matcher m = p.matcher("1. Evocatio\n"
          + "Scendeva la sera mentre i Frati dell’Ordine della Spada si disponevano "
@@ -321,7 +324,7 @@ public class ManuzioViewer {
                     err = e;
                 } //probably the db does not exist
             }
-            conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to the server
+            conn = ConnectionPoolFactory.getConnection(url + "/" + user, user, password); //connects to the server
             query = conn.createStatement();
             query.executeUpdate("CREATE DATABASE \"" + dbName + '"');
 
@@ -488,7 +491,7 @@ public class ManuzioViewer {
      * @throws SQLException if the database couldn't be deleted for any reason
      */
     public static void deleteManuzioDB(String url, String dbName, String user, String password) throws SQLException {
-        Connection conn = ConnectionPoolFactory.getConnection(url, user, password); //connects to the server
+        Connection conn = ConnectionPoolFactory.getConnection(url + "/" + user, user, password); //connects to the server
         try {
             conn.createStatement().executeUpdate("DROP DATABASE \"" + dbName + "\";");
         } catch (SQLException e) {
