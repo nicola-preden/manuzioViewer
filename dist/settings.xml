@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Setting>
+    <ConnectionsList>
+        <url>localhost:5432/manuzio</url>
+        <user>manu</user>
+        <password>1234</password>
+    </ConnectionsList>
+    <SchemaList>
+        <schema-url>localhost:5432/manuzio</schema-url>
+    </SchemaList>
+</Setting>
