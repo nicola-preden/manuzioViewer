@@ -11,16 +11,17 @@ package viewer.setting;
 public interface PreferencesPane {
 
     /**
-     * <p>Salva la configurazione del pannella attuale. </p>
+     * <p>Configura il pannello in base alla configurazione atuale. </p>
+     * @param node 
      */
-    void savePreferences();
-
+    void setPreferences(NodeSettingInterface node);
+    
     /**
-     * <p>Resetta l'attuale configurazione ai settaggi di default.</p>
-     * <p>Questo medodo non si applica in tutti i casi. In alcuni casi un
-     * pannello potrebbe essere sprovvisto di settaggi di defaout. </p>
+     * <p>Rinuove dalle preferenze le configurazioni associate alle striga 
+     * passata in input.</p>
+     * @param url Stringa che identifica le configuraioni
      */
-    void resetToDefaultPreferences();
+    void removePreference(String url);
 
     /**
      * <p>Ritorna lo status del atttuale pannello e se ha subito modifiche. </p>

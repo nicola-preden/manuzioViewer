@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -164,8 +162,6 @@ public class ManuzioViewer {
         tm.start();
         mw = new MainWindow();
         mw.setVisible(true);
-
-
     }
 
     /**

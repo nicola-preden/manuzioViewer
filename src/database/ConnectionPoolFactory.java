@@ -69,7 +69,7 @@ public class ConnectionPoolFactory {
         config.setJdbcUrl(driverPrefix[0] + url);
         config.setUsername(user);
         config.setPassword(password);
-        config.setMinConnectionsPerPartition(1);
+        config.setMinConnectionsPerPartition(2);
         config.setMaxConnectionsPerPartition(10);
         config.setPartitionCount(2);
         config.setTransactionRecoveryEnabled(false);
