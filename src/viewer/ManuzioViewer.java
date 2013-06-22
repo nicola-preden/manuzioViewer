@@ -14,6 +14,12 @@ import com.jolbox.bonecp.BoneCP;
 import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,6 +27,8 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,6 +37,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import viewer.manuzioParser.Schema;
+import viewer.setting.NodeSettingInterface;
 import viewer.setting.SettingXML;
 import viewer.taskThread.TaskTree;
 
@@ -55,6 +64,19 @@ public class ManuzioViewer {
             }
         }
     }
+    private static class Anonymus {
+        Locale l;
+
+        public Anonymus(Locale l) {
+            this.l = l;
+        }
+        
+        @Override
+        public String toString(){
+            return l.getDisplayLanguage();
+            
+        }
+    }
     private static volatile boolean isConnect = false;
     private static BoneCP connPool = null;                       // Pool Connessione al DB
     static SettingXML setting = null;                            // Struttura configurazione
@@ -66,11 +88,12 @@ public class ManuzioViewer {
     private static Timer tm = new Timer();
     private static final double VERSION_Manuzio = 3.2;
     private static final String APP_NAME = "ManuzioViewer";
+    public static Locale LANGUAGE = null;
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws URISyntaxException {
         //<editor-fold defaultstate="collapsed" desc="regexTest">
         /*
          String w = "\\p{Graph}+";
@@ -159,6 +182,34 @@ public class ManuzioViewer {
             Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
         }
         setting = new SettingXML(urlXml);
+        NodeSettingInterface set = setting.getSetting("Language");
+        if (set != null) {
+            LANGUAGE = Locale.forLanguageTag(set.readProp().next().getProperty("lang"));
+        } else {
+            ArrayList<Anonymus> ar = new ArrayList();
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            Path dir = Paths.get(loader.getResource("viewer/language").toURI());
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "Bundle_?*.{properties}")) {
+                for (Path entry : stream) {
+                    String s = entry.getFileName().toString().replaceAll("^Bundle(_)?|\\.properties$", "").replaceAll("_", "-");
+                    Locale forLanguageTag = Locale.forLanguageTag(s);
+                    ar.add(new Anonymus(forLanguageTag));
+                }
+            } catch (IOException x) {
+                Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, x);
+            }
+            Object[] possibilities = ar.toArray();
+            Anonymus s;
+            s = (Anonymus) JOptionPane.showInputDialog(null, "Choose Language", "", JOptionPane.PLAIN_MESSAGE, null, possibilities, possibilities[0]);
+            if (s == null) {
+                shutdownProgram();
+            } else {
+                LANGUAGE = s.l;
+                Properties p = new Properties();
+                p.setProperty("lang", LANGUAGE.toString());
+                setting.addSetting(SettingXML.LANGUAGE_SELECT, p);
+            }
+        }
         tm.start();
         mw = new MainWindow();
         mw.setVisible(true);

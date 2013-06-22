@@ -197,6 +197,20 @@ public class SettingXML {
 
             }
 
+            nList = doc.getElementsByTagName(SettingXML.LANGUAGE_SELECT);
+
+            for (int i = 0; i < nList.getLength(); i++) {
+                Node n = nList.item(i);
+                if (n.getNodeType() == Node.ELEMENT_NODE) {
+                    Element e = (Element) n;
+                    Properties p = new Properties();
+
+                    p.setProperty("lang", e.getAttribute("lang"));
+                    this.addSetting(SettingXML.CONNECTION_LIST, p);
+                }
+
+            }
+
         } catch (SAXException | IOException | ParserConfigurationException ex) {
             Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -265,6 +279,19 @@ public class SettingXML {
                 }
             }
             // riscrivere per salvataggio lingua
+            NodeSetting ns_l = (NodeSetting) this.getSetting(SettingXML.LANGUAGE_SELECT);
+            if (ns_l != null) {
+                ListIterator<Properties> readProp = ns_l.readProp();
+                while (readProp.hasNext()) {
+                    Properties next;
+                    Element ConnectionsList;
+
+                    next = readProp.next();
+                    ConnectionsList = doc.createElement(SettingXML.LANGUAGE_SELECT);
+                    ConnectionsList.setAttribute("lang", next.getProperty("lang"));
+                    rootElement.appendChild(ConnectionsList);
+                }
+            }
 
             // SCRITTURA FILE
             OutputFormat format = new OutputFormat(doc);
