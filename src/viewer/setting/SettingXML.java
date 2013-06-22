@@ -170,9 +170,9 @@ public class SettingXML {
                     Element e = (Element) n;
                     Properties p = new Properties();
 
-                    p.setProperty("url", e.getElementsByTagName("url").item(0).getTextContent());
-                    p.setProperty("user", e.getElementsByTagName("user").item(0).getTextContent());
-                    p.setProperty("password", e.getElementsByTagName("password").item(0).getTextContent());
+                    p.setProperty("url", e.getAttribute("url"));
+                    p.setProperty("user", e.getAttribute("user"));
+                    p.setProperty("password", e.getAttribute("password"));
                     this.addSetting(SettingXML.CONNECTION_LIST, p);
                 }
 
@@ -206,7 +206,7 @@ public class SettingXML {
                     Properties p = new Properties();
 
                     p.setProperty("lang", e.getAttribute("lang"));
-                    this.addSetting(SettingXML.CONNECTION_LIST, p);
+                    this.addSetting(SettingXML.LANGUAGE_SELECT, p);
                 }
 
             }
@@ -234,25 +234,12 @@ public class SettingXML {
                 while (readProp.hasNext()) {
                     Properties next;
                     Element ConnectionsList;
-                    Element db_url;
-                    Element user;
-                    Element password;
-
                     next = readProp.next();
                     ConnectionsList = doc.createElement(SettingXML.CONNECTION_LIST);
+                    ConnectionsList.setAttribute("url", next.getProperty("url"));
+                    ConnectionsList.setAttribute("user", next.getProperty("user"));
+                    ConnectionsList.setAttribute("password", next.getProperty("password"));
                     rootElement.appendChild(ConnectionsList);
-
-                    db_url = doc.createElement("url");
-                    db_url.appendChild(doc.createTextNode(next.getProperty("url")));
-                    ConnectionsList.appendChild(db_url);
-
-                    user = doc.createElement("user");
-                    user.appendChild(doc.createTextNode(next.getProperty("user")));
-                    ConnectionsList.appendChild(user);
-
-                    password = doc.createElement("password");
-                    password.appendChild(doc.createTextNode(next.getProperty("password")));
-                    ConnectionsList.appendChild(password);
                 }
             }
             // Elenco layout

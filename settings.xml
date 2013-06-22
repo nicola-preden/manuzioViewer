@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Setting>
-    <ConnectionsList>
-        <url>localhost:5432/manuzio</url>
-        <user>manu</user>
-        <password>1234</password>
-    </ConnectionsList>
+    <ConnectionsList password="1234" url="localhost:5432/manuzio" user="manu"/>
     <SchemaList>
         <Book>3</Book>
         <Chapter>3</Chapter>
