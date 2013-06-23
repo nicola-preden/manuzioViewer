@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -55,7 +56,7 @@ public class PreferenceWindow extends javax.swing.JFrame {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                Anonymus selectedItem =(Anonymus) ((JComboBox) e.getSource()).getSelectedItem();
+                Anonymus selectedItem = (Anonymus) ((JComboBox) e.getSource()).getSelectedItem();
                 next.setProperty(set, selectedItem.l.toString());
                 isModified = true;
             }
@@ -88,45 +89,50 @@ public class PreferenceWindow extends javax.swing.JFrame {
                 GridBagConstraints c;
                 JLabel l = new JLabel(lang.getString("LANGUAGE"));
                 JComboBox f;
-                
-                
+
+
                 ArrayList<Anonymus> ar = new ArrayList();
                 ClassLoader loader = Thread.currentThread().getContextClassLoader();
-                Path dir = Paths.get(loader.getResource("viewer/language").toURI());
-                try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "lang_?*.{properties}")) {
-                    for (Path entry : stream) {
-                        String s = entry.getFileName().toString().replaceAll("^lang(_)?|\\.properties$", "").replaceAll("_", "-");
-                        Locale forLanguageTag = Locale.forLanguageTag(s);
-                        ar.add(new Anonymus(forLanguageTag));
+                URI toURI = loader.getResource("viewer/language").toURI();
+
+                if (toURI.getScheme().compareTo("jar") != 0) {
+                    Path dir = Paths.get(loader.getResource("viewer/language").toURI());
+                    try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "lang_?*.{properties}")) {
+                        for (Path entry : stream) {
+                            String s = entry.getFileName().toString().replaceAll("^lang(_)?|\\.properties$", "").replaceAll("_", "-");
+                            Locale forLanguageTag = Locale.forLanguageTag(s);
+                            ar.add(new Anonymus(forLanguageTag));
+                        }
+                    } catch (IOException x) {
+                        Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, x);
                     }
-                } catch (IOException x) {
-                    Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, x);
+                } else {
                 }
                 Object[] possibilities = ar.toArray();
                 f = new JComboBox(possibilities);
                 for (int i = 0; i < possibilities.length; i++) {
-                    if (((Anonymus)possibilities[i]).l.equals(ManuzioViewer.LANGUAGE)) {
+                    if (((Anonymus) possibilities[i]).l.equals(ManuzioViewer.LANGUAGE)) {
                         f.setSelectedIndex(i);
                         break;
                     }
                 }
                 f.addActionListener(new ActionListenerComboBox(node.readProp().next(), "lang"));
-                
+
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.anchor = GridBagConstraints.PAGE_START;
                 c.gridx = 0;
                 c.gridwidth = 1;
                 c.gridy = 0;
-                this.add(l,c);
+                this.add(l, c);
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.anchor = GridBagConstraints.PAGE_END;
                 c.gridx = 1;
                 c.gridwidth = 1;
                 c.gridy = 0;
-                this.add(f,c);
-                
+                this.add(f, c);
+
             } catch (URISyntaxException ex) {
                 Logger.getLogger(PreferenceWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -308,7 +314,7 @@ public class PreferenceWindow extends javax.swing.JFrame {
         jL_server.setModel(m);
         JPanelTextGraphics text = (JPanelTextGraphics) jP_TextLayout;
         text.setPreferences(viewer.ManuzioViewer.setting.getSetting(SettingXML.SCHEMA_LIST));
-        JPanelLanguages language = (JPanelLanguages)jP_Languages;
+        JPanelLanguages language = (JPanelLanguages) jP_Languages;
         language.setPreferences(viewer.ManuzioViewer.setting.getSetting(SettingXML.LANGUAGE_SELECT));
         jL_server.setValueIsAdjusting(false);
     }

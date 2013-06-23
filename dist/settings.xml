@@ -11,5 +11,4 @@
         <schema-url>localhost:5432/manuzio</schema-url>
         <Paragraph>3</Paragraph>
     </SchemaList>
-    <Language lang="en"/>
 </Setting>

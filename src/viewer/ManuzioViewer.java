@@ -13,9 +13,14 @@ import com.apple.eawt.QuitResponse;
 import com.jolbox.bonecp.BoneCP;
 import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,11 +31,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -193,15 +201,21 @@ public class ManuzioViewer {
         } else {
             ArrayList<Anonymus> ar = new ArrayList();
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            Path dir = Paths.get(loader.getResource("viewer/language").toURI());
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "lang_?*.{properties}")) {
-                for (Path entry : stream) {
-                    String s = entry.getFileName().toString().replaceAll("^lang(_)?|\\.properties$", "").replaceAll("_", "-");
-                    Locale forLanguageTag = Locale.forLanguageTag(s);
-                    ar.add(new Anonymus(forLanguageTag));
+            URI toURI = loader.getResource("viewer/language").toURI();
+
+            if (toURI.getScheme().compareTo("jar") != 0) {
+                Path dir = Paths.get(loader.getResource("viewer/language").toURI());
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "lang_?*.{properties}")) {
+                    for (Path entry : stream) {
+                        String s = entry.getFileName().toString().replaceAll("^lang(_)?|\\.properties$", "").replaceAll("_", "-");
+                        Locale forLanguageTag = Locale.forLanguageTag(s);
+                        ar.add(new Anonymus(forLanguageTag));
+                    }
+                } catch (IOException x) {
+                    Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, x);
                 }
-            } catch (IOException x) {
-                Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, x);
+            } else {
+                
             }
             Object[] possibilities = ar.toArray();
             Anonymus s;
