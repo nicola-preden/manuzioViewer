@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JTextArea;
@@ -34,6 +35,7 @@ import viewer.manuzioParser.Type;
  * in Venice
  */
 public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
     AddToServerWizard windows;
     SecondStepStrategy.TextType maxTypeList;
@@ -78,7 +80,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
                 int lineStart = lineElem.getStartOffset();
                 int lineEnd = lineElem.getEndOffset();
                 document.remove(lineStart, lineEnd - lineStart);
-                this.jTA.append("In corso ... " + progress + " su " + max + "\n");
+                this.jTA.append(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("IN_PROGRESS {0} / {1}"), new Object[] {progress, max}));
             } catch (BadLocationException ex) {
                 Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -86,7 +88,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
         }
         if (x instanceof String) {
             this.jTA.append((String) x + "\n");
-            this.jTA.append("In corso ... \n");
+            this.jTA.append(lang.getString("IN_PROGRESS"));
             setProgress(0);
         }
     }
@@ -106,7 +108,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
             setSavepoint = conn.setSavepoint();
 
             conn.commit();
-            updateProgress("Inizializzazione Caricamento ... ");
+            updateProgress(lang.getString("LOADING"));
             int allTextLeng = this.maxTypeList.getAllText().length;
             // calcolo lo start
             stmt = conn.createStatement();
@@ -128,7 +130,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
             conn.commit();
             resultSet.close();
             conn.close();
-            updateProgress("Caricamento dati ... ");
+            updateProgress(lang.getString("QUERY_DB"));
             int id = load(this.maxTypeList, start_idx, end_idx);
         } catch (SQLException ex) {
             if (setSavepoint != null) {

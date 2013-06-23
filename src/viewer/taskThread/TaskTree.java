@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.ListIterator;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -43,10 +44,7 @@ public class TaskTree<T extends JEditorPane> extends Thread implements TreeSelec
      * Richiede il refresh
      */
     private static final int REFRESH = -1;
-    /**
-     * Thread corrente
-     */
-    private volatile Thread thisThread;
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
     /**
      * Albero swing ed nodo root
      */
@@ -171,7 +169,6 @@ public class TaskTree<T extends JEditorPane> extends Thread implements TreeSelec
 
     @Override
     public void run() {
-        thisThread = Thread.currentThread();
         tree.setEditable(false);
 
         while (!endValue()) {
@@ -264,7 +261,7 @@ public class TaskTree<T extends JEditorPane> extends Thread implements TreeSelec
             }
         }
         // Chiudo il processo
-        DefaultMutableTreeNode node = new javax.swing.tree.DefaultMutableTreeNode("Server Disconnesso");
+        DefaultMutableTreeNode node = new javax.swing.tree.DefaultMutableTreeNode(lang.getString("SERVER_OFFLINE"));
         tree.setModel(new DefaultTreeModel(node));
         tree.removeTreeSelectionListener(this);
         slider.setMaximum(10);

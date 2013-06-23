@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.AbstractButton;
@@ -58,11 +59,11 @@ public class SecondStepStrategy {
             ButtonModel selection = jbg.getSelection();
             String selectedText = jep.getSelectedText();
             if (selectedText == null) {
-                JOptionPane.showMessageDialog(((JButton) e.getSource()).getParent(), "Selezionare un testo", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(((JButton) e.getSource()).getParent(), lang.getString("SELECT_TEXT"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
                 return;
             }
             if ("".equals(selectedText)) {
-                JOptionPane.showMessageDialog(((JButton) e.getSource()).getParent(), "Selezionare un testo", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(((JButton) e.getSource()).getParent(), lang.getString("SELECT_TEXT"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
                 return;
             }
             AbstractButton jrb = null;
@@ -75,7 +76,7 @@ public class SecondStepStrategy {
                 }
             }
             if (jrb == null) {
-                JOptionPane.showMessageDialog(((JButton) e.getSource()).getParent(), "Selezionare un componente", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(((JButton) e.getSource()).getParent(), lang.getString("SELECT_COMPONENT"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
                 return;
             }
             String name = jrb.getName();
@@ -282,6 +283,7 @@ public class SecondStepStrategy {
      * <p>Indica che solo un carattere è da associare al testo. </p>
      */
     public static final int CHAR = 7;
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
     /**
      * <p>Costruttore, crea la classe alla quale è necessario passare tra i
@@ -309,11 +311,11 @@ public class SecondStepStrategy {
             throw new NullPointerException();
         }
         if (!(cards.getLayout() instanceof BorderLayout)) {
-            throw new IllegalArgumentException(cards.toString() + "Don't have a BorderLayout");
+            throw new IllegalArgumentException(cards.toString() + lang.getString("DON'T HAVE A BORDERLAYOUT"));
         }
         this.tittle = new JLabel();
         this.tittle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        this.tittle.setText("<html><b>Personalizzazione Dati</b></html>");
+        this.tittle.setText(lang.getString("CUSTOMIZE_DATA"));
         this.tittle.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 0, 0)));
         cards.add(this.tittle, java.awt.BorderLayout.PAGE_START);
 
@@ -344,17 +346,17 @@ public class SecondStepStrategy {
     public void start() {
         System.gc();
         this.prev.setEnabled(false);
-        this.next.setText("Avanti");
+        this.next.setText(lang.getString("NEXT"));
         this.close.setEnabled(true);
         this.next.setEnabled(true);
         Type rootType = ManuzioViewer.schema.getType(this.rootTypeName);
         if (!typeMap.containsKey(rootTypeName)) {
-            throw new IllegalArgumentException("Missing type");
+            throw new IllegalArgumentException(lang.getString("MISSING TYPE"));
         }
         Object get = typeMap.get(rootTypeName);
         TextType textType;
         if (!(get instanceof Integer)) {
-            throw new IllegalArgumentException("Missing type");
+            throw new IllegalArgumentException(lang.getString("MISSING TYPE"));
         }
 
         int x = ((Integer) get).intValue();
@@ -363,7 +365,7 @@ public class SecondStepStrategy {
             textType = new TextType(rootType, null, null, this.text);
             this.maxTypeList = textType;
         } else {
-            throw new IllegalArgumentException("Missing type");
+            throw new IllegalArgumentException(lang.getString("MISSING TYPE"));
         }
 
         this.isEnd = autoScan(this.maxTypeList); // cerco di minimizzare già il testo
@@ -401,7 +403,7 @@ public class SecondStepStrategy {
             JLabel l;
 
             int i = 0;
-            l = new JLabel("<HTML><p><b>Componente: " + (tx.getComponentName() == null ? "ROOT" : tx.getComponentName()) + " Tipo: " + tx.getType().getTypeName() + "</b></p></HTML>");
+            l = new JLabel(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("COMPONENT: {0} TYPE: {1}"), new Object[] {(tx.getComponentName() == null ? "ROOT" : tx.getComponentName()), tx.getType().getTypeName()}));
             l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             c = new GridBagConstraints();
             c.fill = GridBagConstraints.HORIZONTAL;
@@ -414,7 +416,7 @@ public class SecondStepStrategy {
             if (tx.getType().hasComponents()) {
                 //<editor-fold defaultstate="collapsed" desc="Inserimento Componenti">
                 ComponentProperty[] components = tx.getType().getComponents();
-                l = new JLabel("<HTML><p><b>Specificare il numero di componenti</b></p></HTML>");
+                l = new JLabel(lang.getString("CHOOSE_NUMBERS"));
                 l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 c = new GridBagConstraints();
                 c.fill = GridBagConstraints.HORIZONTAL;
@@ -430,7 +432,7 @@ public class SecondStepStrategy {
                 c.anchor = GridBagConstraints.LINE_START;
                 c.gridx = 0;
                 c.gridy = i;
-                l = new JLabel("Optionale");
+                l = new JLabel(lang.getString("OPTIONAL"));
                 l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 pane.add(l, c);
                 c = new GridBagConstraints();
@@ -438,7 +440,7 @@ public class SecondStepStrategy {
                 c.anchor = GridBagConstraints.CENTER;
                 c.gridx = 1;
                 c.gridy = i;
-                l = new JLabel("Componente : tipo");
+                l = new JLabel(lang.getString("COMPONENT_TYPE"));
                 l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 pane.add(l, c);
                 c = new GridBagConstraints();
@@ -446,7 +448,7 @@ public class SecondStepStrategy {
                 c.anchor = GridBagConstraints.LINE_END;
                 c.gridx = 2;
                 c.gridy = i;
-                l = new JLabel("Valore");
+                l = new JLabel(lang.getString("VALUE"));
                 l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 pane.add(l, c);
 
@@ -470,8 +472,8 @@ public class SecondStepStrategy {
                     c2.setText(prop.getComponentName() + " : " + (prop.isPlural() ? prop.getComponent().getPluralName() : prop.getComponent().getTypeName()));
                     JTextField c3 = new JTextField();
                     c3.setName(prop.getComponentName() + "_textField");
-                    c3.setToolTipText("Numero di oggetti da caricare");
-                    c3.setText("AUTO");
+                    c3.setToolTipText(lang.getString("OBJECT_NUMBER"));
+                    c3.setText(lang.getString("AUTO"));
                     c3.setEnabled(false);
                     c = new GridBagConstraints();
                     c.fill = GridBagConstraints.HORIZONTAL;
@@ -504,7 +506,7 @@ public class SecondStepStrategy {
                 c.gridx = 0;
                 c.gridwidth = 3;
                 c.gridy = i;
-                l = new JLabel("<HTML><p><b>Specificare gli attributi</b></p></HTML>");
+                l = new JLabel(lang.getString("SELECT_ATTRIBUTE"));
                 l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 pane.add(l, c);
                 i++;
@@ -514,7 +516,7 @@ public class SecondStepStrategy {
                 c.anchor = GridBagConstraints.LINE_START;
                 c.gridx = 0;
                 c.gridy = i;
-                l = new JLabel("Attributo : Tipo");
+                l = new JLabel(lang.getString("ATTRIBUTE_TYPE"));
                 l.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 pane.add(l, c);
                 c = new GridBagConstraints();
@@ -532,7 +534,7 @@ public class SecondStepStrategy {
                     c1.setName(att.getAtName() + "_label");
                     JTextField c2 = new JTextField();
                     c2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-                    c2.setToolTipText("Valore dell'attributo");
+                    c2.setToolTipText(lang.getString("ATTRIBUTE_VALUE"));
                     c2.setName(att.getAtName() + "_textField");
                     c = new GridBagConstraints();
                     c.fill = GridBagConstraints.HORIZONTAL;
@@ -567,12 +569,12 @@ public class SecondStepStrategy {
             JScrollPane jsp;
 
             int i = 0;
-            jta = new JTextArea("Creazione dati completata<br />Premi Termina  per caricare i dati nel database\n");
+            jta = new JTextArea(lang.getString("LOAD_COMPLETE_NEXT"));
             jsp = new JScrollPane(jta,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             
             pane.add(jsp, BorderLayout.CENTER);
 
-            this.next.setText("Termina");
+            this.next.setText(lang.getString("FINISH"));
             cards.add(pane, "end");
             //</editor-fold>
         }
@@ -600,8 +602,8 @@ public class SecondStepStrategy {
         ButtonGroup jBG = new ButtonGroup();
         //carico jbutton[GET] componenti
         int i = 0;
-        JLabel l = new JLabel("Seleziona un tipo un frammento del testo infine \n"
-                + "premi \"Crea Oggetto\" terminata la scelta premi \"Avanti\"");
+        JLabel l = new JLabel(lang.getString("TEXT_9")
+                + lang.getString("TEXT_10"));
         c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.FIRST_LINE_END;
@@ -615,7 +617,7 @@ public class SecondStepStrategy {
         c.anchor = GridBagConstraints.LINE_END;
         c.gridx = 1;
         c.gridy = i;
-        JButton c0 = new JButton("Crea oggetto");
+        JButton c0 = new JButton(lang.getString("CREATE_OBJECT"));
         c0.addActionListener(new GetActionListener(jEP, jBG, elem));
         controll.add(c0, c);
         for (Component com : lpc) {

@@ -5,6 +5,8 @@
 package database;
 
 import java.sql.SQLException;
+import java.util.ResourceBundle;
+import viewer.ManuzioViewer;
 
 /**
  * <p>Classe che gestisce tutte le eccezioni sollevate da ConnectionPoolFactory. </p>
@@ -12,6 +14,7 @@ import java.sql.SQLException;
  * in Venice
  */
 public class ConnectionPoolException extends SQLException {
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
     /**
      * Creates a new instance of

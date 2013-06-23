@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JEditorPane;
@@ -22,6 +23,7 @@ import viewer.ManuzioViewer;
 import viewer.manuzioParser.Schema;
 import viewer.manuzioParser.Type;
 
+
 /**
  * <p>Classe astratta che descrive i metodi per aggiungere generare del testo a
  * seconda dei stili pre caricati</p>
@@ -30,6 +32,7 @@ import viewer.manuzioParser.Type;
  * in Venice
  */
 public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout {
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
     private int id_object;
     private T output;
@@ -49,7 +52,7 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
      */
     private TextualLayout(int id_object, T output, Schema s, Properties prop) {
         if (id_object <= 0) {
-            throw new IllegalArgumentException("MIssing Data : schema-url" + prop.toString());
+            throw new IllegalArgumentException(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("MISSING DATA : SCHEMA-URL{0}"), new Object[] {prop.toString()}));
         }
         this.id_object = id_object;
         this.output = output;
@@ -63,7 +66,6 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
             consistency = false;
         }
     }
-
     public static <T extends JEditorPane> TextualLayout<T> createTextualLayout(int id_object, T output, Schema s, Properties prop) {
         return new TextualLayout<T>(id_object, output, s, prop);
     }
@@ -93,14 +95,14 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
                 int lineStart = lineElem.getStartOffset();
                 int lineEnd = lineElem.getEndOffset();
                 document.remove(lineStart, lineEnd - lineStart);
-                document.insertString(document.getLength(), "In corso ... " + progress + " / " + max + "\n", null);
+                document.insertString(document.getLength(), java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("IN_PROGRESS {0} / {1}"), new Object[] {progress, max}), null);
             }
             if (x instanceof String) {
                 progress = 0;
                 Document document = output.getDocument();
                 document.insertString(document.getLength(), (String) x + "\n", null);
                 if (!b) {
-                    document.insertString(document.getLength(), "In corso ... \n", null);
+                    document.insertString(document.getLength(), lang.getString("IN_PROGRESS"), null);
                 }
                 setProgress(0);
             }
@@ -118,7 +120,7 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
         CallableStatement function;
         try {
             output.setText(null);
-            updateProgress("Controllo coerenza layout ...", false);
+            updateProgress(lang.getString("CONSISTENCY_CONTROL"), false);
             if (consistency) {
                 updateProgress(null, false);
             } else {
@@ -130,7 +132,7 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
                     updateProgress(null, false);
                 }
             }
-            updateProgress("Interrogazione Database ...", false);
+            updateProgress(lang.getString("QUERY_DB"), false);
             conn = ManuzioViewer.getConnection();
             stmt = conn.prepareStatement("SELECT "
                     + "textual_objects.id_tex_obj, "
@@ -143,7 +145,7 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
             resultSet = stmt.executeQuery();
             String q;
             if (!resultSet.next()) {
-                updateProgress("Errore Caricamento dati inesistenti", true);
+                updateProgress(lang.getString("LOADING_ERROR"), true);
                 return null;
             } else {
                 q = resultSet.getString(2);
@@ -156,10 +158,10 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
             String translateText = translateText(this.id_object);
 
             // Caricamento degli attributi
-            updateProgress("Caricamento Attributi ...", true);
+            updateProgress(lang.getString("ATTRIBUTE_LOADING"), true);
             String k = "-------------\n";
             conn = ManuzioViewer.getConnection();
-            k += "ID : " + this.id_object + " TYPE: " + q + "\n\n";
+            k += java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("ID : {0} TYPE: {1}"), new Object[] {this.id_object, q});
             q = "SELECT "
                     + "  attribute_values.id_att_value, "
                     + "  attribute_types.label, "
@@ -177,15 +179,15 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
             resultSet = stmt.executeQuery();
             String z = "";
             while (resultSet.next()) {
-                z += "ID_ATTRIBUTE :  " + resultSet.getInt("id_att_value") + "\tLABEL : " + resultSet.getString("label") + " VALUE : " + resultSet.getString("value") + "\n";
+                z += java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("ID_ATTRIBUTE :  {0} LABEL : {1} VALUE : {2}"), new Object[] {resultSet.getInt("id_att_value"), resultSet.getString("label"), resultSet.getString("value")});
             }
-            k += z.length() == 0 ? "" : "Attributi Textual Object: \n" + z;
-            k += (consistency) ? "-------------\n" : "Layout non configurato, scegliere Preferenze --> Layout \n" + "-------------\n";
+            k += z.length() == 0 ? "" : java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("ATTRIBUTE TEXTUAL OBJECT: {0}"), new Object[] {z});
+            k += (consistency) ? "-------------\n" : lang.getString("LAYOUT_NOT_SET");
             ManuzioViewer.close(resultSet);
             ManuzioViewer.close(stmt);
             ManuzioViewer.close(conn);
             k += "\n\n" + translateText;
-            updateProgress("Visualizzazione", true);
+            updateProgress(lang.getString("DISPLAY"), true);
 
             // Visualizzazione dati
             Document document = output.getDocument();

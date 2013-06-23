@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +37,8 @@ import viewer.taskThread.TaskRawInput;
  * in Venice
  */
 public class AddToServerWizard extends javax.swing.JFrame implements PropertyChangeListener {
+
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
     /**
      * <p>Classe ausigliaria per creare una struttura contennente tutti i
@@ -84,7 +87,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 case 6:
                     jtf.setEnabled(true);
                     jtf.setEditable(true);
-                    jtf.setText("Inserire una stringa Regex");
+                    jtf.setText(lang.getString("INSERT_REGEX"));
                     break;
                 default:
                     jtf.setEnabled(false);
@@ -112,13 +115,13 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      * i tipi comunemente usati di formattazione nei testi. </p>
      */
     private static final String tab_type[] = {
-        "Carattere",
-        "Parola",
-        "Frase",
-        "Paragrafo",
-        "Tutto il testo",
-        "Una Selezione personalizzata",
-        "Espressione Regolare"
+        lang.getString("CHAR"),
+        lang.getString("WORD"),
+        lang.getString("SENTENCE"),
+        lang.getString("PARAGRAPH"),
+        lang.getString("ALL_TEXT"),
+        lang.getString("SELECTION"),
+        lang.getString("REG_EXP")
     };
     private String currentStep; // step attuale
     private String currentCard; // carta raggiunta
@@ -141,7 +144,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      * @throws IllegalArgumentException se i parametri sono incoerenti
      */
     public AddToServerWizard(int id, String type) {
-        initComponents();
+        initComponents();    
         idX_to = id;
         if (type == null) {
             // type mancante thrown exception
@@ -175,12 +178,12 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         // Creo il primo pannello variabile a secodo del valore di idX_to
         JPanel jPsub_comment = new JPanel();
         // Aggiunta JLabel commenti
-        String commentText = "<html><p>Ora è necesssario associare per ogni textual object, specificato nello Schema, <br />"
-                + "il relativo testo che lo compone. Per facilitare l'operazione per i tipi più semplici basterà <br />"
-                + "scegliere tra le tipologie già suggerite, usare una <a href=\"http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html\">Espressione Regolare</a> oppure selezionare il <br />"
-                + "testo scelto attreverso un editor. <br />"
-                + "Se è stata scelta l'aggiunta ad un textual object verranno "
-                + "presentati solo i sottotipi interessati.</p></html>";
+        String commentText = lang.getString("TEXT_1")
+                + lang.getString("TEXT_2")
+                + lang.getString("TEXT_3")
+                + lang.getString("TEXT_4")
+                + lang.getString("TEXT_5")
+                + lang.getString("TEXT_6");
         javax.swing.JLabel comment = new javax.swing.JLabel(commentText);
         comment.addMouseListener(new MouseListener() {
             @Override
@@ -229,42 +232,41 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
             tmp.setLayout(layout);
             layout.setAutoCreateGaps(true);
             layout.setAutoCreateContainerGaps(true);
-            JLabel c1 = new JLabel("Tipo: " + type.getTypeName());
+            JLabel c1 = new JLabel(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("TYPE: {0}"), new Object[]{type.getTypeName()}));
             JComboBox c2 = new JComboBox(tab_type);
-            c2.setEditable(false);
-            JTextField c3 = new JTextField(30);
-            c3.setEnabled(false);
+        c2.setEditable(false);
+        JTextField c3 = new JTextField(30);
+        c3.setEnabled(false);
 
-            c2.addActionListener(new JComboBoxActionListener(c3));
-            // http://docs.oracle.com/javase/tutorial/uiswing/layout/groupExample.html
-            // layout Orizzontale
-            layout.setHorizontalGroup(layout.createSequentialGroup()
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(c1)
-                    .addComponent(c2))
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(c3)));
-            // layout Verticale
-            layout.setVerticalGroup(layout.createSequentialGroup()
-                    .addComponent(c1)
-                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(c2)
-                    .addComponent(c3)));
-            // Aggiunto i controlli
-            type_setting.add(new AuxJP_regex(type, c2, c3));
-            // Aggiungo il pannello a qello interno
-            jP_regexInner.add(tmp);
-        }
+        c2.addActionListener(new JComboBoxActionListener(c3));
+        // http://docs.oracle.com/javase/tutorial/uiswing/layout/groupExample.html
+        // layout Orizzontale
+        layout.setHorizontalGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addComponent(c1)
+                .addComponent(c2))
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addComponent(c3)));
+        // layout Verticale
+        layout.setVerticalGroup(layout.createSequentialGroup()
+                .addComponent(c1)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                .addComponent(c2)
+                .addComponent(c3)));
+        // Aggiunto i controlli
+        type_setting.add(new AuxJP_regex(type, c2, c3));
+        // Aggiungo il pannello a qello interno
+        jP_regexInner.add(tmp);
     }
-
-    /**
-     * <p> Ritorna un array ordinato contenente i tipi disponibili a partire da
-     * quello indicato. </p>
-     *
-     * @param max iniziale per creare l'array
-     * @return un array contenente i tipi disponibili
-     */
-    protected viewer.manuzioParser.Type[] getOrderType(viewer.manuzioParser.Type max) {
+}
+/**
+ * <p> Ritorna un array ordinato contenente i tipi disponibili a partire da
+ * quello indicato. </p>
+ *
+ * @param max iniziale per creare l'array
+ * @return un array contenente i tipi disponibili
+ */
+protected viewer.manuzioParser.Type[] getOrderType(viewer.manuzioParser.Type max) {
         ArrayList<viewer.manuzioParser.Type> a = new ArrayList<viewer.manuzioParser.Type>();
         int idx = 0;
         if (max.isMaximalUnit()) { // se è maximalUnit inserisco anche lui
@@ -352,20 +354,20 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 taskRawInput = null;
                 jB_previous.setEnabled(false);
                 jB_next.setEnabled(true);
-                jB_next.setText("Avanti");
+                jB_next.setText(lang.getString("NEXT"));
                 jFileChooser.setSelectedFile(null);
                 break;
             case regex:
                 currentCard = regex;
                 jB_previous.setEnabled(true);
                 jB_next.setEnabled(true);
-                jB_next.setText("Avanti");
+                jB_next.setText(lang.getString("NEXT"));
                 break;
             case regexLarge: // Inizializza il 3 pannello per la conferma dei dati
                 currentCard = regexLarge;
                 jB_previous.setEnabled(true);
                 jB_next.setEnabled(true);
-                jB_next.setText("Conferma");
+                jB_next.setText(lang.getString("CONFIRM"));
                 initRegexLarge();
                 break;
         }
@@ -413,7 +415,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
+        public void propertyChange(PropertyChangeEvent evt) {
         if ("progress".equals(evt.getPropertyName())) { // Se vero stiamo caricando il file
             if (currentStep.compareTo(firstStep) == 0) {
                 int progress = (Integer) evt.getNewValue();
@@ -437,7 +439,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                             taskRawInput = null;
                             jB_next.setEnabled(true);
                             jProgressBar.setVisible(false);
-                            JOptionPane.showMessageDialog(this, "Errore nel caricamento del file", "Errore", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(this, lang.getString("FILE_ERROR_LOADING"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 }
@@ -485,7 +487,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jProgressBar = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("Aggiunta");
+        setTitle(lang.getString("ADD")); // NOI18N
         setAlwaysOnTop(true);
         setMinimumSize(new java.awt.Dimension(400, 300));
         setResizable(false);
@@ -498,7 +500,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jP_file.setLayout(new java.awt.BorderLayout());
 
         jL_fileTittle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jL_fileTittle.setText("<html><b>Scegli un file</b></html>");
+        jL_fileTittle.setText(lang.getString("FILE_CHOOSE")); // NOI18N
         jL_fileTittle.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 0, 0)));
         jP_file.add(jL_fileTittle, java.awt.BorderLayout.PAGE_START);
 
@@ -507,7 +509,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jFileChooser.setAcceptAllFileFilterUsed(false);
         jFileChooser.setControlButtonsAreShown(false);
         jFileChooser.setCurrentDirectory(null);
-        jFileChooser.setFileFilter(new FileNameExtensionFilter("Plain text file", "txt"));
+        jFileChooser.setFileFilter(new FileNameExtensionFilter(lang.getString("PLAIN_TEXT_FILE"), lang.getString("TXT")));
 
         org.jdesktop.layout.GroupLayout jP_fileInnerLayout = new org.jdesktop.layout.GroupLayout(jP_fileInner);
         jP_fileInner.setLayout(jP_fileInnerLayout);
@@ -535,7 +537,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jP_regex.setLayout(new java.awt.BorderLayout());
 
         jL_regexTittle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jL_regexTittle.setText("<html><b>Associazione Manuzio's Type</b></html>");
+        jL_regexTittle.setText(lang.getString("ASSOCIATION_MANUZIO'S_TYPE")); // NOI18N
         jL_regexTittle.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 0, 0)));
         jP_regex.add(jL_regexTittle, java.awt.BorderLayout.PAGE_START);
 
@@ -564,7 +566,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
         jP_regexLarge.setLayout(new java.awt.BorderLayout());
 
         jL_regexLargeTittle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jL_regexLargeTittle.setText("<html><b>Conferma Dati Inseriti</b></html>");
+        jL_regexLargeTittle.setText(lang.getString("DATA_CONFIRM")); // NOI18N
         jL_regexLargeTittle.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 1, 0, new java.awt.Color(0, 0, 0)));
         jP_regexLarge.add(jL_regexLargeTittle, java.awt.BorderLayout.PAGE_START);
 
@@ -589,21 +591,21 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
 
         jP_control.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(0, 0, 0)));
 
-        jB_close.setText("Annulla");
+        jB_close.setText(lang.getString("CANCEL")); // NOI18N
         jB_close.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jB_closeActionPerformed(evt);
             }
         });
 
-        jB_next.setText("Avanti");
+        jB_next.setText(lang.getString("NEXT")); // NOI18N
         jB_next.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jB_nextActionPerformed(evt);
             }
         });
 
-        jB_previous.setText("Indietro");
+        jB_previous.setText(lang.getString("BACK")); // NOI18N
         jB_previous.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jB_previousActionPerformed(evt);
@@ -653,7 +655,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                 case file:    // Seleziono il file da aggiungere
                     File selectedFile = jFileChooser.getSelectedFile();
                     if (selectedFile == null || !selectedFile.isFile()) {
-                        JOptionPane.showMessageDialog(this, "Selezionare un file", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(this, lang.getString("FILE_SELECT"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
                     } else {
                         // Aggiungo il contenuto del file in un oggetto.
                         taskRawInput = new TaskRawInput(selectedFile.getPath());
@@ -671,7 +673,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     Iterator<AuxJP_regex> iterator = type_setting.iterator();
                     boolean err = false;
                     boolean allText = false;
-                    String notReg = "Inserire una stringa Regex";
+                    String notReg = lang.getString("INSERT_REGEX");
                     while (iterator.hasNext() && !err) { // controllo la corretteza di tutti i campi e conto i tipi
                         AuxJP_regex next = iterator.next();
                         // un solo allText
@@ -682,7 +684,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                                 allText = true;
                             } else {
                                 err = true;
-                                JOptionPane.showMessageDialog(this, "Attenzione in più di un tipo è attiva l'opzione \"Tutto il testo\"\nOppure è stata attivata su un tipo non compatibile", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(this, lang.getString("TEXT_7"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
                             }
                         }
                         if (x == 6) { // campi regex
@@ -690,13 +692,13 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                             String text = jtf.getText();
                             if (text.compareTo(notReg) == 0) {
                                 err = true;
-                                JOptionPane.showMessageDialog(this, "Attenzione un campo è incompleto", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(this, lang.getString("ATTENZIONE UN CAMPO È INCOMPLETO"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
                             }
                         }
                     }
                     if (!allText && !err) {
                         err = true;
-                        JOptionPane.showMessageDialog(this, "Attenzione ci deve essere almeno un tipo valido per inserimento che contenga l'intero file", "Attenzione", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(this, lang.getString("TEXT_8"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
                     }
 
                     if (!err) { // passo al riepilogo
@@ -706,7 +708,7 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
                     }
                     break;
                 case regexLarge:
-                    int x = JOptionPane.showConfirmDialog(this, "Confermi i dati inseriti?", "Conferma?", JOptionPane.YES_NO_OPTION);
+                    int x = JOptionPane.showConfirmDialog(this, lang.getString("CONFIRM_DATA"), lang.getString("CONFIRM"), JOptionPane.YES_NO_OPTION);
                     if (x == JOptionPane.YES_OPTION) {
                         this.jB_next.setEnabled(false);
                         this.jB_previous.setEnabled(false);

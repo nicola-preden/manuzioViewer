@@ -5,16 +5,28 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import static viewer.ManuzioViewer.shutdownProgram;
 import viewer.setting.AbstractTextualLayout;
 import viewer.setting.NodeSettingInterface;
 import viewer.setting.PreferencesPane;
@@ -29,16 +41,98 @@ import viewer.setting.SettingXML;
  */
 public class PreferenceWindow extends javax.swing.JFrame {
 
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
+
     private class JPanelLanguages extends JPanel implements PreferencesPane {
+
+        private class ActionListenerComboBox implements ActionListener {
+
+            private final Properties next;
+            private final String set;
+
+            private ActionListenerComboBox(Properties next, String set) {
+                this.next = next;
+                this.set = set;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Anonymus selectedItem =(Anonymus) ((JComboBox) e.getSource()).getSelectedItem();
+                next.setProperty(set, selectedItem.l.toString());
+                isModified = true;
+            }
+        }
+
+        private class Anonymus {
+
+            Locale l;
+
+            public Anonymus(Locale l) {
+                this.l = l;
+            }
+
+            @Override
+            public String toString() {
+                return l.getDisplayLanguage();
+
+            }
+        }
+        private volatile boolean isModified = false;
 
         @Override
         public boolean isModified() {
-            return false;
+            return isModified;
         }
 
         @Override
         public void setPreferences(NodeSettingInterface node) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            try {
+                GridBagConstraints c;
+                JLabel l = new JLabel(lang.getString("LANGUAGE"));
+                JComboBox f;
+                
+                
+                ArrayList<Anonymus> ar = new ArrayList();
+                ClassLoader loader = Thread.currentThread().getContextClassLoader();
+                Path dir = Paths.get(loader.getResource("viewer/language").toURI());
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "lang_?*.{properties}")) {
+                    for (Path entry : stream) {
+                        String s = entry.getFileName().toString().replaceAll("^lang(_)?|\\.properties$", "").replaceAll("_", "-");
+                        Locale forLanguageTag = Locale.forLanguageTag(s);
+                        ar.add(new Anonymus(forLanguageTag));
+                    }
+                } catch (IOException x) {
+                    Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, x);
+                }
+                Object[] possibilities = ar.toArray();
+                f = new JComboBox(possibilities);
+                for (int i = 0; i < possibilities.length; i++) {
+                    if (((Anonymus)possibilities[i]).l.equals(ManuzioViewer.LANGUAGE)) {
+                        f.setSelectedIndex(i);
+                        break;
+                    }
+                }
+                f.addActionListener(new ActionListenerComboBox(node.readProp().next(), "lang"));
+                
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.PAGE_START;
+                c.gridx = 0;
+                c.gridwidth = 1;
+                c.gridy = 0;
+                this.add(l,c);
+                c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.anchor = GridBagConstraints.PAGE_END;
+                c.gridx = 1;
+                c.gridwidth = 1;
+                c.gridy = 0;
+                this.add(f,c);
+                
+            } catch (URISyntaxException ex) {
+                Logger.getLogger(PreferenceWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
 
         @Override
@@ -90,15 +184,15 @@ public class PreferenceWindow extends javax.swing.JFrame {
                 jP_SchemaConfig.add(panel, url);
                 if (viewer.setting.AbstractTextualLayout.typeConsistencyCheck(next, viewer.ManuzioViewer.schema)) {
                     // Server Connesso ed tutto ok
-                    l = new JLabel("<HTML><p><b>DataBase: " + url + "</b></p></HTML>");
+                    l = new JLabel(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("DATABASE: {0}"), new Object[]{url}));
                 } else {
                     String t = viewer.ManuzioViewer.getJdbcUrl() != null ? viewer.ManuzioViewer.getJdbcUrl() : "";
                     if (t.compareTo(url) != 0) {
                         // Server Disconnesso tutto ok
-                        l = new JLabel("<HTML><p color=red><b>DataBase: " + url + "<br />Server non connesso</b></p></HTML>");
+                        l = new JLabel(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("DATABASE_RED: {0}"), new Object[]{url}));
                     } else {
                         // Server Connesso con dati mancanti
-                        l = new JLabel("<HTML><p><b>DataBase: " + url + "</b></p></HTML>");
+                        l = new JLabel(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("DATABASE: {0}"), new Object[]{url}));
                         next.clear();
                         next.setProperty("schema-url", url);
                         viewer.manuzioParser.Type[] typeSet = viewer.ManuzioViewer.schema.getTypeSet();
@@ -216,6 +310,8 @@ public class PreferenceWindow extends javax.swing.JFrame {
         jL_server.setModel(m);
         JPanelTextGraphics text = (JPanelTextGraphics) jP_TextLayout;
         text.setPreferences(viewer.ManuzioViewer.setting.getSetting(SettingXML.SCHEMA_LIST));
+        JPanelLanguages language = (JPanelLanguages)jP_Languages;
+        language.setPreferences(viewer.ManuzioViewer.setting.getSetting(SettingXML.LANGUAGE_SELECT));
         jL_server.setValueIsAdjusting(false);
     }
 
@@ -239,7 +335,7 @@ public class PreferenceWindow extends javax.swing.JFrame {
         jB_close = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Preferenze");
+        setTitle(lang.getString("PREFERENCES")); // NOI18N
 
         jL_server.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jL_server.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
@@ -284,22 +380,12 @@ public class PreferenceWindow extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jTP_Preferences.addTab("Layout", jP_TextLayout);
+        jTP_Preferences.addTab(lang.getString("LAYOUT"), jP_TextLayout); // NOI18N
 
-        org.jdesktop.layout.GroupLayout jP_LanguagesLayout = new org.jdesktop.layout.GroupLayout(jP_Languages);
-        jP_Languages.setLayout(jP_LanguagesLayout);
-        jP_LanguagesLayout.setHorizontalGroup(
-            jP_LanguagesLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 596, Short.MAX_VALUE)
-        );
-        jP_LanguagesLayout.setVerticalGroup(
-            jP_LanguagesLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 305, Short.MAX_VALUE)
-        );
+        jP_Languages.setLayout(new java.awt.GridBagLayout());
+        jTP_Preferences.addTab(lang.getString("LANGUAGE"), jP_Languages); // NOI18N
 
-        jTP_Preferences.addTab("Lingua", jP_Languages);
-
-        jB_close.setText("Chiudi");
+        jB_close.setText(lang.getString("EXIT")); // NOI18N
         jB_close.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jB_closeActionPerformed(evt);

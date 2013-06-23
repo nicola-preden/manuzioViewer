@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.Enumeration;
 import java.util.ListIterator;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JMenuItem;
@@ -32,6 +33,7 @@ import viewer.taskThread.TaskTree;
  * in Venice
  */
 public class MainWindow extends javax.swing.JFrame {
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
     /**
      * ActionListener per il menu
@@ -56,10 +58,10 @@ public class MainWindow extends javax.swing.JFrame {
                 ManuzioViewer.schema = Schema.loadFromDB(conn);
             } catch (ParseException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(ManuzioViewer.mw, "Impossibile Scaricare lo schema", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ManuzioViewer.mw, lang.getString("SCHEMA_LOAD_ERR"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
             } catch (SQLException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(ManuzioViewer.mw, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ManuzioViewer.mw, lang.getString("WRONG_URL"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
             } finally {
                 if (conn != null) {
                     try {
@@ -231,7 +233,7 @@ public class MainWindow extends javax.swing.JFrame {
         errorLogMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("ManuzioViewer");
+        setTitle(lang.getString("MANUZIOVIEWER")); // NOI18N
         setLocationByPlatform(true);
         setMinimumSize(new java.awt.Dimension(1052, 542));
         setResizable(false);
@@ -242,7 +244,7 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarServer.setRollover(true);
 
         toolBarSx_Disconnect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/32px/038.png"))); // NOI18N
-        toolBarSx_Disconnect.setToolTipText("Disconnetti");
+        toolBarSx_Disconnect.setToolTipText(lang.getString("DISCONNECT")); // NOI18N
         toolBarSx_Disconnect.setBorderPainted(false);
         toolBarSx_Disconnect.setFocusable(false);
         toolBarSx_Disconnect.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -258,7 +260,7 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarServer.add(toolBarSx_Disconnect);
 
         toolBarSx_Refrash.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/32px/033.png"))); // NOI18N
-        toolBarSx_Refrash.setToolTipText("Aggiorna");
+        toolBarSx_Refrash.setToolTipText(lang.getString("UPDATE")); // NOI18N
         toolBarSx_Refrash.setBorderPainted(false);
         toolBarSx_Refrash.setFocusable(false);
         toolBarSx_Refrash.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -273,7 +275,7 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarServer.add(toolBarSx_Refrash);
 
         toolBarSx_NewType.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/32px/060.png"))); // NOI18N
-        toolBarSx_NewType.setToolTipText("Aggiungi un nuovo tipo alla selezione");
+        toolBarSx_NewType.setToolTipText(lang.getString("ADD_NEW_TYPE")); // NOI18N
         toolBarSx_NewType.setBorderPainted(false);
         toolBarSx_NewType.setFocusable(false);
         toolBarSx_NewType.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -289,7 +291,7 @@ public class MainWindow extends javax.swing.JFrame {
         toolBarServer.add(toolBarSx_NewType);
 
         toolBarSx_RemoveType.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/32px/059.png"))); // NOI18N
-        toolBarSx_RemoveType.setToolTipText("Rimuovi selezionato");
+        toolBarSx_RemoveType.setToolTipText(lang.getString("REMOVE_SELECT")); // NOI18N
         toolBarSx_RemoveType.setBorderPainted(false);
         toolBarSx_RemoveType.setFocusable(false);
         toolBarSx_RemoveType.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -309,7 +311,7 @@ public class MainWindow extends javax.swing.JFrame {
         jS_Level.setPaintLabels(true);
         jS_Level.setPaintTicks(true);
         jS_Level.setSnapToTicks(true);
-        jS_Level.setToolTipText("Livello di dettaglio");
+        jS_Level.setToolTipText(lang.getString("LEVEL_DETAIL")); // NOI18N
         jS_Level.setValue(1);
         jS_Level.setEnabled(false);
         jS_Level.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -319,8 +321,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         toolBarServer.add(jS_Level);
 
-        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Server Disconnesso");
-        jT_SchemaServer.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        jT_SchemaServer.setModel(new javax.swing.tree.DefaultTreeModel(new javax.swing.tree.DefaultMutableTreeNode(lang.getString("SERVER_OFFLINE"))));
         jScrollPane1.setViewportView(jT_SchemaServer);
 
         org.jdesktop.layout.GroupLayout jP_ServerLayout = new org.jdesktop.layout.GroupLayout(jP_Server);
@@ -395,15 +396,15 @@ public class MainWindow extends javax.swing.JFrame {
         );
 
         fileMenu.setMnemonic('f');
-        fileMenu.setText("File");
+        fileMenu.setText(lang.getString("FILE")); // NOI18N
 
-        jM_Connects.setText("Connetti ....");
+        jM_Connects.setText(lang.getString("CONNECT_")); // NOI18N
 
         connectMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
             Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
     connectMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/16px/040.png"))); // NOI18N
     connectMenuItem.setMnemonic('o');
-    connectMenuItem.setText("Nuovo ...");
+    connectMenuItem.setText(lang.getString("NEW_")); // NOI18N
     connectMenuItem.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(java.awt.event.ActionEvent evt) {
             connectMenuItemActionPerformed(evt);
@@ -418,7 +419,7 @@ public class MainWindow extends javax.swing.JFrame {
         Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 disconnectMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/16px/038.png"))); // NOI18N
 disconnectMenuItem.setMnemonic('s');
-disconnectMenuItem.setText("Disconnetti");
+disconnectMenuItem.setText(lang.getString("DISCONNECT")); // NOI18N
 disconnectMenuItem.setEnabled(false);
 disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
     public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -428,7 +429,7 @@ disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
     fileMenu.add(disconnectMenuItem);
     fileMenu.add(jSeparator3);
 
-    preferenceMenuItem.setText("Preferenze");
+    preferenceMenuItem.setText(lang.getString("PREFERENCES")); // NOI18N
     preferenceMenuItem.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(java.awt.event.ActionEvent evt) {
             preferenceMenuItemActionPerformed(evt);
@@ -441,7 +442,7 @@ disconnectMenuItem.addActionListener(new java.awt.event.ActionListener() {
     exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
         Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 exitMenuItem.setMnemonic('x');
-exitMenuItem.setText("Exit");
+exitMenuItem.setText(lang.getString("EXIT")); // NOI18N
 exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     public void actionPerformed(java.awt.event.ActionEvent evt) {
         exitMenuItemActionPerformed(evt);
@@ -454,31 +455,31 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     menuBar.add(fileMenu);
 
     editMenu.setMnemonic('e');
-    editMenu.setText("Edit");
+    editMenu.setText(lang.getString("EDIT")); // NOI18N
 
     cutMenuItem.setMnemonic('t');
-    cutMenuItem.setText("Cut");
+    cutMenuItem.setText(lang.getString("CUT")); // NOI18N
     editMenu.add(cutMenuItem);
 
     copyMenuItem.setMnemonic('y');
-    copyMenuItem.setText("Copy");
+    copyMenuItem.setText(lang.getString("COPY")); // NOI18N
     editMenu.add(copyMenuItem);
 
     pasteMenuItem.setMnemonic('p');
-    pasteMenuItem.setText("Paste");
+    pasteMenuItem.setText(lang.getString("PASTE")); // NOI18N
     editMenu.add(pasteMenuItem);
 
     deleteMenuItem.setMnemonic('d');
-    deleteMenuItem.setText("Delete");
+    deleteMenuItem.setText(lang.getString("DELETE")); // NOI18N
     editMenu.add(deleteMenuItem);
 
     menuBar.add(editMenu);
 
     helpMenu.setMnemonic('h');
-    helpMenu.setText("Help");
+    helpMenu.setText(lang.getString("HELP")); // NOI18N
 
     aboutMenuItem.setMnemonic('a');
-    aboutMenuItem.setText("About");
+    aboutMenuItem.setText(lang.getString("ABOUT")); // NOI18N
     aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(java.awt.event.ActionEvent evt) {
             aboutMenuItemActionPerformed(evt);
@@ -486,7 +487,7 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     });
     helpMenu.add(aboutMenuItem);
 
-    errorLogMenuItem.setText("Log Errori");
+    errorLogMenuItem.setText(lang.getString("ERROR_LOG")); // NOI18N
     helpMenu.add(errorLogMenuItem);
 
     menuBar.add(helpMenu);
@@ -516,7 +517,7 @@ exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
-        int showConfirmDialog = JOptionPane.showConfirmDialog(this, "Vuoi davvero chiudere il programma?", "Sei Sicuro?", JOptionPane.YES_NO_OPTION);
+        int showConfirmDialog = JOptionPane.showConfirmDialog(this, lang.getString("CLOSE_PROGRAM_CONFIRM"), lang.getString("SURE"), JOptionPane.YES_NO_OPTION);
         switch (showConfirmDialog) {
             case JOptionPane.YES_OPTION:
                 ManuzioViewer.shutdownProgram();

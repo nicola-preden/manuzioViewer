@@ -10,8 +10,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import viewer.ManuzioViewer;
 
 /**
  * <p>La classe crea un pool di conessioni a un db PostgreSQL oppure ad un atro
@@ -27,6 +29,7 @@ public class ConnectionPoolFactory {
     private BoneCPConfig config = null;     // Configurazione
     private static String[] driverName = {"org.postgresql.Driver"};
     private static String[] driverPrefix = {"jdbc:postgresql://"};
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
     /**
      * Crea una nuova factory a partire da un una configurazione gia pronta
@@ -59,7 +62,7 @@ public class ConnectionPoolFactory {
             try {
                 Class.forName(driverName[i]);
             } catch (ClassNotFoundException ex) {
-                throw new ConnectionPoolException("Driver not Found");
+                throw new ConnectionPoolException(lang.getString("DRIVER_NOT_FOUND"));
             }
         }
     }
@@ -181,7 +184,7 @@ public class ConnectionPoolFactory {
             connection.setAutoCommit(true);
             return connection;
         } catch (SQLException ex) {
-            throw new SQLException("Fatal error: cannot connect to DB");
+            throw new SQLException(lang.getString("FATAL ERROR"));
         }
 
     }

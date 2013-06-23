@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,19 +65,22 @@ public class ManuzioViewer {
             }
         }
     }
+
     private static class Anonymus {
+
         Locale l;
 
         public Anonymus(Locale l) {
             this.l = l;
         }
-        
+
         @Override
-        public String toString(){
+        public String toString() {
             return l.getDisplayLanguage();
-            
+
         }
     }
+    private static ResourceBundle lang;
     private static volatile boolean isConnect = false;
     private static BoneCP connPool = null;                       // Pool Connessione al DB
     static SettingXML setting = null;                            // Struttura configurazione
@@ -87,7 +91,7 @@ public class ManuzioViewer {
     private static final String urlXml = "settings.xml";         // File di Configurazione
     private static Timer tm = new Timer();
     private static final double VERSION_Manuzio = 3.2;
-    private static final String APP_NAME = "ManuzioViewer";
+    private static String APP_NAME = "ManuzioViewer";
     public static Locale LANGUAGE = null;
 
     /**
@@ -155,7 +159,7 @@ public class ManuzioViewer {
                 macApp.setQuitHandler(new QuitHandler() {
                     @Override
                     public void handleQuitRequestWith(AppEvent.QuitEvent qe, QuitResponse qr) {
-                        int showConfirmDialog = JOptionPane.showConfirmDialog(mw, "Vuoi davvero chiudere il programma?", "Sei Sicuro?", JOptionPane.YES_NO_OPTION);
+                        int showConfirmDialog = JOptionPane.showConfirmDialog(mw, lang.getString("CLOSE_PROGRAM_CONFIRM"), lang.getString("SURE"), JOptionPane.YES_NO_OPTION);
                         switch (showConfirmDialog) {
                             case JOptionPane.YES_OPTION:
                                 ManuzioViewer.shutdownProgram();
@@ -185,13 +189,14 @@ public class ManuzioViewer {
         NodeSettingInterface set = setting.getSetting("Language");
         if (set != null) {
             LANGUAGE = Locale.forLanguageTag(set.readProp().next().getProperty("lang"));
+            lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
         } else {
             ArrayList<Anonymus> ar = new ArrayList();
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             Path dir = Paths.get(loader.getResource("viewer/language").toURI());
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "Bundle_?*.{properties}")) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "lang_?*.{properties}")) {
                 for (Path entry : stream) {
-                    String s = entry.getFileName().toString().replaceAll("^Bundle(_)?|\\.properties$", "").replaceAll("_", "-");
+                    String s = entry.getFileName().toString().replaceAll("^lang(_)?|\\.properties$", "").replaceAll("_", "-");
                     Locale forLanguageTag = Locale.forLanguageTag(s);
                     ar.add(new Anonymus(forLanguageTag));
                 }
@@ -208,6 +213,7 @@ public class ManuzioViewer {
                 Properties p = new Properties();
                 p.setProperty("lang", LANGUAGE.toString());
                 setting.addSetting(SettingXML.LANGUAGE_SELECT, p);
+                lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
             }
         }
         tm.start();
@@ -481,7 +487,7 @@ public class ManuzioViewer {
             scan = new Scanner(new java.io.File(file));
         } catch (FileNotFoundException e1) {
             deleteManuzioDB(url, "man_DB " + dbName, user, password);
-            throw new SQLException("Cannot find system file '" + file + "'");
+            throw new SQLException(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("CANNOT FIND SYSTEM FILE '{0}'"), new Object[]{file}));
         }
         String fun = "";
         while (scan.hasNext()) {
@@ -542,7 +548,7 @@ public class ManuzioViewer {
         try {
             conn.createStatement().executeUpdate("DROP DATABASE \"" + dbName + "\";");
         } catch (SQLException e) {
-            throw new SQLException("FATAL " + e.getMessage() + "\nWARNING: The database just created may be in a incosistent status.");
+            throw new SQLException(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("FATAL {0}\\NWARNING_DATABASE"), new Object[]{e.getMessage()}));
         } finally {
             close(conn);
         }
@@ -587,7 +593,7 @@ public class ManuzioViewer {
             query.executeUpdate("ALTER SEQUENCE id_text_seq RESTART");
             query.executeUpdate("ALTER SEQUENCE id_user_seq RESTART");
         } catch (SQLException e) {
-            throw new ParseException("Invalid DB format", -1);
+            throw new ParseException(lang.getString("INVALID DB FORMAT"), -1);
         } finally {
             //closes resources
             close(query);
@@ -611,7 +617,7 @@ public class ManuzioViewer {
                 try {
                     resultSet.close();
                 } catch (SQLException e) {
-                    throw new SQLException("Fatal error. Try restart the program.");
+                    throw new SQLException(lang.getString("FATAL ERROR. TRY RESTART THE PROGRAM."));
                 }
             }
         }
@@ -633,7 +639,7 @@ public class ManuzioViewer {
                 try {
                     statement.close();
                 } catch (SQLException e) {
-                    throw new SQLException("Fatal error. Try restart the program.");
+                    throw new SQLException(lang.getString("FATAL ERROR. TRY RESTART THE PROGRAM."));
                 }
             }
         }
@@ -655,7 +661,7 @@ public class ManuzioViewer {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    throw new SQLException("Fatal error. Try restart the program.");
+                    throw new SQLException(lang.getString("FATAL ERROR. TRY RESTART THE PROGRAM."));
                 }
             }
         }

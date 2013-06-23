@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -35,6 +36,7 @@ import viewer.setting.SettingXML;
  * in Venice
  */
 public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeListener {
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
     private MainWindow mainWindow;
     private JFileChooser chooser;
@@ -68,10 +70,10 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
             } catch (IOException | ParseException ex) {
                 Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                 ManuzioViewer.schema = null;
-                JOptionPane.showMessageDialog(ManuzioViewer.cw, "Errore Caricamento Schema", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ManuzioViewer.cw, lang.getString("ERROR_LOADING_SCHEMA"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
             } catch (SQLException ex) {
                 Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(ManuzioViewer.cw, "Impossibile Creare il DataBase", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ManuzioViewer.cw, lang.getString("IMPOSSIBLE_CREATE_DATABASE"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
                 conn = false;
             } finally {
                 if (conn) {
@@ -126,7 +128,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                 setProgress(100 * 2 / MAX);
             } catch (SQLException ex) {
                 Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(ManuzioViewer.cw, "URL errato o Server offline", "Errore", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(ManuzioViewer.cw, lang.getString("WRONG_URL"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
             } finally {
                 if (conn != null) {
                     try {
@@ -173,7 +175,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
         this.setVisible(false);
         this.mainWindow = mainWindow;
         chooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Plain text file", "txt");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(lang.getString("PLAIN_TEXT_FILE"), lang.getString("TXT"));
         chooser.setAcceptAllFileFilterUsed(false);
         chooser.addChoosableFileFilter(filter);
     }
@@ -221,23 +223,23 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
         jB_cancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Connetti");
+        setTitle(lang.getString("CONNECT")); // NOI18N
         setAlwaysOnTop(true);
         setResizable(false);
 
-        jlb_addr.setText("Indirizzo Server");
+        jlb_addr.setText(lang.getString("SERVER_ADDRESS")); // NOI18N
 
-        jlb_port.setText("Porta");
+        jlb_port.setText(lang.getString("PORT")); // NOI18N
 
         jtf_addr.setToolTipText("<html> www.server.it <br \\> 192.169.34.2");
 
-        jlb_dbName.setText("Nome Database");
+        jlb_dbName.setText(lang.getString("DATABASE_NAME")); // NOI18N
 
-        jlb_usr.setText("Nome Utente");
+        jlb_usr.setText(lang.getString("USERS")); // NOI18N
 
-        jlb_passw.setText("Password");
+        jlb_passw.setText(lang.getString("PASSWORD")); // NOI18N
 
-        jb_Connect.setText("Connetti");
+        jb_Connect.setText(lang.getString("CONNECT")); // NOI18N
         jb_Connect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jb_ConnectActionPerformed(evt);
@@ -321,26 +323,26 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
 
         jt_connect_type.addTab("Connetti ...", jp_connect_DB);
 
-        jlb_addr_new.setText("Indirizzo Server");
+        jlb_addr_new.setText(lang.getString("SERVER_ADDRESS")); // NOI18N
 
-        jlb_port_new.setText("Porta");
+        jlb_port_new.setText(lang.getString("PORT")); // NOI18N
 
         jtf_addr_new.setToolTipText("<html>\nwww.server.it <br \\>\n192.169.34.2");
 
-        jlb_dbName_new.setText("Nome del nuovo Database");
+        jlb_dbName_new.setText(lang.getString("DATABASE_NEW_NAME")); // NOI18N
 
-        jlb_passw_new.setText("Password");
+        jlb_passw_new.setText(lang.getString("PASSWORD")); // NOI18N
 
-        jlb_usr_new.setText("Nome Utente");
+        jlb_usr_new.setText(lang.getString("USERS")); // NOI18N
 
-        jb_Connect_new.setText("Connetti");
+        jb_Connect_new.setText(lang.getString("CONNECT")); // NOI18N
         jb_Connect_new.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jb_Connect_newActionPerformed(evt);
             }
         });
 
-        jB_load.setText("Carica");
+        jB_load.setText(lang.getString("LOAD")); // NOI18N
         jB_load.setEnabled(false);
         jB_load.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -349,7 +351,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
         });
 
         jbG_load.add(jRb_loadFromFile);
-        jRb_loadFromFile.setText("Carica Schema da File");
+        jRb_loadFromFile.setText(lang.getString("LOAD_FROM_FILE")); // NOI18N
         jRb_loadFromFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jRb_loadFromFileActionPerformed(evt);
@@ -357,7 +359,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
         });
 
         jbG_load.add(jRb_loadFromString);
-        jRb_loadFromString.setText("Carica Schema da testo");
+        jRb_loadFromString.setText(lang.getString("LOAD_FROM_TEXT")); // NOI18N
         jRb_loadFromString.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jRb_loadFromStringActionPerformed(evt);
@@ -458,7 +460,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
 
         jt_connect_type.addTab("Crea un nuovo Database", jp_newDB);
 
-        jB_cancel.setText("Annulla");
+        jB_cancel.setText(lang.getString("CANCEL")); // NOI18N
         jB_cancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jB_cancelActionPerformed(evt);
@@ -515,11 +517,11 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
         url = this.jtf_addr_new.getText() + ":" + this.jtf_port_new.getText();
 
         if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {                        // Controlla se tutti i campi non son vuoti
-            JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, lang.getString("FIELDS_INCOMPLETE"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (this.jRb_loadFromFile.isSelected() && f == null) {
-            JOptionPane.showMessageDialog(this, "Devi scegliere un file", "Attenzione", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, lang.getString("CHOOSE_A_FILE"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         jPr_create.setVisible(true);
@@ -540,7 +542,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
         url = this.jtf_addr.getText() + ":" + this.jtf_port.getText() + "/" + dbName;
 
         if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Campi incompleti", "Attenzione", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, lang.getString("CAMPI INCOMPLETI"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         jPr_connect.setVisible(true);
@@ -579,7 +581,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
             areaScrollPane.setPreferredSize(new Dimension(250, 250));
 
             jp.add(areaScrollPane, BorderLayout.CENTER); // Aggiungo lo scroller centrato al pannello
-            int confirm = JOptionPane.showConfirmDialog(this, jp, "Inserisci lo Schema", JOptionPane.OK_CANCEL_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(this, jp, lang.getString("INSERT_SCHEMA"), JOptionPane.OK_CANCEL_OPTION);
             if (confirm == JOptionPane.OK_OPTION) {
                 this.text = textArea.getText();
             } else {

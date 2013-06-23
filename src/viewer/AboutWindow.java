@@ -1,11 +1,14 @@
 package viewer;
 
+import java.util.ResourceBundle;
+
 /**
  *
  * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
 public class AboutWindow extends javax.swing.JFrame {
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
     /**
      * Creates new form AboutWindow
@@ -27,13 +30,13 @@ public class AboutWindow extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("About");
+        setTitle(lang.getString("ABOUT")); // NOI18N
 
         jLabel1.setFont(new java.awt.Font("Lucida Grande", 2, 48)); // NOI18N
-        jLabel1.setText("Viewer");
+        jLabel1.setText(lang.getString("VIEWER")); // NOI18N
 
         jLabel2.setFont(new java.awt.Font("Lucida Grande", 2, 48)); // NOI18N
-        jLabel2.setText("Manuzio");
+        jLabel2.setText(lang.getString("MANUZIO")); // NOI18N
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
