@@ -5,6 +5,7 @@
 package viewer.setting;
 
 import java.util.Properties;
+import java.util.ResourceBundle;
 import javax.swing.JEditorPane;
 import javax.swing.SwingWorker;
 import viewer.ManuzioViewer;
@@ -23,7 +24,8 @@ public abstract class AbstractTextualLayout<T extends JEditorPane> extends Swing
     public static final int TABBED_SPACE = 2;
     public static final int RETURN_CARRIGE = 3;
     public static final int DEFAULT = SPACE;
-    public static final String[] LIST_OPERATION = {"Nessuna", "Spazio", "TAB", "Ritorno a Capo"};
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
+    public static final String[] LIST_OPERATION = {lang.getString("NO_ONE"), lang.getString("SPACE"), lang.getString("TAB"), lang.getString("RETURN_CARRIAGE")};
 
     /**
      *

@@ -542,7 +542,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
         url = this.jtf_addr.getText() + ":" + this.jtf_port.getText() + "/" + dbName;
 
         if (user.isEmpty() || password.isEmpty() || dbName.isEmpty() || url.isEmpty()) {
-            JOptionPane.showMessageDialog(this, lang.getString("CAMPI INCOMPLETI"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, lang.getString("FIELDS_INCOMPLETE"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         jPr_connect.setVisible(true);

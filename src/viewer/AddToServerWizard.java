@@ -692,7 +692,7 @@ protected viewer.manuzioParser.Type[] getOrderType(viewer.manuzioParser.Type max
                             String text = jtf.getText();
                             if (text.compareTo(notReg) == 0) {
                                 err = true;
-                                JOptionPane.showMessageDialog(this, lang.getString("ATTENZIONE UN CAMPO È INCOMPLETO"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(this, lang.getString("CAUTION_FIELDS_INCOMPLETE"), lang.getString("CAUTION"), JOptionPane.WARNING_MESSAGE);
                             }
                         }
                     }

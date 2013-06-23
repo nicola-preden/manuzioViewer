@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Setting>
-    <ConnectionsList>
-        <url>localhost:5432/manuzio</url>
-        <user>manu</user>
-        <password>1234</password>
-    </ConnectionsList>
+    <ConnectionsList password="1234" url="localhost:5432/manuzio" user="manu"/>
     <SchemaList>
+        <Book>3</Book>
+        <Chapter>3</Chapter>
+        <Epilogue>3</Epilogue>
+        <Word>1</Word>
+        <Sentence>0</Sentence>
+        <Prologue>3</Prologue>
         <schema-url>localhost:5432/manuzio</schema-url>
+        <Paragraph>3</Paragraph>
     </SchemaList>
+    <Language lang="en"/>
 </Setting>
