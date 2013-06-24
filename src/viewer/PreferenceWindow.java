@@ -6,20 +6,25 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -107,6 +112,23 @@ public class PreferenceWindow extends javax.swing.JFrame {
                         Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, x);
                     }
                 } else {
+                    URL url = loader.getResource("viewer/language/");
+                    JarURLConnection urlcon;
+                    try {
+                        urlcon = (JarURLConnection) (url.openConnection());
+                        JarFile jar = urlcon.getJarFile();
+                        Enumeration<JarEntry> entries = jar.entries();
+                        while (entries.hasMoreElements()) {
+                            String entry = entries.nextElement().getName();
+                            if (entry.matches("viewer/language/lang_\\w{2}\\.properties$")) {
+                                String k = entry.replaceAll("viewer/language/lang_|\\.properties$", "").replaceAll("_", "-");
+                                Locale forLanguageTag = Locale.forLanguageTag(k);
+                                ar.add(new Anonymus(forLanguageTag));
+                            }
+                        }
+                    } catch (IOException ex) {
+                        Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
                 Object[] possibilities = ar.toArray();
                 f = new JComboBox(possibilities);
@@ -172,7 +194,9 @@ public class PreferenceWindow extends javax.swing.JFrame {
             jP_SchemaConfig.add(new JPanel(), VOID);
             CardLayout cl = (CardLayout) (jP_SchemaConfig.getLayout());
             cl.show(jP_SchemaConfig, VOID);
-
+            if (node == null) {
+                return;
+            }
             ListIterator<Properties> readProp = node.readProp();
             while (readProp.hasNext()) {
                 Properties next = readProp.next(); // Properties corrente

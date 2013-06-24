@@ -15,12 +15,14 @@ import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -215,7 +217,23 @@ public class ManuzioViewer {
                     Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, x);
                 }
             } else {
-                
+                URL url = loader.getResource("viewer/language/");
+                JarURLConnection urlcon;
+                try {
+                    urlcon = (JarURLConnection) (url.openConnection());
+                    JarFile jar = urlcon.getJarFile();
+                    Enumeration<JarEntry> entries = jar.entries();
+                    while (entries.hasMoreElements()) {
+                        String entry = entries.nextElement().getName();
+                        if (entry.matches("viewer/language/lang_\\w{2}\\.properties$")) {
+                            String k = entry.replaceAll("viewer/language/lang_|\\.properties$", "").replaceAll("_", "-");
+                            Locale forLanguageTag = Locale.forLanguageTag(k);
+                            ar.add(new Anonymus(forLanguageTag));
+                        }
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             Object[] possibilities = ar.toArray();
             Anonymus s;
