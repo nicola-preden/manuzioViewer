@@ -602,15 +602,6 @@ public class SecondStepStrategy {
         ButtonGroup jBG = new ButtonGroup();
         //carico jbutton[GET] componenti
         int i = 0;
-        JLabel l = new JLabel(lang.getString("TEXT_9")
-                + lang.getString("TEXT_10"));
-        c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.anchor = GridBagConstraints.FIRST_LINE_END;
-        c.gridx = 0;
-        c.gridwidth = 2;
-        c.gridy = i;
-        i++;
         Component[] lpc = this.lastPanel.getComponents();
         c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;

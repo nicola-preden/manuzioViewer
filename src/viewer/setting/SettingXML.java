@@ -189,7 +189,7 @@ public class SettingXML {
                     for (int j = 0; j < childNodes.getLength(); j++) {
                         if (childNodes.item(j).getNodeType() == Node.ELEMENT_NODE) {
                             Element item = (Element) childNodes.item(j);
-                            p.setProperty(item.getTagName(), item.getTextContent());
+                            p.setProperty(item.getTagName(), item.getAttribute("value"));
                         }
                     }
                     this.addSetting(SettingXML.SCHEMA_LIST, p);
@@ -260,7 +260,7 @@ public class SettingXML {
                     while (iterSnp.hasNext()) {
                         String s = iterSnp.next();
                         Element type = doc.createElement(s);
-                        type.appendChild(doc.createTextNode(next.getProperty(s)));
+                        type.setAttribute("value", next.getProperty(s));
                         SchemaList.appendChild(type);
                     }
                 }

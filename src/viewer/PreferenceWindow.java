@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import viewer.setting.AbstractTextualLayout;
 import viewer.setting.NodeSettingInterface;
@@ -64,6 +65,7 @@ public class PreferenceWindow extends javax.swing.JFrame {
                 Anonymus selectedItem = (Anonymus) ((JComboBox) e.getSource()).getSelectedItem();
                 next.setProperty(set, selectedItem.l.toString());
                 isModified = true;
+                JOptionPane.showMessageDialog((JComboBox) e.getSource(), lang.getString("NEED_RESTART"));
             }
         }
 
