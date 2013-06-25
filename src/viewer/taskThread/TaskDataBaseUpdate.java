@@ -80,7 +80,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
                 int lineStart = lineElem.getStartOffset();
                 int lineEnd = lineElem.getEndOffset();
                 document.remove(lineStart, lineEnd - lineStart);
-                this.jTA.append(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("IN_PROGRESS {0} / {1}"), new Object[] {progress, max}));
+                this.jTA.append(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("IN_PROGRESS {0} / {1}"), new Object[] {progress, max})+"\n");
             } catch (BadLocationException ex) {
                 Logger.getLogger(TaskDataBaseUpdate.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -88,7 +88,7 @@ public class TaskDataBaseUpdate extends SwingWorker<Void, Void> {
         }
         if (x instanceof String) {
             this.jTA.append((String) x + "\n");
-            this.jTA.append(lang.getString("IN_PROGRESS"));
+            this.jTA.append(lang.getString("IN_PROGRESS")+"\n");
             setProgress(0);
         }
     }
