@@ -52,7 +52,7 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
      */
     private TextualLayout(int id_object, T output, Schema s, Properties prop) {
         if (id_object <= 0) {
-            throw new IllegalArgumentException(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("MISSING DATA : SCHEMA-URL{0}"), new Object[] {prop.toString()}));
+            throw new IllegalArgumentException(java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("MISSING DATA : SCHEMA-URL{0}"), new Object[] {prop.toString()})+"\n");
         }
         this.id_object = id_object;
         this.output = output;
@@ -95,14 +95,14 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
                 int lineStart = lineElem.getStartOffset();
                 int lineEnd = lineElem.getEndOffset();
                 document.remove(lineStart, lineEnd - lineStart);
-                document.insertString(document.getLength(), java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("IN_PROGRESS {0} / {1}"), new Object[] {progress, max}), null);
+                document.insertString(document.getLength(), java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("IN_PROGRESS {0} / {1}"), new Object[] {progress, max}) +"\n", null);
             }
             if (x instanceof String) {
                 progress = 0;
                 Document document = output.getDocument();
                 document.insertString(document.getLength(), (String) x + "\n", null);
                 if (!b) {
-                    document.insertString(document.getLength(), lang.getString("IN_PROGRESS"), null);
+                    document.insertString(document.getLength(), lang.getString("IN_PROGRESS")+"\n", null);
                 }
                 setProgress(0);
             }
@@ -161,7 +161,7 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
             updateProgress(lang.getString("ATTRIBUTE_LOADING"), true);
             String k = "-------------\n";
             conn = ManuzioViewer.getConnection();
-            k += java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("ID : {0} TYPE: {1}"), new Object[] {this.id_object, q});
+            k += java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("ID : {0} TYPE: {1}"), new Object[] {this.id_object, q})+"\n\n";
             q = "SELECT "
                     + "  attribute_values.id_att_value, "
                     + "  attribute_types.label, "
@@ -179,9 +179,9 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
             resultSet = stmt.executeQuery();
             String z = "";
             while (resultSet.next()) {
-                z += java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("ID_ATTRIBUTE :  {0} LABEL : {1} VALUE : {2}"), new Object[] {resultSet.getInt("id_att_value"), resultSet.getString("label"), resultSet.getString("value")});
+                z += java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("ID_ATTRIBUTE :  {0} LABEL : {1} VALUE : {2}"), new Object[] {resultSet.getInt("id_att_value"), resultSet.getString("label"), resultSet.getString("value")})+"\n";
             }
-            k += z.length() == 0 ? "" : java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("ATTRIBUTE TEXTUAL OBJECT: {0}"), new Object[] {z});
+            k += z.length() == 0 ? "" : java.text.MessageFormat.format(java.util.ResourceBundle.getBundle("viewer/language/lang").getString("ATTRIBUTE TEXTUAL OBJECT: {0}"), new Object[] {z}) + "\n";
             k += (consistency) ? "-------------\n" : lang.getString("LAYOUT_NOT_SET");
             ManuzioViewer.close(resultSet);
             ManuzioViewer.close(stmt);
