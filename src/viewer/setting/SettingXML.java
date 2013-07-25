@@ -211,7 +211,11 @@ public class SettingXML {
 
             }
 
-        } catch (SAXException | IOException | ParserConfigurationException ex) {
+        } catch (SAXException ex) {
+            Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParserConfigurationException ex) {
             Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -286,7 +290,9 @@ public class SettingXML {
             XMLSerializer serializer = new XMLSerializer(new FileOutputStream(new File(this.url)), format);
             serializer.serialize(doc);
 
-        } catch (ParserConfigurationException | IOException ex) {
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

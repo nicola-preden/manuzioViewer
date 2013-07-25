@@ -192,8 +192,17 @@ public class ManuzioViewer {
                     }
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException ex) {
             Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (setting == null || isOSX()) {
+            
         }
         setting = new SettingXML(urlXml);
         NodeSettingInterface set = setting.getSetting("Language");

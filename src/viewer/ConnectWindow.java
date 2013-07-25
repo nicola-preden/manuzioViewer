@@ -36,8 +36,8 @@ import viewer.setting.SettingXML;
  * in Venice
  */
 public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeListener {
-    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
 
+    private static final ResourceBundle lang = ResourceBundle.getBundle("viewer/language/lang", ManuzioViewer.LANGUAGE);
     private MainWindow mainWindow;
     private JFileChooser chooser;
     private File f = null;
@@ -67,11 +67,15 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                 setProgress(100 * 2 / MAX);
                 ManuzioViewer.schema.saveToDB(url, dbName, user, password);
                 setProgress(100 * 3 / MAX);
-            } catch (IOException | ParseException ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                 ManuzioViewer.schema = null;
                 JOptionPane.showMessageDialog(ManuzioViewer.cw, lang.getString("ERROR_LOADING_SCHEMA"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
-            } catch (SQLException ex) {
+            } catch (ParseException ex) {
+                Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
+                ManuzioViewer.schema = null;
+                JOptionPane.showMessageDialog(ManuzioViewer.cw, lang.getString("ERROR_LOADING_SCHEMA"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
+            }catch (SQLException ex) {
                 Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(ManuzioViewer.cw, lang.getString("IMPOSSIBLE_CREATE_DATABASE"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
                 conn = false;

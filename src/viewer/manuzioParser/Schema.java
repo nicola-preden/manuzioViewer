@@ -278,7 +278,9 @@ public class Schema {
             }
 
             return schema;
-        } catch (SQLException | ParseException e) {
+        } catch (SQLException e) {
+            throw e;
+        } catch (ParseException e) {
             throw e;
         } finally {
             //closes resources

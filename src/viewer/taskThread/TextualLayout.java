@@ -193,7 +193,9 @@ public class TextualLayout<T extends JEditorPane> extends AbstractTextualLayout 
             Document document = output.getDocument();
             document.insertString(document.getLength(), "\n\n" + k, null);
 
-        } catch (SQLException | BadLocationException ex) {
+        } catch (SQLException ex) {
+            Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (BadLocationException ex) {
             Logger.getLogger(TextualLayout.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
