@@ -12,5 +12,8 @@
         <schema-url value="localhost:5432/manuzio"/>
         <Paragraph value="3"/>
     </SchemaList>
+    <SchemaList>
+        <schema-url value="127.0.0.1:5432/manuzio"/>
+    </SchemaList>
     <Language lang="it"/>
 </Setting>
