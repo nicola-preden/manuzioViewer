@@ -17,7 +17,7 @@ public interface NodeSettingInterface extends Comparable<NodeSettingInterface> {
     /**
      * <p>Ritorna il descrittore della classe</p>
      *
-     * @return
+     * @return la descrizione del nodo
      */
     String getDesc();
 
@@ -25,8 +25,7 @@ public interface NodeSettingInterface extends Comparable<NodeSettingInterface> {
      * <p>Aggiunge ad un nodo una o più coppie di valori (es. user-->"pippo",
      * password-->"1234").</p>
      *
-     * @param Prop <tt>java.util.Properties</tt> da aggiungere
-     * @return
+     * @param prop <tt>java.util.Properties</tt> da aggiungere
      */
     void addProp(Properties... prop);
 
@@ -34,22 +33,18 @@ public interface NodeSettingInterface extends Comparable<NodeSettingInterface> {
      * <p>Aggiunge una coppia di valori in testa</p>
      *
      * @param prop <tt>java.util.Properties</tt> da aggingere
-     * @return
      */
     void addAtFistOccProp(Properties prop);
 
     /**
      * <p>Rimuove una coppie di valori</p>
      *
-     * @param Prop <tt>java.util.Properties</tt> da rimuovere
-     * @return 
+     * @param prop <tt>java.util.Properties</tt> da rimuovere
      */
     void removeProp(Properties... prop);
 
     /**
      * <p>Rimuove l'ultima coppia di valori presente nel nodo</p>
-     *
-     * @return
      */
     void removeLastProp();
 
@@ -64,14 +59,14 @@ public interface NodeSettingInterface extends Comparable<NodeSettingInterface> {
      * <p>Ritorna</p>
      * <tt>TRUE</tt> se il nodo con contiene coppie di valori</p>
      *
-     * @return
+     * @return Boolean value
      */
     boolean isEmpty();
 
     /**
      * <p>Ritorna il numero di Properties presenti</p>
      *
-     * @return
+     * @return Integer value
      */
     int size();
 

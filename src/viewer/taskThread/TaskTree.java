@@ -422,14 +422,12 @@ public class TaskTree<T extends JEditorPane> extends Thread implements TreeSelec
 
     /**
      * <p>Richiede un refrash sulla struttura dell albero.</p>
-     *
-     * @param sec
      */
     public synchronized void refresh() {
         queue.offer(new TreeNodeObject(TaskTree.REFRESH, null, false));
     }
 
-    synchronized boolean sendMessage(TreeNodeObject s) {
+    private synchronized boolean sendMessage(TreeNodeObject s) {
         return queue.offer(s);
     }
 }

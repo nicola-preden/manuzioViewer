@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package viewer.setting;
 
 import java.util.Properties;
@@ -14,7 +10,7 @@ import viewer.manuzioParser.Type;
 
 /**
  *
- * @author Nicola Preden, matricola 818578, Facolt? di informatica Ca' Foscari
+ * @author Nicola Preden, matricola 818578, Facoltà di informatica Ca' Foscari
  * in Venice
  */
 public abstract class AbstractTextualLayout<T extends JEditorPane> extends SwingWorker<Void, Void> {
@@ -35,23 +31,23 @@ public abstract class AbstractTextualLayout<T extends JEditorPane> extends Swing
     protected abstract void updateProgress(Object x, Boolean b);
 
     /**
-     * <p>Dato l'id dell oggetto da caricare restituisce, in base alla
-     * configurazione, la struttara dell' oggetto contenente il testo attraverso
+     * <p>Dato l'id dell'oggetto da caricare restituisce, in base alla
+     * configurazione, la struttura dell'oggetto contenente il testo attraverso
      * una serie di chiamate ricorsive. </p>
      *
-     * @param obj id dell' oggetto da caricare
+     * @param obj id dell'oggetto da caricare
      * @return Stringa formattata o vuota se non trova l'oggetto
      */
     protected abstract String translateText(int obj);
 
     /**
      * <p>Controllo se i nomi dei tipi passati in input è coerente con la
-     * connessione attuale. Si ricoda che tra le properties deve esssercene una
+     * connessione attuale. Si ricorda che tra le properties deve essere presente una
      * con il capo key = "schema-url"</p>
      *
      * @param prop properties relative alle regole di visualizzazione dei dati
      * @return <tt>true</tt> se i dati in input sono coerenti con il server al
-     * quale si è connessi <tt>false</tt> atrimenti
+     * quale si è connessi <tt>false</tt> altrimenti
      */
     public static Boolean typeConsistencyCheck(Properties prop, Schema sc) throws IllegalArgumentException {
         if (prop == null || sc == null) {

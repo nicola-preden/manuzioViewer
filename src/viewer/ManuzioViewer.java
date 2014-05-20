@@ -13,16 +13,12 @@ import com.apple.eawt.QuitResponse;
 import com.jolbox.bonecp.BoneCP;
 import database.ConnectionPoolException;
 import database.ConnectionPoolFactory;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.JarURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -192,13 +188,7 @@ public class ManuzioViewer {
                     }
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             Logger.getLogger(ManuzioViewer.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (setting == null || isOSX()) {
@@ -314,7 +304,7 @@ public class ManuzioViewer {
      * <p>Ritorna l'indirizzzo del Database al quale siamo connessi o
      * <tt>NULL</tt>. </p>
      *
-     * @return
+     * @return un JdbcUrl
      */
     public static synchronized String getJdbcUrl() {
         String k = null;
@@ -328,7 +318,7 @@ public class ManuzioViewer {
     /**
      * <p>Ritorna una connessione dal connection pool se disponibile</p>
      *
-     * @return
+     * @return un @see Connection
      * @throws SQLException
      */
     public static synchronized Connection getConnection() throws SQLException {

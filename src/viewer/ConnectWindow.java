@@ -67,11 +67,7 @@ public class ConnectWindow extends javax.swing.JFrame implements PropertyChangeL
                 setProgress(100 * 2 / MAX);
                 ManuzioViewer.schema.saveToDB(url, dbName, user, password);
                 setProgress(100 * 3 / MAX);
-            } catch (IOException ex) {
-                Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
-                ManuzioViewer.schema = null;
-                JOptionPane.showMessageDialog(ManuzioViewer.cw, lang.getString("ERROR_LOADING_SCHEMA"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);
-            } catch (ParseException ex) {
+            } catch (    IOException | ParseException ex) {
                 Logger.getLogger(ConnectWindow.class.getName()).log(Level.SEVERE, null, ex);
                 ManuzioViewer.schema = null;
                 JOptionPane.showMessageDialog(ManuzioViewer.cw, lang.getString("ERROR_LOADING_SCHEMA"), lang.getString("ERROR"), JOptionPane.ERROR_MESSAGE);

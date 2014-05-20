@@ -44,8 +44,7 @@ public class SettingXML {
     private String url;
 
     /**
-     * <p>Crea un nuovo oggetti contenente tutte le configurazione dell'app in
-     * base</p>
+     * <p>Crea un nuovo oggetto a partire da un file xml se esiste</p>
      *
      * @param url indirizzo del file xml di configurazione
      */
@@ -56,8 +55,8 @@ public class SettingXML {
     }
 
     /**
-     * <p>Aggiunge un nuovo valore di configurazione in coda agli altri gi��
-     * presenti</p>
+     * <p>Aggiunge un nuovo valore di configurazione in coda agli altri già
+     *  presenti</p>
      *
      * @param desc descrittore
      * @param prop parametri di configurazione
@@ -79,7 +78,7 @@ public class SettingXML {
     }
 
     /**
-     * <p>Aggiunge un nuovo valore di configurazione in testa agli altri gi��
+     * <p>Aggiunge un nuovo valore di configurazione in testa agli altri già
      * presenti</p>
      *
      * @param desc descrittore
@@ -129,7 +128,7 @@ public class SettingXML {
      * se trova l'oggetto altrimenti <tt>NULL</tt>. </p>
      *
      * @param desc
-     * @return
+     * @return Un @see NodeSettingInterface 
      */
     public synchronized NodeSettingInterface getSetting(String desc) {
         int find = Collections.binarySearch(setting, new NodeSetting(desc), new NodeSettingComparator());
@@ -211,11 +210,7 @@ public class SettingXML {
 
             }
 
-        } catch (SAXException ex) {
-            Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParserConfigurationException ex) {
+        } catch (SAXException | IOException | ParserConfigurationException ex) {
             Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -290,9 +285,7 @@ public class SettingXML {
             XMLSerializer serializer = new XMLSerializer(new FileOutputStream(new File(this.url)), format);
             serializer.serialize(doc);
 
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (ParserConfigurationException | IOException ex) {
             Logger.getLogger(SettingXML.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

@@ -790,8 +790,6 @@ public class SecondStepStrategy {
     /**
      * <p>Genera e rende visibile un nuovo pannello. Se è possibile ritorna
      * <tt>TRUE</tt> altrimenti <tt>FALSE</tt>. </p>
-     *
-     * @return <tt>TRUE</tt> se esite
      */
     public synchronized void next() {
         if (!this.isEnd) {
@@ -820,7 +818,7 @@ public class SecondStepStrategy {
                 this.process = false;
             } else { // genero in nuovo pannello config per il prossimo oggetto
                 TextType peekFirst = this.ttl.peekFirst();
-                printPaneConfig(peekFirst); // se peekFirst è null imposta la finiestra per la fine
+                printPaneConfig(peekFirst); // se peekFirst è null imposta la finestra per la fine
                 CardLayout layout = (CardLayout) cards.getLayout();
                 layout.next(cards);
                 if (peekFirst == null) {

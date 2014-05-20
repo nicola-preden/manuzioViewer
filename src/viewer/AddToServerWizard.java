@@ -140,7 +140,6 @@ public class AddToServerWizard extends javax.swing.JFrame implements PropertyCha
      *
      * @param id intero indicante id di un textual object
      * @param type il tipo dell'id spassato come input
-     * @param mw jframe padre
      * @throws IllegalArgumentException se i parametri sono incoerenti
      */
     public AddToServerWizard(int id, String type) {

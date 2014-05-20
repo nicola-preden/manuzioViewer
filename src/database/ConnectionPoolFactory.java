@@ -140,7 +140,7 @@ public class ConnectionPoolFactory {
      * <tt>com.jolbox.bonecp.BoneCP</tt> creato o se non presente ne crea
      * uno di nuovo
      *
-     * @return
+     * @return @see BoneCP
      * @throws ConnectionPoolException
      */
     public synchronized BoneCP getConnectionPool() throws ConnectionPoolException {
@@ -170,7 +170,7 @@ public class ConnectionPoolFactory {
      * @param url
      * @param user
      * @param password
-     * @return
+     * @return @see Connection
      * @throws SQLException
      */
     public static Connection getConnection(String url, String user, String password) throws SQLException {
