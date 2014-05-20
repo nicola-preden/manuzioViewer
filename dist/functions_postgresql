@@ -17,8 +17,8 @@ iter :=1;
 FOR i IN array_lower(container,1) .. array_upper(container,1) LOOP
 	
 	--verifica corretezza della composizione
-	--prima query se presente a parti invertite container/contained e contained/container, controlla se esiste già la relazione o se il component_name è vuoto 
-	--seconda query verifica se già presente
+	--prima query se presente a parti invertite container/contained e contained/container, controlla se esiste gi‡ la relazione o se il component_name Ë vuoto 
+	--seconda query verifica se gi‡ presente
 	IF EXISTS (SELECT * FROM type_composition WHERE container_type = contained[i]
 		AND contained_type = container[i]) OR EXISTS
 		(SELECT * FROM type_composition WHERE container_type = container[i]
@@ -81,7 +81,7 @@ END;
 $BODY$
   LANGUAGE plpgsql VOLATILE;
 -----
-COMMENT ON FUNCTION create_object_composition(integer, varchar, integer, integer) IS 'Funzione che riceve tutti i dati relativi a un textual object, e se è possibile crea la composizione con gli oggetti da lui contenuti';
+COMMENT ON FUNCTION create_object_composition(integer, varchar, integer, integer) IS 'Funzione che riceve tutti i dati relativi a un textual object, e se Ë possibile crea la composizione con gli oggetti da lui contenuti';
 -----
 CREATE OR REPLACE FUNCTION create_or_return_att_for_admin(att_type integer, att_text text, att_obj integer)
   RETURNS attribute_values AS
@@ -98,7 +98,7 @@ BEGIN
 	id_tex_obj = att_obj AND 
 	id_user=0;
 
-	-- se la lista è nulla viene inserita
+	-- se la lista Ë nulla viene inserita
 	IF existing_att IS NULL THEN
 
 		-- selezione di un timestamp aggiornato
@@ -138,7 +138,7 @@ BEGIN
 	id_user = att_user AND
 	id_tex_obj = att_obj;
 
-	-- se la lista è nulla viene inserita
+	-- se la lista Ë nulla viene inserita
 	IF existing_att IS NULL THEN
 
 		-- selezione di un timestamp aggiornato
@@ -176,7 +176,7 @@ BEGIN
 		type_name = tex_type AND
 		is_plural = is_plu;
 
-	-- se la lista dei risultati è vuota
+	-- se la lista dei risultati Ë vuota
 	IF existing_texobj IS NULL THEN
 	
 		-- inserimento dell'oggetto
@@ -197,7 +197,7 @@ RETURN existing_texobj;
 END;$BODY$
   LANGUAGE plpgsql VOLATILE;
 -----
-COMMENT ON FUNCTION create_or_return_obj(varchar, boolean, integer, integer) IS 'Funzione che riceve i dati relativi a un textual object, se è gia presente nel db lo restituisce altrimenti lo crea';
+COMMENT ON FUNCTION create_or_return_obj(varchar, boolean, integer, integer) IS 'Funzione che riceve i dati relativi a un textual object, se Ë gia presente nel db lo restituisce altrimenti lo crea';
 -----
 CREATE OR REPLACE FUNCTION create_or_return_rto(component integer[], obj_type varchar, is_plu boolean, obj_label text)
   RETURNS textual_objects AS
@@ -219,7 +219,7 @@ BEGIN
 		label = obj_label AND
 		is_plural = is_plu;
 		
-	-- se la lista dei risultati è vuota
+	-- se la lista dei risultati Ë vuota
 	IF existing_texobj IS NULL THEN
 	
 		-- inserimento dell'oggetto
@@ -264,7 +264,7 @@ RETURN existing_texobj;
 END;$BODY$
   LANGUAGE plpgsql VOLATILE;
 -----
-COMMENT ON FUNCTION create_or_return_sto(text, integer, integer, integer, varchar, boolean) IS 'Funzione che riceve tutti i dati relativi a un single textual object, se è gia presente nel db lo restituisce altrimenti lo crea. Il tutto viene realizzato tramite la chiamata delle funzioni:
+COMMENT ON FUNCTION create_or_return_sto(text, integer, integer, integer, varchar, boolean) IS 'Funzione che riceve tutti i dati relativi a un single textual object, se Ë gia presente nel db lo restituisce altrimenti lo crea. Il tutto viene realizzato tramite la chiamata delle funzioni:
 create_or_return_text
 create_or_return_obj
 create_object_composition';
@@ -283,7 +283,7 @@ BEGIN
 	WHERE lenght = tex_len AND  
 		cached_text = new_tex;
 
-	-- se la lista dei risultati è vuota
+	-- se la lista dei risultati Ë vuota
 	IF existing_text IS NULL THEN
 	
 		-- inserimento del text
@@ -304,7 +304,7 @@ BEGIN
 		WHERE occ.start = tex_start AND 
 			occ.end = tex_end;
 
-		-- se la lista dei risultati è vuota
+		-- se la lista dei risultati Ë vuota
 		IF existing_occ IS NULL THEN
 	
 			-- inserimento dell'occurence
@@ -322,7 +322,7 @@ RETURN existing_occ;
 END;$BODY$
   LANGUAGE plpgsql VOLATILE;
 -----
-COMMENT ON FUNCTION create_or_return_text(text, integer, integer, integer) IS 'Funzione che riceve i dati relativi a una porzione di testo, se è gia presente nel db lo restituisce altrimenti lo crea';
+COMMENT ON FUNCTION create_or_return_text(text, integer, integer, integer) IS 'Funzione che riceve i dati relativi a una porzione di testo, se Ë gia presente nel db lo restituisce altrimenti lo crea';
 -----
 CREATE OR REPLACE FUNCTION create_rto_from_pos_type(pstart integer, pend integer, obj_type varchar, is_plu boolean, nw_label text)
   RETURNS textual_objects AS
@@ -370,7 +370,7 @@ END IF;
 IF EXISTS (SELECT id_tex_obj 
 	FROM textual_objects
 	WHERE start=first_start AND type_name=obj_type AND is_plural=is_plu) THEN
-		RAISE EXCEPTION 'RTO già esistente';
+		RAISE EXCEPTION 'RTO gi‡ esistente';
 	ELSE
 	nw_rto=create_or_return_rto(obj, obj_type, plu, nw_label);
 END IF;
@@ -574,7 +574,7 @@ RETURN ris;
 END;$BODY$
   LANGUAGE plpgsql VOLATILE;
 -----
-COMMENT ON FUNCTION get_text_from_text(text, integer, integer) IS 'Partendo da una stringa vengono restituiti tutti i testi con lunghezza massima definita dall''utente che la contengono. Se la lunghezza massima è posta a zero vengono restituiti tutti i testi.';
+COMMENT ON FUNCTION get_text_from_text(text, integer, integer) IS 'Partendo da una stringa vengono restituiti tutti i testi con lunghezza massima definita dall''utente che la contengono. Se la lunghezza massima Ë posta a zero vengono restituiti tutti i testi.';
 -----
 CREATE OR REPLACE FUNCTION insert_att_type(nome_tipo varchar[], etichette varchar[], tipo varchar[], is_plu boolean[], edit boolean[])
   RETURNS integer[] AS
@@ -586,7 +586,7 @@ iter :=1;
 
 FOR i IN array_lower(nome_tipo,1) .. array_upper(nome_tipo,1) LOOP
 
-	--verifica che il tipo non sia stato già inserito
+	--verifica che il tipo non sia stato gi‡ inserito
 	IF EXISTS (SELECT * FROM attribute_types WHERE attribute_types.type_name=nome_tipo[i] AND attribute_types.label=etichette[i])
 	OR (etichette[i] = '') OR (tipo[i] = '')
 	THEN
@@ -617,7 +617,7 @@ iter :=1;
 
 FOR i IN array_lower(type,1) .. array_upper(type,1) LOOP
 
-	--verifica che il tipo non sia stato già inserito
+	--verifica che il tipo non sia stato gi‡ inserito
 	IF EXISTS (SELECT * FROM methods WHERE methods.type_name=type[i] AND methods.label=etichette[i])
 	OR (etichette[i] = '') OR (sintassi[i] = '')
 	THEN
@@ -651,7 +651,7 @@ iter :=1;
 --creazione dei nuovi tipi
 FOR i IN array_lower(nome,1) .. array_upper(nome,1) LOOP
 
-	--verifica che il tipo non sia stato già inserito
+	--verifica che il tipo non sia stato gi‡ inserito
 	IF EXISTS (SELECT * FROM types WHERE types.type_name=nome[i] OR types.plural_name=nome[i] OR 
 				types.type_name=nome_plurale[i] OR types.plural_name=nome_plurale[i]) OR 
 				(nome[i] = '') OR (nome_plurale[i] = '')
@@ -794,5 +794,5 @@ RETURN result;
 END;$BODY$
   LANGUAGE plpgsql VOLATILE;
 -----
-COMMENT ON FUNCTION create_or_update_schema(varchar, text) IS 'Crea uno schema o ne aggiorna uno già esistente.';
+COMMENT ON FUNCTION create_or_update_schema(varchar, text) IS 'Crea uno schema o ne aggiorna uno gi‡ esistente.';
 -----
